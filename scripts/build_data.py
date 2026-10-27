@@ -978,16 +978,39 @@ if os.path.exists(receitas_path):
             target_param = succ_list[0].get('Param', '')
             target_rarity = succ_list[0].get('RewardRank', '0')
 
+        # Target Icon matching directly from Item.csv
+        target_row = item_raw.get(target_param, {})
+        target_img_raw = target_row.get("Img", "").strip()
+        target_clean_img = target_img_raw.replace("IMG_", "").replace("TEX_", "").lower() + ".png"
+        if target_clean_img in item_pngs:
+            icon = f"assets/items/{target_clean_img}"
+        else:
+            icon = "assets/items/flat_itemcraft.png"
+
         clean_mats = []
         for m in mats:
             mname = m.get('item_nome_pt', '').strip()
             param = m.get('CostParam', '')
-            if not mname and param == 'Gold': mname = 'Ouro (Gold)'
-            elif not mname: mname = f"Material #{param}"
+            if not mname and param == 'Gold':
+                mname = 'Ouro (Gold)'
+            elif not mname:
+                mname = f"Material #{param}"
+
+            # Material icon matching
+            mat_icon = "assets/items/flat_itemcraft.png"
+            if param == 'Gold':
+                mat_icon = "assets/items/asset_gold.png"
+            elif param in item_raw:
+                m_raw = item_raw[param].get("Img", "").strip()
+                m_clean = m_raw.replace("IMG_", "").replace("TEX_", "").lower() + ".png"
+                if m_clean in item_pngs:
+                    mat_icon = f"assets/items/{m_clean}"
+
             clean_mats.append({
                 "name": mname,
                 "amount": m.get('CostValue', '1'),
-                "type": m.get('custo_tipo_nome_enum', 'Item')
+                "type": m.get('custo_tipo_nome_enum', 'Item'),
+                "icon": mat_icon
             })
 
         succ_rate = (int(r.get('SuccessRate') or 0)) // 10000
@@ -1000,7 +1023,7 @@ if os.path.exists(receitas_path):
         elif tab_num in range(201, 205):
             recipe_category = "armors"
             cat_label = "Armaduras & Peças"
-        elif tab_num in range(301, 306):
+        elif tab_num in range(301, 308):
             recipe_category = "accessories"
             cat_label = "Acessórios & Joias"
         elif tab_num in [401, 402, 403]:
@@ -1012,14 +1035,6 @@ if os.path.exists(receitas_path):
         else:
             recipe_category = "events"
             cat_label = "Eventos / Emblemas"
-
-        # Icon matching
-        icon = "assets/items/weapon_bloodsword_common_01.png"
-        clean_target = target_name.lower().replace(" ", "")
-        for p in item_pngs:
-            if clean_target in p:
-                icon = f"assets/items/{p}"
-                break
 
         crafting_catalog.append({
             "id": rid,

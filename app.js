@@ -750,10 +750,20 @@
           </div>
         </div>
         <div style="margin: 12px 0 8px; font-size: 0.82rem; color: #94a3b8;">
-          <div style="font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Materiais Necessários:</div>
-          <ul style="padding-left: 18px; margin: 0; line-height: 1.5;">
-            ${c.materials.map(m => `<li><strong>${m.name}</strong> × ${m.amount}</li>`).join('')}
-          </ul>
+          <div style="font-weight: 700; color: #cbd5e1; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+            <span>Materiais Necessários:</span>
+            <span style="font-size: 0.72rem; color: #94a3b8;">${c.materials.length} insumos</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            ${c.materials.slice(0, 3).map(m => `
+              <div style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.25); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.04);">
+                <img src="${m.icon || 'assets/items/flat_itemcraft.png'}" alt="${m.name}" style="width: 20px; height: 20px; border-radius: 3px; object-fit: contain; background: rgba(0,0,0,0.3);" onerror="this.src='assets/logo.png'">
+                <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #cbd5e1; font-size: 0.78rem;">${m.name}</span>
+                <span style="font-weight: 700; color: #f59e0b; font-family: monospace; font-size: 0.8rem;">×${Number(m.amount).toLocaleString('pt-BR')}</span>
+              </div>
+            `).join('')}
+            ${c.materials.length > 3 ? `<div style="font-size: 0.72rem; color: var(--crimson-light); text-align: right; padding-right: 4px;">+ mais ${c.materials.length - 3} insumos...</div>` : ''}
+          </div>
         </div>
         <div class="entity-meta-row" style="margin-top: 10px;">
           <span>${c.materials.length} Insumos</span>
@@ -1081,16 +1091,36 @@
         <div class="item-slot-frame" style="width: 56px; height: 56px;">
           <img src="${c.icon_img}" alt="${c.target_name}" class="item-slot-img" onerror="this.src='assets/logo.png'">
         </div>
-        <div style="font-size: 0.95rem; color: #cbd5e1; line-height: 1.6;">
-          Receita da bancada <strong>${c.tab_name}</strong> com probabilidade de sucesso de <strong>${c.success_rate}</strong> e grande sucesso de <strong>${c.big_success_rate}</strong>.
+        <div style="flex: 1;">
+          <div style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 4px;">${c.target_name}</div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <span class="entity-badge badge-gold">${c.tab_name}</span>
+            <span class="entity-badge ${c.big_success_rate !== '0%' ? 'badge-blue' : 'badge-crimson'}">
+              Sucesso: ${c.success_rate} ${c.big_success_rate !== '0%' ? '• Gr. Sucesso: ' + c.big_success_rate : ''}
+            </span>
+          </div>
         </div>
       </div>
       <div class="panel-box">
-        <div class="panel-title">Materiais e Recursos Exigidos</div>
-        <ul style="padding-left: 20px; margin: 8px 0; color: #e2e8f0; font-size: 0.9rem; line-height: 1.6;">
-          ${c.materials.map(m => `<li><strong>${m.name}</strong>: ${m.amount} unidades (${m.type})</li>`).join('')}
-        </ul>
-        <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 8px;">
+        <div class="panel-title" style="display: flex; align-items: center; gap: 8px;">
+          <img src="assets/items/flat_itemcraft.png" style="width: 18px; height: 18px; vertical-align: middle;" onerror="this.src='assets/logo.png'">
+          Materiais e Recursos Exigidos
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin: 12px 0;">
+          ${c.materials.map(m => `
+            <div style="display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+              <img src="${m.icon || 'assets/items/flat_itemcraft.png'}" style="width: 32px; height: 32px; border-radius: 6px; object-fit: contain; background: rgba(0,0,0,0.4);" onerror="this.src='assets/logo.png'">
+              <div style="flex: 1;">
+                <div style="font-weight: 600; color: #f1f5f9;">${m.name}</div>
+                <div style="font-size: 0.75rem; color: #94a3b8;">${m.type}</div>
+              </div>
+              <div style="font-weight: 700; color: #fbbf24; font-size: 1rem; font-family: monospace;">
+                × ${Number(m.amount).toLocaleString('pt-BR')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.08);">
           ${c.tradeable_on_big ? '💎 Em caso de Grande Sucesso, o item gerado possui FreeTradeRate=10000 e pode ser vendido livremente no Mercado de Leilões.' : '🔒 O item forjado é vinculado à conta do personagem.'}
         </div>
       </div>
