@@ -1,267 +1,1847 @@
 [
   {
-    "id": "vipora-corrupcao",
     "class_id": 1,
     "class_name": "Víbora",
-    "title": "Build: Corrupção Abissal & Dano Contínuo (DoT)",
-    "objective": "Dano mágico sustentado, espalhamento de veneno e alta sobrevivência via escudos de feitiçaria e drenagem.",
-    "playstyle": "Mantenha o Escudo de Veneno ativo, aplique Sussurros do Sofrimento para reduzir a defesa mágica em área e espalhe a Explosão de Veneno para detonar as ondas de monstros.",
-    "skills": [
+    "resource": "DarkMage",
+    "slug": "vipora",
+    "icon_img": "assets/classes/darkmage_icon.png",
+    "male_img": "assets/classes/darkmage_male.png",
+    "female_img": "assets/classes/darkmage_female.png",
+    "variants": [
       {
-        "id": "110017",
-        "name": "Explosão de Veneno",
-        "role": "Dois acertos e aplicação de DoT de veneno",
-        "slot": "1",
-        "book": "Livro de Habilidade: Explosão de Veneno (21011001)"
+        "type": "geral",
+        "badge": "🛡️ PvE Geral Equilibrado",
+        "title": "Build de Víbora: proposta para PvE geral",
+        "objective": "dano mágico, veneno e sobrevivência. É uma proposta inicial inferida das descrições das habilidades; não foi validada em jogo nem otimizada com cálculo de dano.",
+        "skills": [
+          {
+            "id": "110017",
+            "name": "Explosão de Veneno",
+            "role": "Dois acertos e aplicação de veneno.",
+            "cooldown": "Dois acertos e aplicação de veneno.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Explosão de Veneno (`21011001`, mín. não informado, máx. não informado)"
+          },
+          {
+            "id": "110021",
+            "name": "Sussurros do Sofrimento",
+            "role": "Causa dano e reduz a defesa mágica do alvo.",
+            "cooldown": "Causa dano e reduz a defesa mágica do alvo.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Sussurros do Sofrimento (`21011002`, mín. não informado, máx. não informado)"
+          },
+          {
+            "id": "110022",
+            "name": "Surto de Poder",
+            "role": "Aumenta o dano mágico.",
+            "cooldown": "Aumenta o dano mágico.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Pico de Poder (`21011004`, mín. não informado, máx. não informado)"
+          },
+          {
+            "id": "110027",
+            "name": "Escudo de Veneno",
+            "role": "Gera um escudo.",
+            "cooldown": "Gera um escudo.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Escudo de Peçonha (`21012004`, mín. não informado, máx. não informado)"
+          },
+          {
+            "id": "110034",
+            "name": "Chamado de Sangue",
+            "role": "Causa dano e recupera PV.",
+            "cooldown": "Causa dano e recupera PV.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Chamado do Sangue (`21011000`, mín. não informado, máx. não informado)"
+          }
+        ],
+        "equipment": [
+          {
+            "item": "Armamento Principal de Víbora",
+            "rarity": "Raro a Épico",
+            "attributes": "Bônus de dano principal da classe e atributos base",
+            "class_info": "1",
+            "level_limits": "Progresso Natural"
+          }
+        ],
+        "stat_priority": [
+          "Dano Principal",
+          "Redução de Cooldown (Haste)",
+          "Pontos de Sangue (BP)",
+          "Defesa / Resistência",
+          "Taxa Crítica"
+        ]
       },
       {
-        "id": "110021",
-        "name": "Sussurros do Sofrimento",
-        "role": "Dano mágico massivo e redução de defesa mágica do alvo",
-        "slot": "1",
-        "book": "Livro de Habilidade: Sussurros do Sofrimento (21011002)"
+        "type": "farm",
+        "badge": "🌾 Farm em Massa & Área (AoE)",
+        "title": "Víbora: farm",
+        "objective": "encontros com vários monstros e manutenção de PV; o efeito em área depende do texto de cada habilidade.",
+        "skills": [
+          {
+            "id": "110018",
+            "name": "Pântano do Sofrimento",
+            "role": "Área e múltiplos golpes; imobilização apenas nos níveis indicados no texto.",
+            "cooldown": "33000 (≈ 33 s)",
+            "mp": "1330",
+            "range": "900",
+            "rarity": "Raro (2)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "110016",
+            "name": "Redemoinho",
+            "role": "Até cinco alvos, lentidão e chance de atordoar.",
+            "cooldown": "48000 (≈ 48 s)",
+            "mp": "2490",
+            "range": "900",
+            "rarity": "Épico (3)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "110017",
+            "name": "Explosão de Veneno",
+            "role": "Dois golpes e veneno.",
+            "cooldown": "10000 (≈ 10 s)",
+            "mp": "360",
+            "range": "900",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "110029",
+            "name": "Foco",
+            "role": "Recuperação de MP e bônus mágico.",
+            "cooldown": "60000 (≈ 60 s)",
+            "mp": "0",
+            "range": "1000",
+            "rarity": "Raro (2)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "110034",
+            "name": "Chamado de Sangue",
+            "role": "Dano e recuperação de PV.",
+            "cooldown": "15000 (≈ 15 s)",
+            "mp": "210",
+            "range": "1000",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          }
+        ],
+        "equipment": [
+          {
+            "item": "Orbe do Caçador (11041006)",
+            "rarity": "Comum (0)",
+            "attributes": "ATQ de Arma Mínimo 20; ATQ de Arma Máximo 60; Dano a Monstro Comum 3",
+            "class_info": "1",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Orbe do Juramento Trovejante (11045003)",
+            "rarity": "Lendário (4)",
+            "attributes": "ATQ Mágico 72; ATQ de Arma Mínimo 130; ATQ de Arma Máximo 502; PREC Mágica 60; Dano CRÍT 33; Aumento de Dano Mágico 500 [percentual bruto]",
+            "class_info": "1",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Armadura Corporal do Caçador (12021010)",
+            "rarity": "Comum (0)",
+            "attributes": "DEF 29; Resistência a Dano Básico 1",
+            "class_info": "vazio; compatibilidade não confirmada",
+            "level_limits": "não informado / não informado"
+          }
+        ],
+        "stat_priority": [
+          "Dano a Monstros",
+          "Dano em Área",
+          "Recuperação de MP",
+          "Velocidade de Movimento",
+          "Taxa de Ataque"
+        ]
       },
       {
-        "id": "110022",
-        "name": "Surto de Poder",
-        "role": "Buff passivo/ativo que amplia o poder mágico",
-        "slot": "1",
-        "book": "Livro de Habilidade: Pico de Poder (21011004)"
+        "type": "chefe",
+        "badge": "👑 Caçador de Chefes (Single-Target)",
+        "title": "Víbora: chefe",
+        "objective": "combate contra um chefe, buscando reforços e dano sustentado sem assumir imunidades ou duração.",
+        "skills": [
+          {
+            "id": "110021",
+            "name": "Sussurros do Sofrimento",
+            "role": "Reduz defesa e resistência mágica do alvo.",
+            "cooldown": "15000 (≈ 15 s)",
+            "mp": "480",
+            "range": "900",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "110022",
+            "name": "Surto de Poder",
+            "role": "Aumenta dano mágico.",
+            "cooldown": "60000 (≈ 60 s)",
+            "mp": "870",
+            "range": "1000",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "110029",
+            "name": "Foco",
+            "role": "Recupera MP e o texto cita bônus contra chefe.",
+            "cooldown": "60000 (≈ 60 s)",
+            "mp": "0",
+            "range": "1000",
+            "rarity": "Raro (2)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "110028",
+            "name": "Corrente da Decomposição",
+            "role": "Projétil, explosão e veneno com condições por nível.",
+            "cooldown": "26000 (≈ 26 s)",
+            "mp": "1050",
+            "range": "900",
+            "rarity": "Raro (2)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "110034",
+            "name": "Chamado de Sangue",
+            "role": "Dano e recuperação de PV.",
+            "cooldown": "15000 (≈ 15 s)",
+            "mp": "210",
+            "range": "1000",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          }
+        ],
+        "equipment": [
+          {
+            "item": "Orbe de Névoa Carmesim (11042015)",
+            "rarity": "Incomum (1)",
+            "attributes": "ATQ de Arma Mínimo 40; ATQ de Arma Máximo 100; Dano a Chefe 5",
+            "class_info": "1",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Orbe do Juramento Trovejante (11045003)",
+            "rarity": "Lendário (4)",
+            "attributes": "ATQ Mágico 72; ATQ de Arma Mínimo 130; ATQ de Arma Máximo 502; PREC Mágica 60; Dano CRÍT 33; Aumento de Dano Mágico 500 [percentual bruto]",
+            "class_info": "1",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Armadura Maculada (12021005)",
+            "rarity": "Comum (0)",
+            "attributes": "DEF 15; Resistência a Dano de Habilidade 1",
+            "class_info": "vazio; compatibilidade não confirmada",
+            "level_limits": "não informado / não informado"
+          }
+        ],
+        "stat_priority": [
+          "Dano a Chefes",
+          "Perfuração de Defesa",
+          "Dano Crítico",
+          "Taxa Crítica",
+          "Resistência a Dano de Habilidade"
+        ]
       },
       {
-        "id": "110027",
-        "name": "Escudo de Veneno",
-        "role": "Barreira protetora que absorve dano baseado na inteligência",
-        "slot": "1",
-        "book": "Livro de Habilidade: Escudo de Peçonha (21012004)"
-      },
-      {
-        "id": "110034",
-        "name": "Chamado de Sangue",
-        "role": "Dano de sangue canalizado e recuperação de PV",
-        "slot": "1",
-        "book": "Livro de Habilidade: Chamado do Sangue (21011000)"
+        "type": "pvp",
+        "badge": "⚔️ Conflito PvP & Controle (JxJ)",
+        "title": "Víbora: pvp",
+        "objective": "controle e sobrevivência contra jogadores; parte dos efeitos tem condições específicas de JxJ.",
+        "skills": [
+          {
+            "id": "110025",
+            "name": "Eco do Desespero",
+            "role": "Reduções de defesa e resistência, incluindo efeito JxJ.",
+            "cooldown": "23000 (≈ 23 s)",
+            "mp": "870",
+            "range": "900",
+            "rarity": "Incomum (1)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "110027",
+            "name": "Escudo de Veneno",
+            "role": "Escudo e possível peçonha ao ser atingido.",
+            "cooldown": "40000 (≈ 40 s)",
+            "mp": "600",
+            "range": "1000",
+            "rarity": "Incomum (1)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "110019",
+            "name": "Essência da Morte",
+            "role": "Chance de atordoar.",
+            "cooldown": "18000 (≈ 18 s)",
+            "mp": "600",
+            "range": "900",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "110029",
+            "name": "Foco",
+            "role": "O texto cita precisão e dano de PvP.",
+            "cooldown": "60000 (≈ 60 s)",
+            "mp": "0",
+            "range": "1000",
+            "rarity": "Raro (2)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "110021",
+            "name": "Sussurros do Sofrimento",
+            "role": "Redução de defesa e resistência mágica; há efeito adicional JxJ.",
+            "cooldown": "15000 (≈ 15 s)",
+            "mp": "480",
+            "range": "900",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          }
+        ],
+        "equipment": [
+          {
+            "item": "Orbe do Vínculo Estelar (11043008)",
+            "rarity": "Raro (2)",
+            "attributes": "ATQ Mágico 24; ATQ de Arma Mínimo 60; ATQ de Arma Máximo 284; PREC Mágica 12; Dano PvP 7",
+            "class_info": "1",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Orbe do Grande Elottarvizian (11045007)",
+            "rarity": "Lendário (4)",
+            "attributes": "ATQ Mágico 30; ATQ JxJ 42; ATQ de Arma Mínimo 130; ATQ de Arma Máximo 502; PREC Mágica 60; Aumento de Dano de JxJ 700 [percentual bruto]",
+            "class_info": "1",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Armadura Corporal da Garra de Sangue (12023004)",
+            "rarity": "Raro (2)",
+            "attributes": "DEF 180; ESQ de Habilidade 12; Resistência a Dano PvP 3; Taxa de Resistência a CRÍT 100 [percentual bruto]; MP Máximo 30",
+            "class_info": "vazio; compatibilidade não confirmada",
+            "level_limits": "não informado / não informado"
+          }
+        ],
+        "stat_priority": [
+          "Dano em Jogadores",
+          "Redução de Dano PvP",
+          "Imunidade a CC / Tenacidade",
+          "Esquiva (ESQ)",
+          "Penetração"
+        ]
       }
-    ],
-    "stat_priority": [
-      "Dano Mágico",
-      "Perfuração Mágica",
-      "Redução de Cooldown (Haste)",
-      "Pontos de Sangue (BP)",
-      "Defesa Mágica"
-    ],
-    "recommended_gear": "Orbes com bônus de Feitiçaria Sombria e Armaduras com regeneração de Mana e Escudo Protetor."
+    ]
   },
   {
-    "id": "ceifador-sombra",
     "class_id": 2,
     "class_name": "Ceifador",
-    "title": "Build: Sombra Executora & Dano Crítico Melee",
-    "objective": "Eliminação cirúrgica de alvos de elite e chefes com golpes corpo a corpo de alta penetração e imobilização.",
-    "playstyle": "Aproxime-se com Prisão Sombria para congelar a movimentação inimiga, ative Energia Sombria para inflar seu dano base e execute com o Golpe Mortal.",
-    "skills": [
+    "resource": "Reaper",
+    "slug": "ceifador",
+    "icon_img": "assets/classes/reaper_icon.png",
+    "male_img": "assets/classes/reaper_male.png",
+    "female_img": "assets/classes/reaper_female.png",
+    "variants": [
       {
-        "id": "120011",
-        "name": "Golpe Mortal",
-        "role": "Ataque corpo a corpo concentrado (alcance de até 3m) com alto multiplicador crítico",
-        "slot": "1",
-        "book": "Livro de Habilidade: Golpe Mortal (21021001)"
+        "type": "geral",
+        "badge": "🛡️ PvE Geral Equilibrado",
+        "title": "Build de Ceifador: proposta para PvE geral",
+        "objective": "corpo a corpo com controle e resistência. É uma proposta inicial inferida das descrições das habilidades; não foi validada em jogo nem otimizada com cálculo de dano.",
+        "skills": [
+          {
+            "id": "120011",
+            "name": "Golpe Mortal",
+            "role": "Ataque corpo a corpo com alcance descrito de até 3 m.",
+            "cooldown": "Ataque corpo a corpo com alcance descrito de até 3 m.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Golpe Mortal (`21021001`, mín. não informado, máx. não informado)"
+          },
+          {
+            "id": "120012",
+            "name": "Prisão Sombria",
+            "role": "Causa dano e tem chance de imobilizar.",
+            "cooldown": "Causa dano e tem chance de imobilizar.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Aprisionamento Sombrio (`21022001`, mín. não informado, máx. não informado)"
+          },
+          {
+            "id": "120018",
+            "name": "Energia Sombria",
+            "role": "Aumenta o dano corpo a corpo.",
+            "cooldown": "Aumenta o dano corpo a corpo.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Energia Sombria (`21021004`, mín. não informado, máx. não informado)"
+          },
+          {
+            "id": "120019",
+            "name": "Pele Grossa",
+            "role": "Aumenta a resistência a dano.",
+            "cooldown": "Aumenta a resistência a dano.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Pele Grossa (`21021005`, mín. não informado, máx. não informado)"
+          },
+          {
+            "id": "120028",
+            "name": "Regeneração Sombria",
+            "role": "A descrição informa recuperação baseada no ATQ.",
+            "cooldown": "A descrição informa recuperação baseada no ATQ.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`0`",
+            "book": "Não localizado pelo vínculo exato"
+          }
+        ],
+        "equipment": [
+          {
+            "item": "Armamento Principal de Ceifador",
+            "rarity": "Raro a Épico",
+            "attributes": "Bônus de dano principal da classe e atributos base",
+            "class_info": "2",
+            "level_limits": "Progresso Natural"
+          }
+        ],
+        "stat_priority": [
+          "Dano Principal",
+          "Redução de Cooldown (Haste)",
+          "Pontos de Sangue (BP)",
+          "Defesa / Resistência",
+          "Taxa Crítica"
+        ]
       },
       {
-        "id": "120012",
-        "name": "Prisão Sombria",
-        "role": "Controle de grupo que prende o alvo nas sombras e impede fuga",
-        "slot": "1",
-        "book": "Livro de Habilidade: Aprisionamento Sombrio (21022001)"
+        "type": "farm",
+        "badge": "🌾 Farm em Massa & Área (AoE)",
+        "title": "Ceifador: farm",
+        "objective": "encontros com vários monstros e manutenção de PV; o efeito em área depende do texto de cada habilidade.",
+        "skills": [
+          {
+            "id": "120020",
+            "name": "Golpe Giratório",
+            "role": "Cinco golpes e até cinco alvos nos níveis 1–5.",
+            "cooldown": "20000 (≈ 20 s)",
+            "mp": "710",
+            "range": "500",
+            "rarity": "Incomum (1)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "120018",
+            "name": "Energia Sombria",
+            "role": "Aumenta dano corpo a corpo.",
+            "cooldown": "60000 (≈ 60 s)",
+            "mp": "870",
+            "range": "900",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "120019",
+            "name": "Pele Grossa",
+            "role": "Aumenta resistência a dano.",
+            "cooldown": "60000 (≈ 60 s)",
+            "mp": "870",
+            "range": "900",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "120029",
+            "name": "Chamado de Sangue",
+            "role": "Dano e recuperação de PV.",
+            "cooldown": "15000 (≈ 15 s)",
+            "mp": "210",
+            "range": "1000",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "120011",
+            "name": "Golpe Mortal",
+            "role": "Ataque de curto alcance.",
+            "cooldown": "8000 (≈ 8 s)",
+            "mp": "240",
+            "range": "300",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          }
+        ],
+        "equipment": [
+          {
+            "item": "Foice do Caçador (11031006)",
+            "rarity": "Comum (0)",
+            "attributes": "ATQ de Arma Mínimo 20; ATQ de Arma Máximo 60; Dano a Monstro Comum 3",
+            "class_info": "2",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Foice do Juramento Trovejante (11035003)",
+            "rarity": "Lendário (4)",
+            "attributes": "ATQ Corpo a Corpo 72; ATQ de Arma Mínimo 130; ATQ de Arma Máximo 502; PREC Corpo a Corpo 60; Dano CRÍT 33; Aumento de Dano Corpo a Corpo 500 [percentual bruto]",
+            "class_info": "2",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Armadura Corporal do Caçador (12021010)",
+            "rarity": "Comum (0)",
+            "attributes": "DEF 29; Resistência a Dano Básico 1",
+            "class_info": "vazio; compatibilidade não confirmada",
+            "level_limits": "não informado / não informado"
+          }
+        ],
+        "stat_priority": [
+          "Dano a Monstros",
+          "Dano em Área",
+          "Recuperação de MP",
+          "Velocidade de Movimento",
+          "Taxa de Ataque"
+        ]
       },
       {
-        "id": "120018",
-        "name": "Energia Sombria",
-        "role": "Aumenta exponencialmente o dano corpo a corpo e ataque crítico",
-        "slot": "1",
-        "book": "Livro de Habilidade: Energia Sombria (21021004)"
+        "type": "chefe",
+        "badge": "👑 Caçador de Chefes (Single-Target)",
+        "title": "Ceifador: chefe",
+        "objective": "combate contra um chefe, buscando reforços e dano sustentado sem assumir imunidades ou duração.",
+        "skills": [
+          {
+            "id": "120013",
+            "name": "Infiltração das Sombras",
+            "role": "Dano e marca com dano adicional condicionado.",
+            "cooldown": "20000 (≈ 20 s)",
+            "mp": "720",
+            "range": "900",
+            "rarity": "Incomum (1)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "120023",
+            "name": "Grito Real",
+            "role": "Dois golpes; redução de resistência apenas nos níveis indicados.",
+            "cooldown": "28000 (≈ 28 s)",
+            "mp": "1140",
+            "range": "500",
+            "rarity": "Raro (2)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "120018",
+            "name": "Energia Sombria",
+            "role": "Aumenta dano corpo a corpo.",
+            "cooldown": "60000 (≈ 60 s)",
+            "mp": "870",
+            "range": "900",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "120026",
+            "name": "Descida do Ceifador",
+            "role": "Aumenta ataque corpo a corpo e defesa.",
+            "cooldown": "60000 (≈ 60 s)",
+            "mp": "1230",
+            "range": "900",
+            "rarity": "Épico (3)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "120029",
+            "name": "Chamado de Sangue",
+            "role": "Dano e recuperação de PV.",
+            "cooldown": "15000 (≈ 15 s)",
+            "mp": "210",
+            "range": "1000",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          }
+        ],
+        "equipment": [
+          {
+            "item": "Foice de Névoa Carmesim (11032015)",
+            "rarity": "Incomum (1)",
+            "attributes": "ATQ de Arma Mínimo 40; ATQ de Arma Máximo 100; Dano a Chefe 5",
+            "class_info": "2",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Foice do Juramento Trovejante (11035003)",
+            "rarity": "Lendário (4)",
+            "attributes": "ATQ Corpo a Corpo 72; ATQ de Arma Mínimo 130; ATQ de Arma Máximo 502; PREC Corpo a Corpo 60; Dano CRÍT 33; Aumento de Dano Corpo a Corpo 500 [percentual bruto]",
+            "class_info": "2",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Armadura Maculada (12021005)",
+            "rarity": "Comum (0)",
+            "attributes": "DEF 15; Resistência a Dano de Habilidade 1",
+            "class_info": "vazio; compatibilidade não confirmada",
+            "level_limits": "não informado / não informado"
+          }
+        ],
+        "stat_priority": [
+          "Dano a Chefes",
+          "Perfuração de Defesa",
+          "Dano Crítico",
+          "Taxa Crítica",
+          "Resistência a Dano de Habilidade"
+        ]
       },
       {
-        "id": "120019",
-        "name": "Pele Grossa",
-        "role": "Aumenta a resistência física e reduz atordoamentos sofridos",
-        "slot": "1",
-        "book": "Livro de Habilidade: Pele Grossa (21021005)"
-      },
-      {
-        "id": "120028",
-        "name": "Regeneração Sombria",
-        "role": "Cura contínua proporcional ao poder de ataque desferido",
-        "slot": "0",
-        "book": "Passiva Inata / Evolução"
+        "type": "pvp",
+        "badge": "⚔️ Conflito PvP & Controle (JxJ)",
+        "title": "Ceifador: pvp",
+        "objective": "controle e sobrevivência contra jogadores; parte dos efeitos tem condições específicas de JxJ.",
+        "skills": [
+          {
+            "id": "120012",
+            "name": "Prisão Sombria",
+            "role": "Chance de imobilizar e redução de resistência JxJ.",
+            "cooldown": "16000 (≈ 16 s)",
+            "mp": "600",
+            "range": "900",
+            "rarity": "Incomum (1)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "120013",
+            "name": "Infiltração das Sombras",
+            "role": "Chance de atordoar e aplicar marca.",
+            "cooldown": "20000 (≈ 20 s)",
+            "mp": "720",
+            "range": "900",
+            "rarity": "Incomum (1)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "120015",
+            "name": "Sombra da Morte",
+            "role": "O texto cita efeito JxJ sobre resistência a crítico.",
+            "cooldown": "17000 (≈ 17 s)",
+            "mp": "540",
+            "range": "300",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "120022",
+            "name": "Armadura de Sombras",
+            "role": "Resistência a dano e velocidade de movimento.",
+            "cooldown": "40000 (≈ 40 s)",
+            "mp": "720",
+            "range": "900",
+            "rarity": "Incomum (1)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "120025",
+            "name": "Sombra da Noite",
+            "role": "Furtividade com restrição explícita aos ataques básicos.",
+            "cooldown": "55000 (≈ 55 s)",
+            "mp": "2820",
+            "range": "900",
+            "rarity": "Épico (3)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          }
+        ],
+        "equipment": [
+          {
+            "item": "Foice do Vínculo Estelar (11033008)",
+            "rarity": "Raro (2)",
+            "attributes": "ATQ Corpo a Corpo 24; ATQ de Arma Mínimo 60; ATQ de Arma Máximo 284; PREC Corpo a Corpo 12; Dano PvP 7",
+            "class_info": "2",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Grande Foice de Elottarvizia (11035007)",
+            "rarity": "Lendário (4)",
+            "attributes": "ATQ Corpo a Corpo 30; ATQ JxJ 42; ATQ de Arma Mínimo 130; ATQ de Arma Máximo 502; PREC Corpo a Corpo 60; Aumento de Dano de JxJ 700 [percentual bruto]",
+            "class_info": "2",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Armadura Corporal da Garra de Sangue (12023004)",
+            "rarity": "Raro (2)",
+            "attributes": "DEF 180; ESQ de Habilidade 12; Resistência a Dano PvP 3; Taxa de Resistência a CRÍT 100 [percentual bruto]; MP Máximo 30",
+            "class_info": "vazio; compatibilidade não confirmada",
+            "level_limits": "não informado / não informado"
+          }
+        ],
+        "stat_priority": [
+          "Dano em Jogadores",
+          "Redução de Dano PvP",
+          "Imunidade a CC / Tenacidade",
+          "Esquiva (ESQ)",
+          "Penetração"
+        ]
       }
-    ],
-    "stat_priority": [
-      "Dano Corpo a Corpo",
-      "Taxa Crítica",
-      "Dano Crítico",
-      "Velocidade de Ataque",
-      "Esquiva (ESQ)"
-    ],
-    "recommended_gear": "Foices com afiação sombria e trajes leves de assassinato com bônus de aceleração de movimento."
+    ]
   },
   {
-    "id": "carnificina-artilharia",
     "class_id": 3,
     "class_name": "Carnificina",
-    "title": "Build: Artilharia Carmesim Ranged DPS",
-    "objective": "Metralhadora de projéteis abençoados, disparos em área a distâncias seguras (8.5m) e evasão tática.",
-    "playstyle": "Posicione-se na retaguarda. Ative Passo Ágil e Mirar para obter 100% de precisão e bônus de alcance, fuzilando os alvos com Tiro Selvagem e repelindo ameaças com Queda da Escuridão.",
-    "skills": [
+    "resource": "Gunner",
+    "slug": "carnificina",
+    "icon_img": "assets/classes/gunner_icon.png",
+    "male_img": "assets/classes/gunner_male.png",
+    "female_img": "assets/classes/gunner_female.png",
+    "variants": [
       {
-        "id": "130012",
-        "name": "Tiro Selvagem",
-        "role": "Sequência de 6 disparos ultra rápidos em até 8,5 metros",
-        "slot": "1",
-        "book": "Livro de Habilidade: Tiro Selvagem (21031002)"
+        "type": "geral",
+        "badge": "🛡️ PvE Geral Equilibrado",
+        "title": "Build de Carnificina: proposta para PvE geral",
+        "objective": "dano à distância e posicionamento. É uma proposta inicial inferida das descrições das habilidades; não foi validada em jogo nem otimizada com cálculo de dano.",
+        "skills": [
+          {
+            "id": "130012",
+            "name": "Tiro Selvagem",
+            "role": "A descrição informa seis acertos e alcance de até 8,5 m.",
+            "cooldown": "A descrição informa seis acertos e alcance de até 8,5 m.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Tiro Selvagem (`21031002`, mín. não informado, máx. não informado)"
+          },
+          {
+            "id": "130014",
+            "name": "Queda da Escuridão",
+            "role": "Causa dano e pode lançar o alvo.",
+            "cooldown": "Causa dano e pode lançar o alvo.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Queda da Escuridão (`21032002`, mín. não informado, máx. não informado)"
+          },
+          {
+            "id": "130015",
+            "name": "Mirar",
+            "role": "Aumenta o dano à distância.",
+            "cooldown": "Aumenta o dano à distância.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Mirar (`21031004`, mín. não informado, máx. não informado)"
+          },
+          {
+            "id": "130016",
+            "name": "Passo Ágil",
+            "role": "Aumenta ESQ.",
+            "cooldown": "Aumenta ESQ.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Passo Ágil (`21031005`, mín. não informado, máx. não informado)"
+          },
+          {
+            "id": "130030",
+            "name": "Chamado de Sangue",
+            "role": "Causa dano e recupera PV.",
+            "cooldown": "Causa dano e recupera PV.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Chamado do Sangue (`21031000`, mín. não informado, máx. não informado)"
+          }
+        ],
+        "equipment": [
+          {
+            "item": "Armamento Principal de Carnificina",
+            "rarity": "Raro a Épico",
+            "attributes": "Bônus de dano principal da classe e atributos base",
+            "class_info": "3",
+            "level_limits": "Progresso Natural"
+          }
+        ],
+        "stat_priority": [
+          "Dano Principal",
+          "Redução de Cooldown (Haste)",
+          "Pontos de Sangue (BP)",
+          "Defesa / Resistência",
+          "Taxa Crítica"
+        ]
       },
       {
-        "id": "130014",
-        "name": "Queda da Escuridão",
-        "role": "Disparo explosivo que lança os inimigos no ar (Knockup)",
-        "slot": "1",
-        "book": "Livro de Habilidade: Queda da Escuridão (21032002)"
+        "type": "farm",
+        "badge": "🌾 Farm em Massa & Área (AoE)",
+        "title": "Carnificina: farm",
+        "objective": "encontros com vários monstros e manutenção de PV; o efeito em área depende do texto de cada habilidade.",
+        "skills": [
+          {
+            "id": "130027",
+            "name": "Tiro Desmembrador",
+            "role": "Dano em área e até cinco alvos; chance de atordoar.",
+            "cooldown": "48000 (≈ 48 s)",
+            "mp": "2490",
+            "range": "850",
+            "rarity": "Épico (3)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "130019",
+            "name": "Descanso da Alma",
+            "role": "Projétil e explosão; chance de imobilizar.",
+            "cooldown": "25000 (≈ 25 s)",
+            "mp": "930",
+            "range": "850",
+            "rarity": "Incomum (1)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "130015",
+            "name": "Mirar",
+            "role": "Aumenta dano à distância.",
+            "cooldown": "60000 (≈ 60 s)",
+            "mp": "870",
+            "range": "1000",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "130020",
+            "name": "Foco do Atirador de Elite",
+            "role": "Velocidade e precisão básicas; recuperação em ataques básicos bem-sucedidos.",
+            "cooldown": "35000 (≈ 35 s)",
+            "mp": "630",
+            "range": "1000",
+            "rarity": "Incomum (1)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "130030",
+            "name": "Chamado de Sangue",
+            "role": "Dano e recuperação de PV.",
+            "cooldown": "15000 (≈ 15 s)",
+            "mp": "210",
+            "range": "1000",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          }
+        ],
+        "equipment": [
+          {
+            "item": "Arma de Fogo do Caçador (11021006)",
+            "rarity": "Comum (0)",
+            "attributes": "ATQ de Arma Mínimo 20; ATQ de Arma Máximo 60; Dano a Monstro Comum 3",
+            "class_info": "3",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Arma de Fogo do Juramento Trovejante (11025003)",
+            "rarity": "Lendário (4)",
+            "attributes": "ATQ à Distância 72; ATQ de Arma Mínimo 130; ATQ de Arma Máximo 502; PREC à Distância 60; Dano CRÍT 33; Aumento de Dano à Distância 500 [percentual bruto]",
+            "class_info": "3",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Armadura Corporal do Caçador (12021010)",
+            "rarity": "Comum (0)",
+            "attributes": "DEF 29; Resistência a Dano Básico 1",
+            "class_info": "vazio; compatibilidade não confirmada",
+            "level_limits": "não informado / não informado"
+          }
+        ],
+        "stat_priority": [
+          "Dano a Monstros",
+          "Dano em Área",
+          "Recuperação de MP",
+          "Velocidade de Movimento",
+          "Taxa de Ataque"
+        ]
       },
       {
-        "id": "130015",
-        "name": "Mirar",
-        "role": "Buff concentrado que amplia dano à distância e perfuração",
-        "slot": "1",
-        "book": "Livro de Habilidade: Mirar (21031004)"
+        "type": "chefe",
+        "badge": "👑 Caçador de Chefes (Single-Target)",
+        "title": "Carnificina: chefe",
+        "objective": "combate contra um chefe, buscando reforços e dano sustentado sem assumir imunidades ou duração.",
+        "skills": [
+          {
+            "id": "130011",
+            "name": "Desarmar",
+            "role": "Chance de reduzir defesa à distância do alvo.",
+            "cooldown": "8000 (≈ 8 s)",
+            "mp": "240",
+            "range": "850",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "130021",
+            "name": "Atirador de Elite",
+            "role": "Reforça as próximas habilidades dentro das condições do texto.",
+            "cooldown": "40000 (≈ 40 s)",
+            "mp": "720",
+            "range": "1000",
+            "rarity": "Incomum (1)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "130023",
+            "name": "Tiro Mortal de Precisão",
+            "role": "Três golpes e chance de atordoar.",
+            "cooldown": "28000 (≈ 28 s)",
+            "mp": "1140",
+            "range": "850",
+            "rarity": "Raro (2)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "130015",
+            "name": "Mirar",
+            "role": "Aumenta dano à distância.",
+            "cooldown": "60000 (≈ 60 s)",
+            "mp": "870",
+            "range": "1000",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "130030",
+            "name": "Chamado de Sangue",
+            "role": "Dano e recuperação de PV.",
+            "cooldown": "15000 (≈ 15 s)",
+            "mp": "210",
+            "range": "1000",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          }
+        ],
+        "equipment": [
+          {
+            "item": "Arma de Fogo da Névoa Carmesim (11022015)",
+            "rarity": "Incomum (1)",
+            "attributes": "ATQ de Arma Mínimo 40; ATQ de Arma Máximo 100; Dano a Chefe 5",
+            "class_info": "3",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Arma de Fogo do Juramento Trovejante (11025003)",
+            "rarity": "Lendário (4)",
+            "attributes": "ATQ à Distância 72; ATQ de Arma Mínimo 130; ATQ de Arma Máximo 502; PREC à Distância 60; Dano CRÍT 33; Aumento de Dano à Distância 500 [percentual bruto]",
+            "class_info": "3",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Armadura Maculada (12021005)",
+            "rarity": "Comum (0)",
+            "attributes": "DEF 15; Resistência a Dano de Habilidade 1",
+            "class_info": "vazio; compatibilidade não confirmada",
+            "level_limits": "não informado / não informado"
+          }
+        ],
+        "stat_priority": [
+          "Dano a Chefes",
+          "Perfuração de Defesa",
+          "Dano Crítico",
+          "Taxa Crítica",
+          "Resistência a Dano de Habilidade"
+        ]
       },
       {
-        "id": "130016",
-        "name": "Passo Ágil",
-        "role": "Amplia velocidade de deslocamento e taxa de evasão (ESQ)",
-        "slot": "1",
-        "book": "Livro de Habilidade: Passo Ágil (21031005)"
-      },
-      {
-        "id": "130030",
-        "name": "Chamado de Sangue",
-        "role": "Dreno balístico vampírico que devolve PV ao atirador",
-        "slot": "1",
-        "book": "Livro de Habilidade: Chamado do Sangue (21031000)"
+        "type": "pvp",
+        "badge": "⚔️ Conflito PvP & Controle (JxJ)",
+        "title": "Carnificina: pvp",
+        "objective": "controle e sobrevivência contra jogadores; parte dos efeitos tem condições específicas de JxJ.",
+        "skills": [
+          {
+            "id": "130011",
+            "name": "Desarmar",
+            "role": "Chance de reduzir defesa; texto inclui efeito adicional JxJ.",
+            "cooldown": "8000 (≈ 8 s)",
+            "mp": "240",
+            "range": "850",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "130014",
+            "name": "Queda da Escuridão",
+            "role": "Chance de lançar o alvo.",
+            "cooldown": "22000 (≈ 22 s)",
+            "mp": "780",
+            "range": "850",
+            "rarity": "Incomum (1)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "130024",
+            "name": "A Caçada Começa",
+            "role": "Taxa de crítico e bônus de PvP conforme faixa de nível.",
+            "cooldown": "60000 (≈ 60 s)",
+            "mp": "1170",
+            "range": "1000",
+            "rarity": "Raro (2)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "130029",
+            "name": "Fogo em Retirada",
+            "role": "Dano e recuo descrito de três metros.",
+            "cooldown": "16000 (≈ 16 s)",
+            "mp": "590",
+            "range": "850",
+            "rarity": "Incomum (1)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "130028",
+            "name": "Proteção de Sangue",
+            "role": "Cria escudo.",
+            "cooldown": "15000 (≈ 15 s)",
+            "mp": "240",
+            "range": "1000",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=0",
+            "book": ""
+          }
+        ],
+        "equipment": [
+          {
+            "item": "Arma de Fogo do Vínculo Estelar (11023008)",
+            "rarity": "Raro (2)",
+            "attributes": "ATQ à Distância 24; ATQ de Arma Mínimo 60; ATQ de Arma Máximo 284; PREC à Distância 12; Dano PvP 7",
+            "class_info": "3",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Arma de Fogo do Grande Elottarvizian (11025007)",
+            "rarity": "Lendário (4)",
+            "attributes": "ATQ à Distância 30; ATQ JxJ 42; ATQ de Arma Mínimo 130; ATQ de Arma Máximo 502; PREC à Distância 60; Aumento de Dano de JxJ 700 [percentual bruto]",
+            "class_info": "3",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Armadura Corporal da Garra de Sangue (12023004)",
+            "rarity": "Raro (2)",
+            "attributes": "DEF 180; ESQ de Habilidade 12; Resistência a Dano PvP 3; Taxa de Resistência a CRÍT 100 [percentual bruto]; MP Máximo 30",
+            "class_info": "vazio; compatibilidade não confirmada",
+            "level_limits": "não informado / não informado"
+          }
+        ],
+        "stat_priority": [
+          "Dano em Jogadores",
+          "Redução de Dano PvP",
+          "Imunidade a CC / Tenacidade",
+          "Esquiva (ESQ)",
+          "Penetração"
+        ]
       }
-    ],
-    "stat_priority": [
-      "Dano à Distância",
-      "Perfuração de Armadura",
-      "Velocidade de Ataque",
-      "Esquiva",
-      "Consumo de Mana"
-    ],
-    "recommended_gear": "Armas de fogo duplas com bônus de cadência e canos estendidos para maximizar o raio de 8.5m."
+    ]
   },
   {
-    "id": "manchado-baluarte",
     "class_id": 4,
     "class_name": "Manchado de Sangue",
-    "title": "Build: Baluarte Carmesim & Drenagem Inabalável",
-    "objective": "Tanque supremo de vanguarda que utiliza o próprio sangue para atrair inimigos, quebrar defesas e absorver dano.",
-    "playstyle": "Agrupe multidões com Sede de Sangue (puxão), ative Postura de Batalha para elevar a defesa e corte com Espada de Sangue e Fúria de Sangue para transformar o dano em autocura instantânea.",
-    "skills": [
+    "resource": "SwordMan",
+    "slug": "manchado_de_sangue",
+    "icon_img": "assets/classes/swordman_icon.png",
+    "male_img": "assets/classes/swordman_male.png",
+    "female_img": "assets/classes/swordman_female.png",
+    "variants": [
       {
-        "id": "140014",
-        "name": "Fúria de Sangue",
-        "role": "Golpe dilacerante que regenera PV equivalente a porcentagem do dano causado",
-        "slot": "1",
-        "book": "Livro de Habilidade: Fúria de Sangue (21042001)"
+        "type": "geral",
+        "badge": "🛡️ PvE Geral Equilibrado",
+        "title": "Build de Manchado de Sangue: proposta para PvE geral",
+        "objective": "corpo a corpo com recuperação e controle. É uma proposta inicial inferida das descrições das habilidades; não foi validada em jogo nem otimizada com cálculo de dano.",
+        "skills": [
+          {
+            "id": "140014",
+            "name": "Fúria de Sangue",
+            "role": "Causa dano e recupera PV em função do dano causado.",
+            "cooldown": "Causa dano e recupera PV em função do dano causado.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Fúria de Sangue (`21042001`, mín. não informado, máx. não informado)"
+          },
+          {
+            "id": "140018",
+            "name": "Postura de Batalha",
+            "role": "Aumenta o dano corpo a corpo.",
+            "cooldown": "Aumenta o dano corpo a corpo.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Postura de Batalha (`21041004`, mín. não informado, máx. não informado)"
+          },
+          {
+            "id": "140020",
+            "name": "Espada de Sangue",
+            "role": "Causa dois acertos e reduz resistência a dano corpo a corpo.",
+            "cooldown": "Causa dois acertos e reduz resistência a dano corpo a corpo.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Espada de Sangue (`21042000`, mín. não informado, máx. não informado)"
+          },
+          {
+            "id": "140023",
+            "name": "Sede de Sangue",
+            "role": "Aplica puxão e pode imobilizar.",
+            "cooldown": "Aplica puxão e pode imobilizar.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Sede de Sangue (`21043000`, mín. não informado, máx. não informado)"
+          },
+          {
+            "id": "140027",
+            "name": "Regeneração de Sangue",
+            "role": "A descrição informa recuperação baseada no ATQ.",
+            "cooldown": "A descrição informa recuperação baseada no ATQ.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`0`",
+            "book": "Não localizado pelo vínculo exato"
+          }
+        ],
+        "equipment": [
+          {
+            "item": "Armamento Principal de Manchado de Sangue",
+            "rarity": "Raro a Épico",
+            "attributes": "Bônus de dano principal da classe e atributos base",
+            "class_info": "4",
+            "level_limits": "Progresso Natural"
+          }
+        ],
+        "stat_priority": [
+          "Dano Principal",
+          "Redução de Cooldown (Haste)",
+          "Pontos de Sangue (BP)",
+          "Defesa / Resistência",
+          "Taxa Crítica"
+        ]
       },
       {
-        "id": "140018",
-        "name": "Postura de Batalha",
-        "role": "Aumenta consideravelmente o ataque corpo a corpo e a tenacidade",
-        "slot": "1",
-        "book": "Livro de Habilidade: Postura de Batalha (21041004)"
+        "type": "farm",
+        "badge": "🌾 Farm em Massa & Área (AoE)",
+        "title": "Manchado de Sangue: farm",
+        "objective": "encontros com vários monstros e manutenção de PV; o efeito em área depende do texto de cada habilidade.",
+        "skills": [
+          {
+            "id": "140012",
+            "name": "Banho de Sangue",
+            "role": "Área com até cinco alvos e chance de lançamento.",
+            "cooldown": "26000 (≈ 26 s)",
+            "mp": "1050",
+            "range": "700",
+            "rarity": "Raro (2)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "140013",
+            "name": "Espinho de Sangue",
+            "role": "Três golpes e lentidão no alvo.",
+            "cooldown": "18000 (≈ 18 s)",
+            "mp": "480",
+            "range": "700",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "140014",
+            "name": "Fúria de Sangue",
+            "role": "Dano e recuperação de PV baseada no dano.",
+            "cooldown": "21000 (≈ 21 s)",
+            "mp": "780",
+            "range": "250",
+            "rarity": "Incomum (1)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "140018",
+            "name": "Postura de Batalha",
+            "role": "Aumenta dano corpo a corpo.",
+            "cooldown": "60000 (≈ 60 s)",
+            "mp": "870",
+            "range": "700",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "140030",
+            "name": "Chamado de Sangue",
+            "role": "Dano e recuperação de PV.",
+            "cooldown": "15000 (≈ 15 s)",
+            "mp": "210",
+            "range": "1000",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          }
+        ],
+        "equipment": [
+          {
+            "item": "Espada do Caçador (11011006)",
+            "rarity": "Comum (0)",
+            "attributes": "ATQ de Arma Mínimo 20; ATQ de Arma Máximo 60; Dano a Monstro Comum 3",
+            "class_info": "4",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Espada do Juramento Trovejante (11015003)",
+            "rarity": "Lendário (4)",
+            "attributes": "ATQ Corpo a Corpo 72; ATQ de Arma Mínimo 130; ATQ de Arma Máximo 502; PREC Corpo a Corpo 60; Dano CRÍT 33; Aumento de Dano Corpo a Corpo 500 [percentual bruto]",
+            "class_info": "4",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Armadura Corporal do Caçador (12021010)",
+            "rarity": "Comum (0)",
+            "attributes": "DEF 29; Resistência a Dano Básico 1",
+            "class_info": "vazio; compatibilidade não confirmada",
+            "level_limits": "não informado / não informado"
+          }
+        ],
+        "stat_priority": [
+          "Dano a Monstros",
+          "Dano em Área",
+          "Recuperação de MP",
+          "Velocidade de Movimento",
+          "Taxa de Ataque"
+        ]
       },
       {
-        "id": "140020",
-        "name": "Espada de Sangue",
-        "role": "Ataque duplo de corte que fragmenta a armadura corpo a corpo do inimigo",
-        "slot": "1",
-        "book": "Livro de Habilidade: Espada de Sangue (21042000)"
+        "type": "chefe",
+        "badge": "👑 Caçador de Chefes (Single-Target)",
+        "title": "Manchado de Sangue: chefe",
+        "objective": "combate contra um chefe, buscando reforços e dano sustentado sem assumir imunidades ou duração.",
+        "skills": [
+          {
+            "id": "140020",
+            "name": "Espada de Sangue",
+            "role": "Reduz defesa e resistência a dano corpo a corpo.",
+            "cooldown": "17000 (≈ 17 s)",
+            "mp": "630",
+            "range": "400",
+            "rarity": "Incomum (1)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "140014",
+            "name": "Fúria de Sangue",
+            "role": "Recupera PV; texto cita resistência a dano de chefe.",
+            "cooldown": "21000 (≈ 21 s)",
+            "mp": "780",
+            "range": "250",
+            "rarity": "Incomum (1)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "140018",
+            "name": "Postura de Batalha",
+            "role": "Aumenta dano corpo a corpo.",
+            "cooldown": "60000 (≈ 60 s)",
+            "mp": "870",
+            "range": "700",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "140019",
+            "name": "Infusão de Poder",
+            "role": "Aumenta taxa e dano crítico.",
+            "cooldown": "60000 (≈ 60 s)",
+            "mp": "870",
+            "range": "700",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "140030",
+            "name": "Chamado de Sangue",
+            "role": "Dano e recuperação de PV.",
+            "cooldown": "15000 (≈ 15 s)",
+            "mp": "210",
+            "range": "1000",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          }
+        ],
+        "equipment": [
+          {
+            "item": "Espada da Névoa Carmesim (11012015)",
+            "rarity": "Incomum (1)",
+            "attributes": "ATQ de Arma Mínimo 40; ATQ de Arma Máximo 100; Dano a Chefe 5",
+            "class_info": "4",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Espada do Juramento Trovejante (11015003)",
+            "rarity": "Lendário (4)",
+            "attributes": "ATQ Corpo a Corpo 72; ATQ de Arma Mínimo 130; ATQ de Arma Máximo 502; PREC Corpo a Corpo 60; Dano CRÍT 33; Aumento de Dano Corpo a Corpo 500 [percentual bruto]",
+            "class_info": "4",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Armadura Maculada (12021005)",
+            "rarity": "Comum (0)",
+            "attributes": "DEF 15; Resistência a Dano de Habilidade 1",
+            "class_info": "vazio; compatibilidade não confirmada",
+            "level_limits": "não informado / não informado"
+          }
+        ],
+        "stat_priority": [
+          "Dano a Chefes",
+          "Perfuração de Defesa",
+          "Dano Crítico",
+          "Taxa Crítica",
+          "Resistência a Dano de Habilidade"
+        ]
       },
       {
-        "id": "140023",
-        "name": "Sede de Sangue",
-        "role": "Puxão magnético sanguíneo que aprisiona e imobiliza alvos ao seu redor",
-        "slot": "1",
-        "book": "Livro de Habilidade: Sede de Sangue (21043000)"
-      },
-      {
-        "id": "140027",
-        "name": "Regeneração de Sangue",
-        "role": "Recuperação passiva periódica de PV com base no poder de ataque",
-        "slot": "0",
-        "book": "Passiva Inata / Evolução"
+        "type": "pvp",
+        "badge": "⚔️ Conflito PvP & Controle (JxJ)",
+        "title": "Manchado de Sangue: pvp",
+        "objective": "controle e sobrevivência contra jogadores; parte dos efeitos tem condições específicas de JxJ.",
+        "skills": [
+          {
+            "id": "140023",
+            "name": "Sede de Sangue",
+            "role": "Puxão, chance de imobilização e redução descrita de dano JxJ.",
+            "cooldown": "18000 (≈ 18 s)",
+            "mp": "720",
+            "range": "1100",
+            "rarity": "Raro (2)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "140017",
+            "name": "Golpe Sangrento",
+            "role": "Aplica atordoamento conforme a descrição.",
+            "cooldown": "16000 (≈ 16 s)",
+            "mp": "420",
+            "range": "250",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "140021",
+            "name": "Presságio do Massacre",
+            "role": "O texto cita dano JxJ e resistência crítica.",
+            "cooldown": "40000 (≈ 40 s)",
+            "mp": "720",
+            "range": "700",
+            "rarity": "Incomum (1)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "140029",
+            "name": "Proteção da Lua de Sangue",
+            "role": "Aumenta resiliência e resistência a efeitos de estado.",
+            "cooldown": "45000 (≈ 45 s)",
+            "mp": "2340",
+            "range": "1000",
+            "rarity": "Épico (3)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "140014",
+            "name": "Fúria de Sangue",
+            "role": "Dano e recuperação de PV.",
+            "cooldown": "21000 (≈ 21 s)",
+            "mp": "780",
+            "range": "250",
+            "rarity": "Incomum (1)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          }
+        ],
+        "equipment": [
+          {
+            "item": "Espada do Vínculo Estelar (11013008)",
+            "rarity": "Raro (2)",
+            "attributes": "ATQ Corpo a Corpo 24; ATQ de Arma Mínimo 60; ATQ de Arma Máximo 284; PREC Corpo a Corpo 12; Dano PvP 7",
+            "class_info": "4",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Espada do Grande Elottarvizian (11015007)",
+            "rarity": "Lendário (4)",
+            "attributes": "ATQ Corpo a Corpo 30; ATQ JxJ 42; ATQ de Arma Mínimo 130; ATQ de Arma Máximo 502; PREC Corpo a Corpo 60; Aumento de Dano de JxJ 700 [percentual bruto]",
+            "class_info": "4",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Armadura Corporal da Garra de Sangue (12023004)",
+            "rarity": "Raro (2)",
+            "attributes": "DEF 180; ESQ de Habilidade 12; Resistência a Dano PvP 3; Taxa de Resistência a CRÍT 100 [percentual bruto]; MP Máximo 30",
+            "class_info": "vazio; compatibilidade não confirmada",
+            "level_limits": "não informado / não informado"
+          }
+        ],
+        "stat_priority": [
+          "Dano em Jogadores",
+          "Redução de Dano PvP",
+          "Imunidade a CC / Tenacidade",
+          "Esquiva (ESQ)",
+          "Penetração"
+        ]
       }
-    ],
-    "stat_priority": [
-      "Pontos de Vida (HP Máximo)",
-      "Defesa Física / Redução de Dano",
-      "Roubo de Vida (Life Steal)",
-      "Resistência a Atordoamento",
-      "Dano Corpo a Corpo"
-    ],
-    "recommended_gear": "Espadas de sangue forjadas e armaduras pesadas de placas vampíricas com alta mitigação de impacto."
+    ]
   },
   {
-    "id": "akasha-berserker",
     "class_id": 5,
     "class_name": "Akasha",
-    "title": "Build: Colosso Corpóreo & Roubo de Poder",
-    "objective": "Brawler implacável de combate corpo a corpo que enfraquece inimigos roubando seus atributos e ignorando controles.",
-    "playstyle": "Inicie o combate aplicando Toque Absorvente para subtrair ATQ do alvo e fortalecer seus punhos. Use Corte Sangrento para rasgar defesas e ative Frenesi Carmesim e Libertação Absoluta para se tornar imune a atordoamento.",
-    "skills": [
+    "resource": "Fighter",
+    "slug": "akasha",
+    "icon_img": "assets/classes/fighter_icon.png",
+    "male_img": "assets/classes/fighter_male.png",
+    "female_img": "assets/classes/fighter_female.png",
+    "variants": [
       {
-        "id": "150014",
-        "name": "Toque Absorvente",
-        "role": "Ataque que rouba poder de ataque do inimigo e transfere para o personagem",
-        "slot": "1",
-        "book": "Livro de Habilidade: Toque Absorvente (21052000)"
+        "type": "geral",
+        "badge": "🛡️ PvE Geral Equilibrado",
+        "title": "Build de Akasha: proposta para PvE geral",
+        "objective": "corpo a corpo com pressão e sobrevivência. É uma proposta inicial inferida das descrições das habilidades; não foi validada em jogo nem otimizada com cálculo de dano.",
+        "skills": [
+          {
+            "id": "150014",
+            "name": "Toque Absorvente",
+            "role": "Causa dano e informa chance de roubar ATQ do alvo.",
+            "cooldown": "Causa dano e informa chance de roubar ATQ do alvo.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Toque Absorvente (`21052000`, mín. não informado, máx. não informado)"
+          },
+          {
+            "id": "150015",
+            "name": "Corte Sangrento",
+            "role": "Causa dois acertos e reduz a defesa corpo a corpo do alvo.",
+            "cooldown": "Causa dois acertos e reduz a defesa corpo a corpo do alvo.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Corte Sangrento (`21051002`, mín. não informado, máx. não informado)"
+          },
+          {
+            "id": "150017",
+            "name": "Chamado de Sangue",
+            "role": "Causa dano e recupera PV.",
+            "cooldown": "Causa dano e recupera PV.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Chamado do Sangue (`21051000`, mín. não informado, máx. não informado)"
+          },
+          {
+            "id": "150019",
+            "name": "Frenesi Carmesim",
+            "role": "Aumenta velocidade e alcance do ataque básico.",
+            "cooldown": "Aumenta velocidade e alcance do ataque básico.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Frenesi Carmesim (`21053002`, mín. não informado, máx. não informado)"
+          },
+          {
+            "id": "150029",
+            "name": "Libertação Absoluta",
+            "role": "Remove determinados efeitos de controle e fraqueza.",
+            "cooldown": "Remove determinados efeitos de controle e fraqueza.",
+            "mp": "",
+            "range": "",
+            "rarity": "",
+            "slot": "`1`",
+            "book": "Livro de Habilidade: Libertação Absoluta (`21054001`, mín. não informado, máx. não informado)"
+          }
+        ],
+        "equipment": [
+          {
+            "item": "Armamento Principal de Akasha",
+            "rarity": "Raro a Épico",
+            "attributes": "Bônus de dano principal da classe e atributos base",
+            "class_info": "5",
+            "level_limits": "Progresso Natural"
+          }
+        ],
+        "stat_priority": [
+          "Dano Principal",
+          "Redução de Cooldown (Haste)",
+          "Pontos de Sangue (BP)",
+          "Defesa / Resistência",
+          "Taxa Crítica"
+        ]
       },
       {
-        "id": "150015",
-        "name": "Corte Sangrento",
-        "role": "Golpes duplos com redução pesada da defesa física do oponente",
-        "slot": "1",
-        "book": "Livro de Habilidade: Corte Sangrento (21051002)"
+        "type": "farm",
+        "badge": "🌾 Farm em Massa & Área (AoE)",
+        "title": "Akasha: farm",
+        "objective": "encontros com vários monstros e manutenção de PV; o efeito em área depende do texto de cada habilidade.",
+        "skills": [
+          {
+            "id": "150019",
+            "name": "Frenesi Carmesim",
+            "role": "Velocidade e alvos máximos de ataque básico, segundo o texto.",
+            "cooldown": "60000 (≈ 60 s)",
+            "mp": "1170",
+            "range": "1000",
+            "rarity": "Raro (2)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "150028",
+            "name": "Instinto Carnívoro",
+            "role": "Bônus contra monstros comuns e recuperação condicionada a acertos.",
+            "cooldown": "12000 (≈ 12 s)",
+            "mp": "220",
+            "range": "900",
+            "rarity": "Incomum (1)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "150017",
+            "name": "Chamado de Sangue",
+            "role": "Dano e recuperação de PV.",
+            "cooldown": "15000 (≈ 15 s)",
+            "mp": "210",
+            "range": "1000",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "150024",
+            "name": "Instinto de Ataque",
+            "role": "Aumenta dano corpo a corpo.",
+            "cooldown": "60000 (≈ 60 s)",
+            "mp": "870",
+            "range": "1000",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "150018",
+            "name": "Talho Profundo",
+            "role": "Quatro golpes no alvo.",
+            "cooldown": "20000 (≈ 20 s)",
+            "mp": "650",
+            "range": "250",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          }
+        ],
+        "equipment": [
+          {
+            "item": "Tonfa do Caçador (11051006)",
+            "rarity": "Comum (0)",
+            "attributes": "ATQ de Arma Mínimo 20; ATQ de Arma Máximo 60; Dano a Monstro Comum 3",
+            "class_info": "5",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Tonfa do Juramento Trovejante (11055003)",
+            "rarity": "Lendário (4)",
+            "attributes": "ATQ Corpo a Corpo 72; ATQ de Arma Mínimo 130; ATQ de Arma Máximo 502; PREC Corpo a Corpo 60; Dano CRÍT 33; Aumento de Dano Corpo a Corpo 500 [percentual bruto]",
+            "class_info": "5",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Armadura Corporal do Caçador (12021010)",
+            "rarity": "Comum (0)",
+            "attributes": "DEF 29; Resistência a Dano Básico 1",
+            "class_info": "vazio; compatibilidade não confirmada",
+            "level_limits": "não informado / não informado"
+          }
+        ],
+        "stat_priority": [
+          "Dano a Monstros",
+          "Dano em Área",
+          "Recuperação de MP",
+          "Velocidade de Movimento",
+          "Taxa de Ataque"
+        ]
       },
       {
-        "id": "150017",
-        "name": "Chamado de Sangue",
-        "role": "Dano contundente com drenagem vital e regeneração de vida",
-        "slot": "1",
-        "book": "Livro de Habilidade: Chamado do Sangue (21051000)"
+        "type": "chefe",
+        "badge": "👑 Caçador de Chefes (Single-Target)",
+        "title": "Akasha: chefe",
+        "objective": "combate contra um chefe, buscando reforços e dano sustentado sem assumir imunidades ou duração.",
+        "skills": [
+          {
+            "id": "150015",
+            "name": "Corte Sangrento",
+            "role": "Reduz defesa corpo a corpo do alvo.",
+            "cooldown": "18000 (≈ 18 s)",
+            "mp": "590",
+            "range": "250",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "150014",
+            "name": "Toque Absorvente",
+            "role": "Dano e chance de roubar ATQ.",
+            "cooldown": "20000 (≈ 20 s)",
+            "mp": "750",
+            "range": "1000",
+            "rarity": "Incomum (1)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "150021",
+            "name": "Corte em Cadeia",
+            "role": "Seis golpes e outras condições de efeito.",
+            "cooldown": "24000 (≈ 24 s)",
+            "mp": "940",
+            "range": "450",
+            "rarity": "Raro (2)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "150024",
+            "name": "Instinto de Ataque",
+            "role": "Aumenta dano corpo a corpo.",
+            "cooldown": "60000 (≈ 60 s)",
+            "mp": "870",
+            "range": "1000",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "150017",
+            "name": "Chamado de Sangue",
+            "role": "Dano e recuperação de PV.",
+            "cooldown": "15000 (≈ 15 s)",
+            "mp": "210",
+            "range": "1000",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          }
+        ],
+        "equipment": [
+          {
+            "item": "Tonfa da Névoa Carmesim (11052015)",
+            "rarity": "Incomum (1)",
+            "attributes": "ATQ de Arma Mínimo 40; ATQ de Arma Máximo 100; Dano a Chefe 5",
+            "class_info": "5",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Tonfa do Juramento Trovejante (11055003)",
+            "rarity": "Lendário (4)",
+            "attributes": "ATQ Corpo a Corpo 72; ATQ de Arma Mínimo 130; ATQ de Arma Máximo 502; PREC Corpo a Corpo 60; Dano CRÍT 33; Aumento de Dano Corpo a Corpo 500 [percentual bruto]",
+            "class_info": "5",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Armadura Maculada (12021005)",
+            "rarity": "Comum (0)",
+            "attributes": "DEF 15; Resistência a Dano de Habilidade 1",
+            "class_info": "vazio; compatibilidade não confirmada",
+            "level_limits": "não informado / não informado"
+          }
+        ],
+        "stat_priority": [
+          "Dano a Chefes",
+          "Perfuração de Defesa",
+          "Dano Crítico",
+          "Taxa Crítica",
+          "Resistência a Dano de Habilidade"
+        ]
       },
       {
-        "id": "150019",
-        "name": "Frenesi Carmesim",
-        "role": "Super buff que expande o alcance e a velocidade dos golpes básicos",
-        "slot": "1",
-        "book": "Livro de Habilidade: Frenesi Carmesim (21053002)"
-      },
-      {
-        "id": "150029",
-        "name": "Libertação Absoluta",
-        "role": "Purifica e imuniza o personagem contra controles de grupo (Stun/Freeze/Slow)",
-        "slot": "1",
-        "book": "Livro de Habilidade: Libertação Absoluta (21054001)"
+        "type": "pvp",
+        "badge": "⚔️ Conflito PvP & Controle (JxJ)",
+        "title": "Akasha: pvp",
+        "objective": "controle e sobrevivência contra jogadores; parte dos efeitos tem condições específicas de JxJ.",
+        "skills": [
+          {
+            "id": "150020",
+            "name": "Ímpeto Sangrento",
+            "role": "Chance de atordoar e efeito adicional de JxJ.",
+            "cooldown": "11000 (≈ 11 s)",
+            "mp": "400",
+            "range": "650",
+            "rarity": "Incomum (1)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "150022",
+            "name": "Caça à Presa",
+            "role": "Marca, lentidão e outras condições por nível.",
+            "cooldown": "22000 (≈ 22 s)",
+            "mp": "900",
+            "range": "900",
+            "rarity": "Raro (2)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "150027",
+            "name": "Dominador",
+            "role": "O texto cita efeito adicional de PvP ao acertar ataques.",
+            "cooldown": "40000 (≈ 40 s)",
+            "mp": "720",
+            "range": "900",
+            "rarity": "Incomum (1)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "150029",
+            "name": "Libertação Absoluta",
+            "role": "Remove determinados efeitos de controle; texto cita resiliência PvP.",
+            "cooldown": "60000 (≈ 60 s)",
+            "mp": "1230",
+            "range": "900",
+            "rarity": "Épico (3)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          },
+          {
+            "id": "150017",
+            "name": "Chamado de Sangue",
+            "role": "Dano e recuperação de PV.",
+            "cooldown": "15000 (≈ 15 s)",
+            "mp": "210",
+            "range": "1000",
+            "rarity": "Comum (0)",
+            "slot": "FireCondition=43; parâmetros vazios; UseSkillSlot=1",
+            "book": ""
+          }
+        ],
+        "equipment": [
+          {
+            "item": "Tonfa do Vínculo Estelar (11053008)",
+            "rarity": "Raro (2)",
+            "attributes": "ATQ Corpo a Corpo 24; ATQ de Arma Mínimo 60; ATQ de Arma Máximo 284; PREC Corpo a Corpo 12; Dano PvP 7",
+            "class_info": "5",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Tonfa do Grande Elottarviziano (11055007)",
+            "rarity": "Lendário (4)",
+            "attributes": "ATQ Corpo a Corpo 30; ATQ JxJ 42; ATQ de Arma Mínimo 130; ATQ de Arma Máximo 502; PREC Corpo a Corpo 60; Aumento de Dano de JxJ 700 [percentual bruto]",
+            "class_info": "5",
+            "level_limits": "não informado / não informado"
+          },
+          {
+            "item": "Armadura Corporal da Garra de Sangue (12023004)",
+            "rarity": "Raro (2)",
+            "attributes": "DEF 180; ESQ de Habilidade 12; Resistência a Dano PvP 3; Taxa de Resistência a CRÍT 100 [percentual bruto]; MP Máximo 30",
+            "class_info": "vazio; compatibilidade não confirmada",
+            "level_limits": "não informado / não informado"
+          }
+        ],
+        "stat_priority": [
+          "Dano em Jogadores",
+          "Redução de Dano PvP",
+          "Imunidade a CC / Tenacidade",
+          "Esquiva (ESQ)",
+          "Penetração"
+        ]
       }
-    ],
-    "stat_priority": [
-      "Velocidade de Ataque",
-      "Dano Corpo a Corpo",
-      "Penetração de Defesa",
-      "Imunidade a CC",
-      "Vigor (HP)"
-    ],
-    "recommended_gear": "Tonfas e Garras afiadas de combate desarmado combinadas com manoplas reforçadas."
+    ]
   }
 ]

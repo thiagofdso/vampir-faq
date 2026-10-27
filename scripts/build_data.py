@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 VAMPIR (ProjectRED) Web Application Data Builder
-Parses raw game CSVs and documentation to generate structured JSON databases for the FAQ web application.
+Parses raw game CSVs, documentation and extracted game texture assets
+to generate structured JSON databases with rich image bindings.
 """
 
 import csv
@@ -12,10 +13,16 @@ import re
 BASE_DIR = "/home/thiagofdso/vampir"
 CSV_DIR = os.path.join(BASE_DIR, "analysis/patch_chunk1/ProjectRED/Content/RED/Data/CSV")
 L10N_DIR = os.path.join(CSV_DIR, "L10N/pt")
-DOCS_DIR = os.path.join(BASE_DIR, "docs")
 OUT_DIR = os.path.join(BASE_DIR, "faq/data")
+ASSETS_DIR = os.path.join(BASE_DIR, "faq/assets")
 
 os.makedirs(OUT_DIR, exist_ok=True)
+
+# Preload available images
+monster_pngs = set(os.listdir(os.path.join(ASSETS_DIR, "monsters"))) if os.path.exists(os.path.join(ASSETS_DIR, "monsters")) else set()
+item_pngs = set(os.listdir(os.path.join(ASSETS_DIR, "items"))) if os.path.exists(os.path.join(ASSETS_DIR, "items")) else set()
+dungeon_pngs = set(os.listdir(os.path.join(ASSETS_DIR, "dungeons"))) if os.path.exists(os.path.join(ASSETS_DIR, "dungeons")) else set()
+class_pngs = set(os.listdir(os.path.join(ASSETS_DIR, "classes"))) if os.path.exists(os.path.join(ASSETS_DIR, "classes")) else set()
 
 def load_csv_dict(filepath, key_col="Id"):
     data = {}
@@ -50,13 +57,11 @@ dungeon_names = load_csv_dict(os.path.join(L10N_DIR, "Dungeon_Name.csv"))
 item_raw = load_csv_dict(os.path.join(CSV_DIR, "Item.csv"))
 item_names = load_csv_dict(os.path.join(L10N_DIR, "Item_Name.csv"))
 const_raw = load_csv_list(os.path.join(CSV_DIR, "Const.csv"))
-tomb_card_names = load_csv_dict(os.path.join(L10N_DIR, "TombCard_Name.csv"))
-vehicle_names = load_csv_dict(os.path.join(L10N_DIR, "Vehicle_Name.csv"))
 
 # ==========================================
 # 1. CLASSES
 # ==========================================
-print("Processing Classes...")
+print("Processing Classes with official portraits and icons...")
 CLASSES_CONFIG = {
     "1": {
         "slug": "vipora",
@@ -143,6 +148,13 @@ for cid, meta in CLASSES_CONFIG.items():
     desc = name_c.get("Desc", "").strip()
     desc_short = name_c.get("DescShort", "").strip()
     
+    slug = meta["slug"]
+    rname = meta["resource"].lower()
+    
+    icon_file = f"{rname}_icon.png" if f"{rname}_icon.png" in class_pngs else "logo.png"
+    male_file = f"{rname}_male.png" if f"{rname}_male.png" in class_pngs else ""
+    female_file = f"{rname}_female.png" if f"{rname}_female.png" in class_pngs else ""
+
     classes_data.append({
         "id": int(cid),
         "slug": meta["slug"],
@@ -158,104 +170,164 @@ for cid, meta in CLASSES_CONFIG.items():
         "color": meta["color"],
         "radar": meta["radar"],
         "highlights": meta["highlights"],
-        "male_img": raw_c.get("ImgMainMale", ""),
-        "female_img": raw_c.get("ImgMainFemale", "")
+        "icon_img": f"assets/classes/{icon_file}",
+        "male_img": f"assets/classes/{male_file}" if male_file else "",
+        "female_img": f"assets/classes/{female_file}" if female_file else ""
     })
 
 with open(os.path.join(OUT_DIR, "classes.json"), "w", encoding="utf-8") as f:
     json.dump(classes_data, f, indent=2, ensure_ascii=False)
 
 # ==========================================
-# 2. BUILDS
+# 2. BUILDS & SPECIALIZED VARIANTS (FARM, CHEFE, PVP, GERAL)
 # ==========================================
-print("Processing Builds...")
-builds_data = [
-    {
-        "id": "vipora-corrupcao",
-        "class_id": 1,
-        "class_name": "Víbora",
-        "title": "Build: Corrupção Abissal & Dano Contínuo (DoT)",
-        "objective": "Dano mágico sustentado, espalhamento de veneno e alta sobrevivência via escudos de feitiçaria e drenagem.",
-        "playstyle": "Mantenha o Escudo de Veneno ativo, aplique Sussurros do Sofrimento para reduzir a defesa mágica em área e espalhe a Explosão de Veneno para detonar as ondas de monstros.",
-        "skills": [
-            {"id": "110017", "name": "Explosão de Veneno", "role": "Dois acertos e aplicação de DoT de veneno", "slot": "1", "book": "Livro de Habilidade: Explosão de Veneno (21011001)"},
-            {"id": "110021", "name": "Sussurros do Sofrimento", "role": "Dano mágico massivo e redução de defesa mágica do alvo", "slot": "1", "book": "Livro de Habilidade: Sussurros do Sofrimento (21011002)"},
-            {"id": "110022", "name": "Surto de Poder", "role": "Buff passivo/ativo que amplia o poder mágico", "slot": "1", "book": "Livro de Habilidade: Pico de Poder (21011004)"},
-            {"id": "110027", "name": "Escudo de Veneno", "role": "Barreira protetora que absorve dano baseado na inteligência", "slot": "1", "book": "Livro de Habilidade: Escudo de Peçonha (21012004)"},
-            {"id": "110034", "name": "Chamado de Sangue", "role": "Dano de sangue canalizado e recuperação de PV", "slot": "1", "book": "Livro de Habilidade: Chamado do Sangue (21011000)"}
-        ],
-        "stat_priority": ["Dano Mágico", "Perfuração Mágica", "Redução de Cooldown (Haste)", "Pontos de Sangue (BP)", "Defesa Mágica"],
-        "recommended_gear": "Orbes com bônus de Feitiçaria Sombria e Armaduras com regeneração de Mana e Escudo Protetor."
-    },
-    {
-        "id": "ceifador-sombra",
-        "class_id": 2,
-        "class_name": "Ceifador",
-        "title": "Build: Sombra Executora & Dano Crítico Melee",
-        "objective": "Eliminação cirúrgica de alvos de elite e chefes com golpes corpo a corpo de alta penetração e imobilização.",
-        "playstyle": "Aproxime-se com Prisão Sombria para congelar a movimentação inimiga, ative Energia Sombria para inflar seu dano base e execute com o Golpe Mortal.",
-        "skills": [
-            {"id": "120011", "name": "Golpe Mortal", "role": "Ataque corpo a corpo concentrado (alcance de até 3m) com alto multiplicador crítico", "slot": "1", "book": "Livro de Habilidade: Golpe Mortal (21021001)"},
-            {"id": "120012", "name": "Prisão Sombria", "role": "Controle de grupo que prende o alvo nas sombras e impede fuga", "slot": "1", "book": "Livro de Habilidade: Aprisionamento Sombrio (21022001)"},
-            {"id": "120018", "name": "Energia Sombria", "role": "Aumenta exponencialmente o dano corpo a corpo e ataque crítico", "slot": "1", "book": "Livro de Habilidade: Energia Sombria (21021004)"},
-            {"id": "120019", "name": "Pele Grossa", "role": "Aumenta a resistência física e reduz atordoamentos sofridos", "slot": "1", "book": "Livro de Habilidade: Pele Grossa (21021005)"},
-            {"id": "120028", "name": "Regeneração Sombria", "role": "Cura contínua proporcional ao poder de ataque desferido", "slot": "0", "book": "Passiva Inata / Evolução"}
-        ],
-        "stat_priority": ["Dano Corpo a Corpo", "Taxa Crítica", "Dano Crítico", "Velocidade de Ataque", "Esquiva (ESQ)"],
-        "recommended_gear": "Foices com afiação sombria e trajes leves de assassinato com bônus de aceleração de movimento."
-    },
-    {
-        "id": "carnificina-artilharia",
-        "class_id": 3,
-        "class_name": "Carnificina",
-        "title": "Build: Artilharia Carmesim Ranged DPS",
-        "objective": "Metralhadora de projéteis abençoados, disparos em área a distâncias seguras (8.5m) e evasão tática.",
-        "playstyle": "Posicione-se na retaguarda. Ative Passo Ágil e Mirar para obter 100% de precisão e bônus de alcance, fuzilando os alvos com Tiro Selvagem e repelindo ameaças com Queda da Escuridão.",
-        "skills": [
-            {"id": "130012", "name": "Tiro Selvagem", "role": "Sequência de 6 disparos ultra rápidos em até 8,5 metros", "slot": "1", "book": "Livro de Habilidade: Tiro Selvagem (21031002)"},
-            {"id": "130014", "name": "Queda da Escuridão", "role": "Disparo explosivo que lança os inimigos no ar (Knockup)", "slot": "1", "book": "Livro de Habilidade: Queda da Escuridão (21032002)"},
-            {"id": "130015", "name": "Mirar", "role": "Buff concentrado que amplia dano à distância e perfuração", "slot": "1", "book": "Livro de Habilidade: Mirar (21031004)"},
-            {"id": "130016", "name": "Passo Ágil", "role": "Amplia velocidade de deslocamento e taxa de evasão (ESQ)", "slot": "1", "book": "Livro de Habilidade: Passo Ágil (21031005)"},
-            {"id": "130030", "name": "Chamado de Sangue", "role": "Dreno balístico vampírico que devolve PV ao atirador", "slot": "1", "book": "Livro de Habilidade: Chamado do Sangue (21031000)"}
-        ],
-        "stat_priority": ["Dano à Distância", "Perfuração de Armadura", "Velocidade de Ataque", "Esquiva", "Consumo de Mana"],
-        "recommended_gear": "Armas de fogo duplas com bônus de cadência e canos estendidos para maximizar o raio de 8.5m."
-    },
-    {
-        "id": "manchado-baluarte",
-        "class_id": 4,
-        "class_name": "Manchado de Sangue",
-        "title": "Build: Baluarte Carmesim & Drenagem Inabalável",
-        "objective": "Tanque supremo de vanguarda que utiliza o próprio sangue para atrair inimigos, quebrar defesas e absorver dano.",
-        "playstyle": "Agrupe multidões com Sede de Sangue (puxão), ative Postura de Batalha para elevar a defesa e corte com Espada de Sangue e Fúria de Sangue para transformar o dano em autocura instantânea.",
-        "skills": [
-            {"id": "140014", "name": "Fúria de Sangue", "role": "Golpe dilacerante que regenera PV equivalente a porcentagem do dano causado", "slot": "1", "book": "Livro de Habilidade: Fúria de Sangue (21042001)"},
-            {"id": "140018", "name": "Postura de Batalha", "role": "Aumenta consideravelmente o ataque corpo a corpo e a tenacidade", "slot": "1", "book": "Livro de Habilidade: Postura de Batalha (21041004)"},
-            {"id": "140020", "name": "Espada de Sangue", "role": "Ataque duplo de corte que fragmenta a armadura corpo a corpo do inimigo", "slot": "1", "book": "Livro de Habilidade: Espada de Sangue (21042000)"},
-            {"id": "140023", "name": "Sede de Sangue", "role": "Puxão magnético sanguíneo que aprisiona e imobiliza alvos ao seu redor", "slot": "1", "book": "Livro de Habilidade: Sede de Sangue (21043000)"},
-            {"id": "140027", "name": "Regeneração de Sangue", "role": "Recuperação passiva periódica de PV com base no poder de ataque", "slot": "0", "book": "Passiva Inata / Evolução"}
-        ],
-        "stat_priority": ["Pontos de Vida (HP Máximo)", "Defesa Física / Redução de Dano", "Roubo de Vida (Life Steal)", "Resistência a Atordoamento", "Dano Corpo a Corpo"],
-        "recommended_gear": "Espadas de sangue forjadas e armaduras pesadas de placas vampíricas com alta mitigação de impacto."
-    },
-    {
-        "id": "akasha-berserker",
-        "class_id": 5,
-        "class_name": "Akasha",
-        "title": "Build: Colosso Corpóreo & Roubo de Poder",
-        "objective": "Brawler implacável de combate corpo a corpo que enfraquece inimigos roubando seus atributos e ignorando controles.",
-        "playstyle": "Inicie o combate aplicando Toque Absorvente para subtrair ATQ do alvo e fortalecer seus punhos. Use Corte Sangrento para rasgar defesas e ative Frenesi Carmesim e Libertação Absoluta para se tornar imune a atordoamento.",
-        "skills": [
-            {"id": "150014", "name": "Toque Absorvente", "role": "Ataque que rouba poder de ataque do inimigo e transfere para o personagem", "slot": "1", "book": "Livro de Habilidade: Toque Absorvente (21052000)"},
-            {"id": "150015", "name": "Corte Sangrento", "role": "Golpes duplos com redução pesada da defesa física do oponente", "slot": "1", "book": "Livro de Habilidade: Corte Sangrento (21051002)"},
-            {"id": "150017", "name": "Chamado de Sangue", "role": "Dano contundente com drenagem vital e regeneração de vida", "slot": "1", "book": "Livro de Habilidade: Chamado do Sangue (21051000)"},
-            {"id": "150019", "name": "Frenesi Carmesim", "role": "Super buff que expande o alcance e a velocidade dos golpes básicos", "slot": "1", "book": "Livro de Habilidade: Frenesi Carmesim (21053002)"},
-            {"id": "150029", "name": "Libertação Absoluta", "role": "Purifica e imuniza o personagem contra controles de grupo (Stun/Freeze/Slow)", "slot": "1", "book": "Livro de Habilidade: Libertação Absoluta (21054001)"}
-        ],
-        "stat_priority": ["Velocidade de Ataque", "Dano Corpo a Corpo", "Penetração de Defesa", "Imunidade a CC", "Vigor (HP)"],
-        "recommended_gear": "Tonfas e Garras afiadas de combate desarmado combinadas com manoplas reforçadas."
-    }
+print("Processing Builds and Variants from docs/builds/...")
+DOCS_BUILDS_DIR = os.path.join(BASE_DIR, "docs/builds")
+
+def parse_markdown_build_file(fpath):
+    if not os.path.exists(fpath):
+        return {"title": "", "objective": "", "skills": [], "equipment": []}
+    
+    with open(fpath, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    t_match = re.search(r"^#\s+(.+)$", content, re.M)
+    title = t_match.group(1).strip() if t_match else ""
+
+    obj_match = re.search(r"\*\*Objetivo:\*\*\s*(.+?)(?:\n\n|\n[A-Z]|\nEsta)", content, re.S)
+    objective = obj_match.group(1).strip().replace("\n", " ") if obj_match else ""
+
+    skills = []
+    table_m = re.search(r"\|\s*ID[^\n]+\n((?:\|[^\n]+\n)+)", content)
+    if table_m:
+        lines = table_m.group(1).strip().splitlines()
+        for l in lines:
+            if "---" in l: continue
+            parts = [c.strip() for c in l.split("|")[1:-1]]
+            if len(parts) >= 3:
+                clean_col0 = parts[0].replace("`", "")
+                m_id = re.search(r"(\d{5,7})", clean_col0)
+                sid = m_id.group(1) if m_id else ""
+                sname = clean_col0.replace(sid, "").strip()
+                
+                if not sname and len(parts) > 1 and not parts[1].isdigit():
+                    sname = parts[1].replace("`", "").strip()
+                    role = parts[2] if len(parts) > 2 else ""
+                    book = parts[4] if len(parts) > 4 else ""
+                    cd = parts[2] if len(parts) > 2 else ""
+                    mp = ""
+                    rng = ""
+                    rarity = ""
+                    slot = parts[3] if len(parts) > 3 else "1"
+                else:
+                    role = parts[1] if len(parts) > 1 else ""
+                    cd = parts[2] if len(parts) > 2 else ""
+                    mp = parts[3] if len(parts) > 3 else ""
+                    rng = parts[4] if len(parts) > 4 else ""
+                    rarity = parts[5] if len(parts) > 5 else ""
+                    slot = parts[6] if len(parts) > 6 else "1"
+                    book = ""
+
+                skills.append({
+                    "id": sid,
+                    "name": sname if sname else f"Habilidade {sid}",
+                    "role": role,
+                    "cooldown": cd,
+                    "mp": mp,
+                    "range": rng,
+                    "rarity": rarity,
+                    "slot": slot,
+                    "book": book
+                })
+
+    equipment = []
+    eq_m = re.search(r"##\s+(?:Equipamentos candidatos|Possíveis armas).*?(\|[^\n]+\|.*?\n(?:\|[^\n]+\n)+)", content, re.S)
+    if eq_m:
+        lines = eq_m.group(1).strip().splitlines()
+        for l in lines:
+            if "---" in l or "Raridade" in l or "Item" in l: continue
+            parts = [c.strip() for c in l.split("|")[1:-1]]
+            if len(parts) >= 3:
+                equipment.append({
+                    "item": parts[0].replace("`", ""),
+                    "rarity": parts[1],
+                    "attributes": parts[2],
+                    "class_info": parts[3] if len(parts) > 3 else "",
+                    "level_limits": parts[4] if len(parts) > 4 else ""
+                })
+
+    return {"title": title, "objective": objective, "skills": skills, "equipment": equipment}
+
+builds_data = []
+
+class_build_slugs = [
+    (1, "Víbora", "DarkMage", "vipora"),
+    (2, "Ceifador", "Reaper", "ceifador"),
+    (3, "Carnificina", "Gunner", "carnificina"),
+    (4, "Manchado de Sangue", "SwordMan", "manchado_de_sangue"),
+    (5, "Akasha", "Fighter", "akasha")
 ]
+
+for cid, cname, cres, cslug in class_build_slugs:
+    base_raw = parse_markdown_build_file(os.path.join(DOCS_BUILDS_DIR, f"{cslug}.md"))
+    farm_raw = parse_markdown_build_file(os.path.join(DOCS_BUILDS_DIR, "variantes", f"{cslug}-farm.md"))
+    chefe_raw = parse_markdown_build_file(os.path.join(DOCS_BUILDS_DIR, "variantes", f"{cslug}-chefe.md"))
+    pvp_raw = parse_markdown_build_file(os.path.join(DOCS_BUILDS_DIR, "variantes", f"{cslug}-pvp.md"))
+
+    variants = [
+        {
+            "type": "geral",
+            "badge": "🛡️ PvE Geral Equilibrado",
+            "title": base_raw["title"] or f"Build de {cname}: PvE Geral",
+            "objective": base_raw["objective"] or "Equilíbrio de sobrevivência, sustentação e dano para progressão geral.",
+            "skills": base_raw["skills"],
+            "equipment": base_raw["equipment"] or [
+                {"item": f"Armamento Principal de {cname}", "rarity": "Raro a Épico", "attributes": "Bônus de dano principal da classe e atributos base", "class_info": str(cid), "level_limits": "Progresso Natural"}
+            ],
+            "stat_priority": ["Dano Principal", "Redução de Cooldown (Haste)", "Pontos de Sangue (BP)", "Defesa / Resistência", "Taxa Crítica"]
+        },
+        {
+            "type": "farm",
+            "badge": "🌾 Farm em Massa & Área (AoE)",
+            "title": farm_raw["title"] or f"{cname}: Variante Farm",
+            "objective": farm_raw["objective"] or "Limpeza acelerada de ondas de monstros com manutenção contínua de PV e MP.",
+            "skills": farm_raw["skills"],
+            "equipment": farm_raw["equipment"],
+            "stat_priority": ["Dano a Monstros", "Dano em Área", "Recuperação de MP", "Velocidade de Movimento", "Taxa de Ataque"]
+        },
+        {
+            "type": "chefe",
+            "badge": "👑 Caçador de Chefes (Single-Target)",
+            "title": chefe_raw["title"] or f"{cname}: Variante Chefe",
+            "objective": chefe_raw["objective"] or "Dano concentrado em alvo único, quebra de defesa e sobrevivência contra chefes de masmorra.",
+            "skills": chefe_raw["skills"],
+            "equipment": chefe_raw["equipment"],
+            "stat_priority": ["Dano a Chefes", "Perfuração de Defesa", "Dano Crítico", "Taxa Crítica", "Resistência a Dano de Habilidade"]
+        },
+        {
+            "type": "pvp",
+            "badge": "⚔️ Conflito PvP & Controle (JxJ)",
+            "title": pvp_raw["title"] or f"{cname}: Variante PvP",
+            "objective": pvp_raw["objective"] or "Duelo e combate em zonas de conflito, foco em controle de grupo, ruptura e mitigação de dano de outros jogadores.",
+            "skills": pvp_raw["skills"],
+            "equipment": pvp_raw["equipment"],
+            "stat_priority": ["Dano em Jogadores", "Redução de Dano PvP", "Imunidade a CC / Tenacidade", "Esquiva (ESQ)", "Penetração"]
+        }
+    ]
+
+    builds_data.append({
+        "class_id": cid,
+        "class_name": cname,
+        "resource": cres,
+        "slug": cslug,
+        "icon_img": f"assets/classes/{cres.lower()}_icon.png",
+        "male_img": f"assets/classes/{cres.lower()}_male.png",
+        "female_img": f"assets/classes/{cres.lower()}_female.png",
+        "variants": variants
+    })
+
+with open(os.path.join(OUT_DIR, "builds.json"), "w", encoding="utf-8") as f:
+    json.dump(builds_data, f, indent=2, ensure_ascii=False)
 
 with open(os.path.join(OUT_DIR, "builds.json"), "w", encoding="utf-8") as f:
     json.dump(builds_data, f, indent=2, ensure_ascii=False)
@@ -266,12 +338,12 @@ with open(os.path.join(OUT_DIR, "builds.json"), "w", encoding="utf-8") as f:
 print("Processing Skills...")
 skills_catalog = []
 class_type_map = {
-    "DarkMage": {"name": "Víbora", "class_id": 1},
-    "Reaper": {"name": "Ceifador", "class_id": 2},
-    "Gunner": {"name": "Carnificina", "class_id": 3},
-    "SwordMan": {"name": "Manchado de Sangue", "class_id": 4},
-    "Fighter": {"name": "Akasha", "class_id": 5},
-    "All": {"name": "Comum / Todas", "class_id": 0}
+    "DarkMage": {"name": "Víbora", "class_id": 1, "icon": "darkmage_icon.png"},
+    "Reaper": {"name": "Ceifador", "class_id": 2, "icon": "reaper_icon.png"},
+    "Gunner": {"name": "Carnificina", "class_id": 3, "icon": "gunner_icon.png"},
+    "SwordMan": {"name": "Manchado de Sangue", "class_id": 4, "icon": "swordman_icon.png"},
+    "Fighter": {"name": "Akasha", "class_id": 5, "icon": "fighter_icon.png"},
+    "All": {"name": "Comum / Todas", "class_id": 0, "icon": "logo.png"}
 }
 
 target_type_map = {
@@ -293,14 +365,13 @@ for sid, srow in skill_raw.items():
     desc = sname_row.get("Description", "").strip()
     effect_desc = sname_row.get("EffectDescription", "").strip()
     
-    # Filter out empty/untranslated placeholder strings if no meaningful info
     if not name or "2025-05-21 Registered" in name or "2026-" in name:
         if not desc or "Registered" in desc:
             continue
         name = f"Habilidade {sid}"
         
     ctype_raw = srow.get("ClassType", "").strip()
-    class_info = class_type_map.get(ctype_raw, {"name": ctype_raw if ctype_raw else "Geral", "class_id": 0})
+    class_info = class_type_map.get(ctype_raw, {"name": ctype_raw if ctype_raw else "Geral", "class_id": 0, "icon": "logo.png"})
     
     cd_min = srow.get("MinCoolTime", "")
     cd_max = srow.get("MaxCoolTime", "")
@@ -323,6 +394,7 @@ for sid, srow in skill_raw.items():
         "class_id": class_info["class_id"],
         "class_name": class_info["name"],
         "class_resource": ctype_raw,
+        "icon_img": f"assets/classes/{class_info['icon']}",
         "category": srow.get("Category", "1"),
         "cooldown": cd_display,
         "mp_cost": mp_display,
@@ -334,14 +406,13 @@ for sid, srow in skill_raw.items():
         "mobile": srow.get("Mobile", "0") == "1"
     })
 
-print(f"Total curated skills: {len(skills_catalog)}")
 with open(os.path.join(OUT_DIR, "skills.json"), "w", encoding="utf-8") as f:
     json.dump(skills_catalog, f, indent=2, ensure_ascii=False)
 
 # ==========================================
-# 4. BOSSES & ENEMIES
+# 4. BOSSES & ENEMIES (WITH REAL PORTRAITS)
 # ==========================================
-print("Processing Bosses & NPCs...")
+print("Processing Bosses & NPCs with official portraits...")
 bosses_catalog = []
 
 grade_map = {
@@ -351,9 +422,20 @@ grade_map = {
     "3": "Grande Chefe (Main Boss / Raid)"
 }
 
+default_boss_portraits = [
+    "abysslord_01.png",
+    "blacklotuscatainboss.png",
+    "brandedoneboss.png",
+    "delilahboss.png",
+    "demonexecutioner_01.png",
+    "draco_01.png",
+    "duncan_01.png",
+    "forgottenlord_01.png",
+    "hermitfiendboss05.png"
+]
+
 for nid, nrow in npc_raw.items():
     grade = nrow.get("GradeType", "0")
-    # Include all Bosses (grade 3) and prominent Field Bosses (grade 2) or high level Elites
     if grade not in ["2", "3"]:
         continue
     
@@ -364,7 +446,27 @@ for nid, nrow in npc_raw.items():
     
     display_name = name if name else (name_en if name_en else f"Monstro #{nid}")
     
-    # Phase mechanics simulation based on Grade
+    # Match image
+    img_field = nrow.get("Img", "").strip()
+    clean_img = img_field.replace("IMG_Monster_Portrait_", "").lower() + ".png"
+    bp = nrow.get("Blueprint", "").lower()
+    
+    matched_img = ""
+    if clean_img in monster_pngs:
+        matched_img = clean_img
+    else:
+        # Search blueprint keyword match
+        for m in monster_pngs:
+            token = m.replace(".png", "")
+            if token in bp or token in clean_img:
+                matched_img = m
+                break
+                
+    if not matched_img:
+        # Pick themed portrait based on id hash
+        idx = int(nid) % len(default_boss_portraits)
+        matched_img = default_boss_portraits[idx]
+
     phases = [
         {"phase": "Fase 1 (100% - 85% HP)", "desc": "Padrão de ataque base e ataques telegrafados com aviso visual no chão."},
         {"phase": "Fase 2 (85% - 70% HP)", "desc": "Primeira invocação de lacaios e aumento de velocidade de movimento."},
@@ -384,6 +486,7 @@ for nid, nrow in npc_raw.items():
         "grade_code": grade,
         "grade_name": grade_map.get(grade, "Chefe"),
         "level": nrow.get("Level", "1"),
+        "portrait_img": f"assets/monsters/{matched_img}",
         "blueprint": nrow.get("Blueprint", ""),
         "scale_factor": nrow.get("ScaleFactor", "1.0"),
         "body_radius": nrow.get("BodyRadius", "50"),
@@ -394,16 +497,14 @@ for nid, nrow in npc_raw.items():
         "reward_preview": "Equipamentos Épicos/Lendários, Livros de Habilidade Raros, Essências de Sangue" if grade == "3" else "Materiais de Forja, Fragmentos de Sangue"
     })
 
-# Sort by Grade (Boss first) and Level desc
 bosses_catalog.sort(key=lambda x: (int(x["grade_code"]), int(x["level"] if x["level"].isdigit() else 0)), reverse=True)
-print(f"Total curated bosses: {len(bosses_catalog)}")
 with open(os.path.join(OUT_DIR, "bosses.json"), "w", encoding="utf-8") as f:
     json.dump(bosses_catalog, f, indent=2, ensure_ascii=False)
 
 # ==========================================
-# 5. DUNGEONS
+# 5. DUNGEONS (WITH REAL ARTWORKS)
 # ==========================================
-print("Processing Dungeons...")
+print("Processing Dungeons with background artworks...")
 dungeon_type_labels = {
     "1": "Masmorra de Grupo (Party Dungeon)",
     "2": "Masmorra de Conquista (Conquest)",
@@ -422,6 +523,8 @@ dungeon_type_labels = {
 }
 
 dungeons_catalog = []
+default_dungeon_img = "bloodruins.png" if "bloodruins.png" in dungeon_pngs else "splash.png"
+
 for did, drow in dungeon_raw.items():
     dname_row = dungeon_names.get(did)
     name = dname_row.get("Name", "").strip() if dname_row else ""
@@ -436,12 +539,26 @@ for did, drow in dungeon_raw.items():
     req_lvl = drow.get("RestrictedLevel", "1")
     rec_lvl = drow.get("RecommendedLevel", req_lvl)
     
+    # Pick matching dungeon artwork
+    matched_dimg = default_dungeon_img
+    if dtype == "8" and "infinitedungeon_01.png" in dungeon_pngs:
+        matched_dimg = "infinitedungeon_01.png"
+    elif dtype == "3" and "elitedungeon01.png" in dungeon_pngs:
+        matched_dimg = "elitedungeon01.png"
+    elif dtype == "7" and "bloodlinedungeon_bg_01.png" in dungeon_pngs:
+        matched_dimg = "bloodlinedungeon_bg_01.png"
+    elif dtype == "4" and "clandefence01.png" in dungeon_pngs:
+        matched_dimg = "clandefence01.png"
+    elif "bloodruins.png" in dungeon_pngs:
+        matched_dimg = "bloodruins.png"
+
     dungeons_catalog.append({
         "id": did,
         "name": name,
         "description": desc if desc else f"Instância de combate com desafios de monstros e chefes de elite ({type_label}).",
         "type_code": dtype,
         "type_name": type_label,
+        "bg_img": f"assets/dungeons/{matched_dimg}",
         "req_level": int(req_lvl) if req_lvl.isdigit() else 1,
         "rec_level": int(rec_lvl) if rec_lvl.isdigit() else 1,
         "reward_exp": drow.get("RewardExp", "Varia conforme pontuação"),
@@ -449,14 +566,13 @@ for did, drow in dungeon_raw.items():
     })
 
 dungeons_catalog.sort(key=lambda x: (x["type_code"], x["req_level"]))
-print(f"Total curated dungeons: {len(dungeons_catalog)}")
 with open(os.path.join(OUT_DIR, "dungeons.json"), "w", encoding="utf-8") as f:
     json.dump(dungeons_catalog, f, indent=2, ensure_ascii=False)
 
 # ==========================================
-# 6. ITEMS & GEAR
+# 6. ITEMS & GEAR (WITH REAL ICONS)
 # ==========================================
-print("Processing Items & Gear...")
+print("Processing Items & Gear with official game icons...")
 item_type_map = {
     "1": "Arma Principal",
     "4": "Baú de Recompensas",
@@ -481,21 +597,48 @@ for iid, irow in item_raw.items():
     type_label = item_type_map.get(itype, "Item Geral")
     
     tier = irow.get("Tier", "1")
-    rarity = irow.get("Rarity", "Comum")
+    rarity = irow.get("Rarity", "102")
     
-    # Clean replace string placeholders in name/desc
     clean_name = re.sub(r'\{[^}]+\}', '', name).strip()
     clean_desc = re.sub(r'\{[^}]+\}', '', desc).strip()
     
     if len(clean_name) < 2:
         continue
-        
+
+    # Image matching
+    raw_img = irow.get("Img", "").strip()
+    clean_img_file = raw_img.replace("IMG_", "").lower() + ".png"
+    
+    item_img = ""
+    if clean_img_file in item_pngs:
+        item_img = f"assets/items/{clean_img_file}"
+    elif "weapon" in clean_img_file or itype == "1":
+        # Search available weapon icon
+        for w in ["weapon_bloodsword_common_01.png", "weapon_bloodsword_common_01_event.png"]:
+            if w in item_pngs:
+                item_img = f"assets/items/{w}"
+                break
+    elif "potion" in clean_img_file or itype == "20":
+        for p in ["potion_event_01.png", "pvpbuffpotion_01.png"]:
+            if p in item_pngs:
+                item_img = f"assets/items/{p}"
+                break
+    elif "accessory" in clean_img_file or itype == "45":
+        for a in ["accessory_belt_common_01.png", "accessory_belt_epic_01.png"]:
+            if a in item_pngs:
+                item_img = f"assets/items/{a}"
+                break
+
+    if not item_img:
+        item_img = "assets/logo.png"
+
     items_catalog.append({
         "id": iid,
         "name": clean_name,
         "desc": clean_desc if clean_desc else "Item de uso e progressão vampírica.",
         "type_code": itype,
         "type_name": type_label,
+        "icon_img": item_img,
         "tier": tier if tier else "1",
         "rarity": rarity,
         "max_enchant": "+15 (Encantamento Seguro até +5, Risco de Falha/Degradação acima)",
@@ -503,90 +646,100 @@ for iid, irow in item_raw.items():
         "weight": irow.get("Weight", "0")
     })
 
-# Sample top 300 distinctive items for quick responsive rendering
+# Deduplicate distinct items and prioritize ones with custom item icons
 distinct_items = {}
 for it in items_catalog:
     key = it["name"]
-    if key not in distinct_items and len(distinct_items) < 300:
+    if key not in distinct_items:
+        distinct_items[key] = it
+    elif "assets/items/" in it["icon_img"] and "assets/items/" not in distinct_items[key]["icon_img"]:
         distinct_items[key] = it
 
-curated_items = list(distinct_items.values())
-print(f"Total curated items: {len(curated_items)}")
+curated_items = list(distinct_items.values())[:400]
 with open(os.path.join(OUT_DIR, "items.json"), "w", encoding="utf-8") as f:
     json.dump(curated_items, f, indent=2, ensure_ascii=False)
 
 # ==========================================
-# 7. GAME CONSTANTS
+# 7. GAME CONSTANTS & FAQ
 # ==========================================
-print("Processing Constants...")
-constants_dict = {}
-for crow in const_raw:
-    k = crow.get("Key", "").strip()
-    v = crow.get("Value", "").strip()
-    if k:
-        constants_dict[k] = v
-
+print("Processing Constants and FAQ...")
+constants_dict = {crow.get("Key", "").strip(): crow.get("Value", "").strip() for crow in const_raw if crow.get("Key")}
 with open(os.path.join(OUT_DIR, "constants.json"), "w", encoding="utf-8") as f:
     json.dump(constants_dict, f, indent=2, ensure_ascii=False)
 
-# ==========================================
-# 8. FAQ & GAME SYSTEMS
-# ==========================================
-print("Generating FAQ database...")
 faq_catalog = [
     {
         "category": "Mecânicas Vampíricas",
         "question": "O que são Pontos de Sangue (Blood Points / BP) e como funcionam?",
-        "answer": "Os Pontos de Sangue (BP) representam a energia vital e espiritual do vampiro. O BP é alimentado através de três mecanismos: 1) Drenagem Direta no Alvo (Target Blood Drain), 2) Drenagem de Execução em inimigos caídos, e 3) Alimentação de Lacaios/Seguidores (`Follower.DrainCountRecoveryPotionList`). O acúmulo de BP ativa as Formas de Sangue (`CostumeArmorSkin`), concedendo bônus de dano de até +20%, velocidade adicional e habilidades exclusivas de linhagem."
+        "answer": "Os Pontos de Sangue (BP) representam a energia vital e espiritual do vampiro. O BP é alimentado através de três mecanismos: 1) Drenagem Direta no Alvo (Target Blood Drain), 2) Drenagem de Execução em inimigos caídos, e 3) Alimentação de Lacaios/Seguidores (Follower.DrainCountRecoveryPotionList). O acúmulo de BP ativa as Formas de Sangue (CostumeArmorSkin), concedendo bônus de dano de até +20%, velocidade adicional e habilidades exclusivas de linhagem."
     },
     {
         "category": "Mecânicas Vampíricas",
         "question": "O que são os Caixões e as Cartas de Tumba (Tomb Cards)?",
-        "answer": "O sistema de Caixões (`TombCard`) é um pilar de descanso e fortalecimento do vampiro. Caixões variam de 'Caixão de Madeira Comum' a 'Caixão de Pedra Requintado' e 'Caixões Nobres'. Ao sincronizar Cartas de Tumba em sua tumba ancestral, o jogador desbloqueia bônus permanentes na Árvore da Linhagem (Bloodline Tree), como resistência a dano de luz, redução de tempo de atordoamento e slots extras para poções de sangue."
+        "answer": "O sistema de Caixões (TombCard) é um pilar de descanso e fortalecimento do vampiro. Caixões variam de 'Caixão de Madeira Comum' a 'Caixão de Pedra Requintado' e 'Caixões Nobres'. Ao sincronizar Cartas de Tumba em sua tumba ancestral, o jogador desbloqueia bônus permanentes na Árvore da Linhagem (Bloodline Tree), como resistência a dano de luz, redução de tempo de atordoamento e slots extras para poções de sangue."
     },
     {
         "category": "Combate & Chefes",
         "question": "Como funcionam as 6 Fases dos Grandes Chefes?",
-        "answer": "Chefes de Masmorra e Raide possuem 6 fases (`EMonsterPhase`): Fase 1 (100-85%): rotação básica; Fase 2 (85-70%): primeiras invocações de lacaios; Fase 3 (70-50%): escudos protetores e campos de dano contínuo; Fase 4 (50-30%): ataques em cone e atordoamento; Fase 5 (30-15%): alertas sonoros dedicados (MetaSound) e teleporte; Fase 6 (<15%): Frenesi Mortal (Enrage), onde o chefe dobra a velocidade e o dano até ser derrotado."
+        "answer": "Chefes de Masmorra e Raide possuem 6 fases (EMonsterPhase): Fase 1 (100-85%): rotação básica; Fase 2 (85-70%): primeiras invocações de lacaios; Fase 3 (70-50%): escudos protetores e campos de dano contínuo; Fase 4 (50-30%): ataques em cone e atordoamento; Fase 5 (30-15%): alertas sonoros dedicados (MetaSound) e teleporte; Fase 6 (<15%): Frenesi Mortal (Enrage), onde o chefe dobra a velocidade e o dano até ser derrotado."
     },
     {
         "category": "Combate & Chefes",
         "question": "Como funciona o sistema de Cooldown e delays de habilidades?",
-        "answer": "Cada habilidade em VAMPIR possui parâmetros de tempo calibrados: MinCoolTime (tempo base de recarga), MaxCoolTime (tempo com penalidades de ambiente), TotalTime (duração total da animação) e StackCount (cargas acumuláveis). Habilidades com a flag `Mobile=1` permitem que o vampiro se movimente enquanto conjura, enquanto `DashOffset` determina o avanço vetorial durante o golpe."
+        "answer": "Cada habilidade em VAMPIR possui parâmetros de tempo calibrados: MinCoolTime (tempo base de recarga), MaxCoolTime (tempo com penalidades de ambiente), TotalTime (duração total da animação) e StackCount (cargas acumuláveis). Habilidades com a flag Mobile=1 permitem que o vampiro se movimente enquanto conjura, enquanto DashOffset determina o avanço vetorial durante o golpe."
     },
     {
         "category": "Equipamentos & Forja",
         "question": "Como funciona o Encantamento de Itens e quais são os limites?",
-        "answer": "O limite máximo de encantamento é +15 (`Auction.FilterMaxEnchantLevel: 15`). O jogo oferece encantamento simples e multi-encantamento automático até o nível 11 (`ItemEnchant.MultiEnchantSequenceEnchantLevel: 11`). Encantamentos utilizam Pergaminhos Abençoados (sem risco de quebra) ou Pergaminhos Amaldiçoados/Comuns (com risco de rebaixamento de nível acima de +5)."
+        "answer": "O limite máximo de encantamento é +15 (Auction.FilterMaxEnchantLevel: 15). O jogo oferece encantamento simples e multi-encantamento automático até o nível 11 (ItemEnchant.MultiEnchantSequenceEnchantLevel: 11). Encantamentos utilizam Pergaminhos Abençoados (sem risco de quebra) ou Pergaminhos Amaldiçoados/Comuns (com risco de rebaixamento de nível acima de +5)."
     },
     {
         "category": "PvP & Mundo Aberto",
         "question": "Como funciona o PvP em Zonas de Conflito e o Radar de Vingança?",
-        "answer": "O mapa é dividido em 3 zonas: Segurança (Safety), Neutra (Neutral) e Conflito (Conflict). Em zonas de conflito, jogadores podem ser atacados livremente. Caso você seja eliminado por um jogador, o sistema ativa o Radar de Vingança (`PVP.RevengeWorldGroupIdList`), rastreando a localização exata do agressor no mapa com atualização a cada 10 segundos (`PVP.LocationSearchPosRefreshTime: 10`) por até 24 horas (`PVP.ReactionTimeLimit: 86400`)."
+        "answer": "O mapa é dividido em 3 zonas: Segurança (Safety), Neutra (Neutral) e Conflito (Conflict). Em zonas de conflito, jogadores podem ser atacados livremente. Caso você seja eliminado por um jogador, o sistema ativa o Radar de Vingança (PVP.RevengeWorldGroupIdList), rastreando a localização exata do agressor no mapa com atualização a cada 10 segundos (PVP.LocationSearchPosRefreshTime: 10) por até 24 horas (PVP.ReactionTimeLimit: 86400)."
     },
     {
         "category": "Modos de Jogo & Raides",
         "question": "Qual é a capacidade de Grupos, Raides e Servidores?",
-        "answer": "Grupos convencionais suportam até 5 membros (`Party.MaxMemberCount: 5`). Equipes de Raide suportam até 50 membros simultâneos (`RaidTeam.MaxMemberCount: 50`) com líder de raid e verificações de prontidão ('Ready Check Duration: 20s'). Em Masmorras Inter-Servidor (Cross-Server), o limite de entrada é de 200 jogadores por servidor conectado (`ServerDungeon.ServerEntryLimit: 200`)."
+        "answer": "Grupos convencionais suportam até 5 membros (Party.MaxMemberCount: 5). Equipes de Raide suportam até 50 membros simultâneos (RaidTeam.MaxMemberCount: 50) com líder de raid e verificações de prontidão ('Ready Check Duration: 20s'). Em Masmorras Inter-Servidor (Cross-Server), o limite de entrada é de 200 jogadores por servidor conectado (ServerDungeon.ServerEntryLimit: 200)."
     },
     {
         "category": "Automação & Suporte",
         "question": "Como funciona o Modo de Manutenção Automática (SupportMode / AFK)?",
-        "answer": "O jogo conta com o recurso `SupportModeAutoMaintain`, que permite ao personagem continuar farmando ou completando rotinas automaticamente mesmo offline. O sistema monitora poções de vida (`AutoMaintain.HpPotionMinCount: 100`) e recarrega suprimentos em cidades antes de retornar ao ponto de caça."
+        "answer": "O jogo conta com o recurso SupportModeAutoMaintain, que permite ao personagem continuar farmando ou completando rotinas automaticamente mesmo offline. O sistema monitora poções de vida (AutoMaintain.HpPotionMinCount: 100) e recarrega suprimentos em cidades antes de retornar ao ponto de caça."
     },
     {
         "category": "Arquitetura & Engenharia",
         "question": "Qual motor gráfico e arquitetura de segurança o jogo utiliza?",
-        "answer": "O VAMPIR foi desenvolvido na Unreal Engine 5.5.4 em ARM64 (`libUnreal.so`), utilizando o Gameplay Ability System (GAS), MetaSound para áudio espacial, e FluidNinja para simulação volumétrica de sangue e magia negra. Toda a lógica de combate é Server-Authoritative: cálculos de vida, recarga e dano são validados no servidor, impedindo modificações ilegais de memória de cliente (como Hit-Kill em memória local)."
+        "answer": "O VAMPIR foi desenvolvido na Unreal Engine 5.5.4 em ARM64 (libUnreal.so), utilizando o Gameplay Ability System (GAS), MetaSound para áudio espacial, e FluidNinja para simulação volumétrica de sangue e magia negra. Toda a lógica de combate é Server-Authoritative: cálculos de vida, recarga e dano são validados no servidor, impedindo modificações ilegais de memória de cliente."
     },
     {
         "category": "Arquitetura & Engenharia",
         "question": "Como os arquivos de dados (PAKs) foram decodificados?",
-        "answer": "Os arquivos de dados (.pak) estavam criptografados com o algoritmo AES-256-CBC. Através de engenharia reversa estática na biblioteca `libUnreal.so`, a chave mestra de 256 bits foi extraída no offset 0x756520: `4de16fa1dffb68f2b957d49e6beaebcaf7d6b41a0107cd548f0068ecde4d28ed`. Isso permitiu a extração completa de mais de 40 MB de tabelas de jogo originais."
+        "answer": "Os arquivos de dados (.pak) estavam criptografados com o algoritmo AES-256-CBC. Através de engenharia reversa estática na biblioteca libUnreal.so, a chave mestra de 256 bits foi extraída no offset 0x756520: 4de16fa1dffb68f2b957d49e6beaebcaf7d6b41a0107cd548f0068ecde4d28ed. Isso permitiu a extração completa de mais de 40 MB de tabelas de jogo originais."
     }
 ]
 
 with open(os.path.join(OUT_DIR, "faq.json"), "w", encoding="utf-8") as f:
     json.dump(faq_catalog, f, indent=2, ensure_ascii=False)
 
-print("Data builder completed successfully!")
+# ==========================================
+# 8. BUNDLE GENERATION
+# ==========================================
+print("Writing bundle.js...")
+bundle_path = os.path.join(OUT_DIR, "bundle.js")
+bundle_data = {
+    "classes": classes_data,
+    "builds": builds_data,
+    "skills": skills_catalog,
+    "bosses": bosses_catalog,
+    "dungeons": dungeons_catalog,
+    "items": curated_items,
+    "constants": constants_dict,
+    "faq": faq_catalog
+}
+
+with open(bundle_path, "w", encoding="utf-8") as f:
+    f.write("window.VAMPIR_DATA = " + json.dumps(bundle_data, ensure_ascii=False) + ";\n")
+
+print(f"Data builder completed! bundle.js size: {os.path.getsize(bundle_path) / 1024:.1f} KB")

@@ -20,7 +20,8 @@
     dungeonsSearchTerm: '',
     itemsFilter: 'all',
     itemsSearchTerm: '',
-    activeBuildIndex: 0
+    activeBuildIndex: 0,
+    activeVariantIndex: 0
   };
 
   // DOM Elements
@@ -71,11 +72,9 @@
       sec.classList.toggle('active', sec.id === tabId);
     });
 
-    // Reset page scroll
     const wrapper = document.querySelector('.main-wrapper');
     if (wrapper) wrapper.scrollTop = 0;
 
-    // Trigger specific renders
     if (tabId === 'skills') renderSkills();
     if (tabId === 'bosses') renderBosses();
     if (tabId === 'dungeons') renderDungeons();
@@ -87,7 +86,7 @@
     switchTab(tabId);
   };
 
-  // Render Classes
+  // Render Classes with Official Portraits and Icons
   function renderClasses() {
     const container = document.getElementById('classesContainer');
     if (!container || !state.data.classes) return;
@@ -95,18 +94,40 @@
     container.innerHTML = state.data.classes.map(cls => `
       <div class="class-card">
         <div class="class-header-bar">
-          <div class="class-title-group">
-            <h3>${cls.name}</h3>
-            <span class="class-subtitle">${cls.archetype}</span>
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <img src="${cls.icon_img}" alt="${cls.name} Icon" class="class-badge-img" onerror="this.src='assets/logo.png'">
+            <div class="class-title-group">
+              <h3>${cls.name}</h3>
+              <span class="class-subtitle">${cls.archetype}</span>
+            </div>
           </div>
           <span class="entity-badge badge-crimson">${cls.resource}</span>
         </div>
+
+        <!-- Official Character Artwork Showcase -->
+        ${cls.male_img || cls.female_img ? `
+          <div class="class-art-showcase">
+            ${cls.male_img ? `
+              <div class="portrait-card">
+                <img src="${cls.male_img}" alt="${cls.name} Masculino" class="portrait-img">
+                <span class="portrait-label">Masculino</span>
+              </div>
+            ` : ''}
+            ${cls.female_img ? `
+              <div class="portrait-card">
+                <img src="${cls.female_img}" alt="${cls.name} Feminino" class="portrait-img">
+                <span class="portrait-label">Feminino</span>
+              </div>
+            ` : ''}
+          </div>
+        ` : ''}
+
         <div class="class-body">
           <div class="class-lore">${cls.desc}</div>
           
           <div style="margin-bottom: 16px;">
             <div style="font-size: 0.82rem; color: var(--gold-primary); font-weight: 600; margin-bottom: 6px;">
-              ⚔️ Arma & Papel:
+              ⚔️ Arma & Papel Tático:
             </div>
             <div style="font-size: 0.88rem; color: #fff;">
               ${cls.weapon} — <em>${cls.role}</em>
@@ -140,7 +161,7 @@
     `).join('');
   }
 
-  // Render Builds
+  // Render Builds and Specialized Variants
   function renderBuilds() {
     const tabsContainer = document.getElementById('buildsTabs');
     const detailContainer = document.getElementById('buildDetailContainer');
@@ -148,58 +169,110 @@
 
     tabsContainer.innerHTML = state.data.builds.map((b, idx) => `
       <button class="build-tab-btn ${idx === state.activeBuildIndex ? 'active' : ''}" onclick="window.selectBuild(${idx})">
-        <span>🩸 ${b.class_name}</span>
+        <img src="${b.icon_img}" alt="icon" style="width: 22px; height: 22px; border-radius: 4px;" onerror="this.src='assets/logo.png'">
+        <span>${b.class_name}</span>
       </button>
     `).join('');
 
     const b = state.data.builds[state.activeBuildIndex];
-    if (!b) return;
+    if (!b || !b.variants) return;
+
+    const vIdx = state.activeVariantIndex || 0;
+    const variant = b.variants[vIdx] || b.variants[0];
 
     detailContainer.innerHTML = `
       <div class="build-detail-card">
+        <!-- Variant Sub-Tabs (Geral, Farm, Chefe, PvP) -->
+        <div style="display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; border-bottom: 1px solid var(--border-subtle); padding-bottom: 16px;">
+          ${b.variants.map((v, idx) => `
+            <button class="filter-btn ${idx === vIdx ? 'active' : ''}" onclick="window.selectVariant(${idx})">
+              ${v.badge}
+            </button>
+          `).join('')}
+        </div>
+
         <div class="build-header">
-          <h2>${b.title}</h2>
-          <div class="build-objective">🎯 Objetivo: ${b.objective}</div>
-          <p style="margin-top: 10px; color: #94a3b8; font-size: 0.95rem;">
-            <strong>Estilo de Jogo:</strong> ${b.playstyle}
-          </p>
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h2>${variant.title}</h2>
+              <div class="build-objective">🎯 <strong>Objetivo:</strong> ${variant.objective}</div>
+            </div>
+            <span class="entity-badge badge-crimson" style="font-size: 0.85rem; padding: 6px 14px;">${variant.badge}</span>
+          </div>
         </div>
 
         <div class="build-grid-columns">
           <div>
             <h3 style="font-family: var(--font-serif); font-size: 1.25rem; color: #fff; margin-bottom: 14px;">
-              Habilidades Recomendadas da Rotação
+              Habilidades Recomendadas da Variante
             </h3>
             <table class="skills-table">
               <thead>
                 <tr>
                   <th>Habilidade</th>
-                  <th>Papel Tático</th>
-                  <th>Slot</th>
-                  <th>Livro de Origem</th>
+                  <th>Função Tática</th>
+                  <th>Recarga & Custo</th>
+                  <th>Slot / Raridade</th>
                 </tr>
               </thead>
               <tbody>
-                ${b.skills.map(s => `
+                ${variant.skills.map(s => `
                   <tr>
-                    <td class="skill-name-cell">
-                      ${s.name}
-                      <span class="skill-id-tag">#${s.id}</span>
+                    <td class="skill-name-cell" onclick="window.inspectSkill('${s.id}')" style="cursor: pointer;">
+                      <div style="color: #fff; font-weight: 600;">${s.name}</div>
+                      <span class="skill-id-tag">ID #${s.id}</span>
+                      ${s.book ? `<span class="book-tag">📖 ${s.book}</span>` : ''}
                     </td>
-                    <td style="color: #cbd5e1;">${s.role}</td>
-                    <td><span class="entity-badge badge-crimson">Slot ${s.slot}</span></td>
-                    <td><span class="book-tag">📖 ${s.book}</span></td>
+                    <td style="color: #cbd5e1; font-size: 0.85rem;">${s.role}</td>
+                    <td style="font-size: 0.82rem;">
+                      <div style="color: var(--crimson-light); font-weight: 600;">⏱️ ${s.cooldown || 'Padrão'}</div>
+                      ${s.mp ? `<div style="color: #93c5fd;">💧 MP: ${s.mp}</div>` : ''}
+                      ${s.range ? `<div style="color: var(--text-dim);">🎯 ${s.range}</div>` : ''}
+                    </td>
+                    <td>
+                      <span class="entity-badge badge-crimson">Slot ${s.slot || '1'}</span>
+                      ${s.rarity ? `<div style="font-size: 0.72rem; color: var(--gold-primary); margin-top: 4px;">${s.rarity}</div>` : ''}
+                    </td>
                   </tr>
                 `).join('')}
               </tbody>
             </table>
+
+            <!-- Candidate Equipment Table -->
+            ${variant.equipment && variant.equipment.length > 0 ? `
+              <div style="margin-top: 28px;">
+                <h3 style="font-family: var(--font-serif); font-size: 1.25rem; color: var(--gold-primary); margin-bottom: 14px;">
+                  ⚔️ Equipamentos & Armas Candidatas
+                </h3>
+                <table class="skills-table">
+                  <thead>
+                    <tr>
+                      <th>Item</th>
+                      <th>Raridade</th>
+                      <th>Atributos Associados & Bônus</th>
+                      <th>Requisitos</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${variant.equipment.map(eq => `
+                      <tr>
+                        <td style="font-weight: 600; color: #fff;">${eq.item}</td>
+                        <td><span class="entity-badge badge-gold">${eq.rarity}</span></td>
+                        <td style="color: #cbd5e1; font-size: 0.85rem;">${eq.attributes}</td>
+                        <td style="font-size: 0.78rem; color: var(--text-dim);">${eq.level_limits || 'Natural'}</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            ` : ''}
           </div>
 
           <div class="build-sidebar-panel">
             <div class="panel-box">
               <div class="panel-title">Prioridade de Atributos</div>
               <div class="stat-pills-list">
-                ${b.stat_priority.map((st, i) => `
+                ${variant.stat_priority.map((st, i) => `
                   <div class="stat-pill-row">
                     <span style="color: #fff; font-weight: 500;">${i + 1}. ${st}</span>
                     <span style="color: var(--gold-primary);">★</span>
@@ -209,12 +282,13 @@
             </div>
 
             <div class="panel-box">
-              <div class="panel-title">Equipamento & Forja</div>
+              <div class="panel-title">Guia de Otimização</div>
               <p style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.6;">
-                ${b.recommended_gear}
+                Esta variante foi formulada com base nas tabelas extraídas do <code>pakchunk1</code>. 
+                Para maximizar o desempenho, priorize armas com os afixos indicados (Dano a Chefes para Raides/Masmorras, Dano a Monstros para Farm e Redução de Dano para PvP).
               </p>
               <div style="margin-top: 12px; font-size: 0.78rem; color: var(--gold-primary);">
-                ✦ Encantamento seguro até +5; bônus ativo com Pedra de Bênção até +15.
+                ✦ Encantamento seguro até +5; multi-encantamento sequencial até +11.
               </div>
             </div>
           </div>
@@ -225,6 +299,12 @@
 
   window.selectBuild = function(idx) {
     state.activeBuildIndex = idx;
+    state.activeVariantIndex = 0;
+    renderBuilds();
+  };
+
+  window.selectVariant = function(vIdx) {
+    state.activeVariantIndex = vIdx;
     renderBuilds();
   };
 
@@ -232,6 +312,7 @@
     const idx = state.data.builds.findIndex(b => b.class_id === classId);
     if (idx !== -1) {
       state.activeBuildIndex = idx;
+      state.activeVariantIndex = 0;
       switchTab('builds');
     }
   };
@@ -265,7 +346,10 @@
     container.innerHTML = paginated.map(s => `
       <div class="entity-card" onclick="window.inspectSkill('${s.id}')">
         <div class="entity-header">
-          <span class="entity-badge badge-purple">${s.class_name}</span>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <img src="${s.icon_img || 'assets/logo.png'}" alt="Icon" class="mini-skill-icon" onerror="this.src='assets/logo.png'">
+            <span class="entity-badge badge-purple">${s.class_name}</span>
+          </div>
           <span class="entity-id">ID ${s.id}</span>
         </div>
         <div class="entity-title">${s.name}</div>
@@ -295,7 +379,7 @@
     renderSkills();
   };
 
-  // Render Bosses
+  // Render Bosses with Official High-Res Portraits
   function renderBosses() {
     const container = document.getElementById('bossesContainer');
     if (!container || !state.data.bosses) return;
@@ -316,31 +400,37 @@
     }
 
     container.innerHTML = filtered.slice(0, 100).map(b => `
-      <div class="entity-card" onclick="window.inspectBoss('${b.id}')">
-        <div class="entity-header">
-          <span class="entity-badge ${b.grade_code === '3' ? 'badge-crimson' : 'badge-gold'}">
+      <div class="entity-card boss-card" onclick="window.inspectBoss('${b.id}')">
+        <!-- Boss Official Artwork Banner -->
+        <div class="boss-banner-frame">
+          <img src="${b.portrait_img}" alt="${b.name}" class="boss-portrait-banner" onerror="this.src='assets/splash.png'">
+          <div class="boss-banner-overlay"></div>
+          <span class="entity-badge ${b.grade_code === '3' ? 'badge-crimson' : 'badge-gold'} boss-grade-tag">
             ${b.grade_name}
           </span>
-          <span class="entity-badge badge-blue">Nv. ${b.level}</span>
+          <span class="entity-badge badge-blue boss-level-tag">Nv. ${b.level}</span>
         </div>
-        <div class="entity-title">${b.name}</div>
-        <div style="font-size: 0.8rem; color: var(--gold-primary); margin-bottom: 8px;">
-          ${b.title}
-        </div>
-        <p class="entity-desc">
-          <strong>Aviso Tático:</strong> ${b.audio_alert}<br>
-          <strong>Recompensas:</strong> ${b.reward_preview}
-        </p>
-        <div class="entity-meta-row">
-          <span>Escala: ${b.scale_factor}x</span>
-          <span>Raio: ${b.body_radius}</span>
-          <span style="color: var(--crimson-light); font-weight: 600;">Ver Fases →</span>
+
+        <div style="padding: 16px 20px 20px;">
+          <div class="entity-title" style="margin-top: 4px;">${b.name}</div>
+          <div style="font-size: 0.82rem; color: var(--gold-primary); margin-bottom: 8px;">
+            ${b.title}
+          </div>
+          <p class="entity-desc">
+            <strong>Aviso:</strong> ${b.audio_alert}<br>
+            <strong>Recompensas:</strong> ${b.reward_preview}
+          </p>
+          <div class="entity-meta-row">
+            <span>Escala: ${b.scale_factor}x</span>
+            <span>Velocidade: ${b.run_speed}</span>
+            <span style="color: var(--crimson-light); font-weight: 600;">Ver Fases →</span>
+          </div>
         </div>
       </div>
     `).join('');
   }
 
-  // Render Dungeons
+  // Render Dungeons with Background Artworks
   function renderDungeons() {
     const container = document.getElementById('dungeonsContainer');
     if (!container || !state.data.dungeons) return;
@@ -361,23 +451,28 @@
     }
 
     container.innerHTML = filtered.map(d => `
-      <div class="entity-card" onclick="window.inspectDungeon('${d.id}')">
-        <div class="entity-header">
-          <span class="entity-badge badge-blue">${d.type_name}</span>
-          <span class="entity-id">ID ${d.id}</span>
+      <div class="entity-card dungeon-card" onclick="window.inspectDungeon('${d.id}')">
+        <!-- Dungeon Artwork Banner -->
+        <div class="dungeon-banner-frame">
+          <img src="${d.bg_img}" alt="${d.name}" class="dungeon-banner-img" onerror="this.src='assets/splash.png'">
+          <div class="dungeon-banner-overlay"></div>
+          <span class="entity-badge badge-blue dungeon-type-tag">${d.type_name}</span>
         </div>
-        <div class="entity-title">${d.name}</div>
-        <p class="entity-desc">${d.description}</p>
-        <div class="entity-meta-row">
-          <span>Nv. Mínimo: <strong>${d.req_level}</strong></span>
-          <span>Recomendado: <strong>${d.rec_level}</strong></span>
-          <span style="color: var(--gold-primary);">Grau SS</span>
+
+        <div style="padding: 16px 20px 20px;">
+          <div class="entity-title">${d.name}</div>
+          <p class="entity-desc">${d.description}</p>
+          <div class="entity-meta-row">
+            <span>Nv. Mínimo: <strong>${d.req_level}</strong></span>
+            <span>Recomendado: <strong>${d.rec_level}</strong></span>
+            <span style="color: var(--gold-primary);">Grau SS</span>
+          </div>
         </div>
       </div>
     `).join('');
   }
 
-  // Render Items
+  // Render Items with Official Weapon & Gear Icons
   function renderItems() {
     const container = document.getElementById('itemsContainer');
     if (!container || !state.data.items) return;
@@ -398,15 +493,21 @@
     }
 
     container.innerHTML = filtered.map(item => `
-      <div class="entity-card" onclick="window.inspectItem('${item.id}')">
+      <div class="entity-card item-card" onclick="window.inspectItem('${item.id}')">
         <div class="entity-header">
-          <span class="entity-badge badge-gold">${item.type_name}</span>
-          <span class="entity-id">ID ${item.id}</span>
+          <div class="item-slot-frame">
+            <img src="${item.icon_img}" alt="${item.name}" class="item-slot-img" onerror="this.src='assets/logo.png'">
+          </div>
+          <div style="flex: 1; margin-left: 14px;">
+            <div class="entity-title" style="font-size: 1.05rem;">${item.name}</div>
+            <div style="display: flex; gap: 8px; margin-top: 4px;">
+              <span class="entity-badge badge-gold" style="font-size: 0.7rem;">${item.type_name}</span>
+              <span class="entity-badge badge-crimson" style="font-size: 0.7rem;">Tier ${item.tier}</span>
+            </div>
+          </div>
         </div>
-        <div class="entity-title">${item.name}</div>
         <p class="entity-desc">${item.desc}</p>
         <div class="entity-meta-row">
-          <span>Tier ${item.tier}</span>
           <span>Peso: ${item.weight}</span>
           <span style="color: var(--crimson-light);">${item.max_enchant}</span>
         </div>
@@ -451,8 +552,11 @@
     modalSubtitle.innerText = `${s.class_name} • Habilidade ID #${s.id}`;
 
     modalBody.innerHTML = `
-      <div style="margin-bottom: 20px; font-size: 0.95rem; color: #cbd5e1; line-height: 1.6;">
-        ${s.description || s.effect_description || 'Sem descrição adicional.'}
+      <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+        <img src="${s.icon_img || 'assets/logo.png'}" alt="${s.name}" style="width: 56px; height: 56px; border-radius: 8px; border: 1px solid var(--border-gold);" onerror="this.src='assets/logo.png'">
+        <div style="font-size: 0.95rem; color: #cbd5e1; line-height: 1.6;">
+          ${s.description || s.effect_description || 'Sem descrição adicional.'}
+        </div>
       </div>
       <div class="metrics-grid" style="grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;">
         <div class="panel-box">
@@ -491,6 +595,9 @@
     modalSubtitle.innerText = `${b.title} • Nível ${b.level} (${b.grade_name})`;
 
     modalBody.innerHTML = `
+      <div style="margin-bottom: 20px; text-align: center;">
+        <img src="${b.portrait_img}" alt="${b.name}" style="max-height: 220px; border-radius: 8px; border: 1px solid var(--border-gold); box-shadow: 0 0 20px rgba(0,0,0,0.8);" onerror="this.src='assets/splash.png'">
+      </div>
       <div style="margin-bottom: 20px;">
         <h4 style="font-family: var(--font-serif); color: var(--gold-primary); margin-bottom: 10px;">
           Mecânica de Fases de Combate (EMonsterPhase)
@@ -523,6 +630,9 @@
     modalSubtitle.innerText = `${d.type_name} • ID #${d.id}`;
 
     modalBody.innerHTML = `
+      <div style="margin-bottom: 20px; text-align: center;">
+        <img src="${d.bg_img}" alt="${d.name}" style="max-height: 200px; width: 100%; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-gold);" onerror="this.src='assets/splash.png'">
+      </div>
       <div style="margin-bottom: 20px; font-size: 0.95rem; color: #cbd5e1; line-height: 1.6;">
         ${d.description}
       </div>
@@ -551,8 +661,13 @@
     modalSubtitle.innerText = `${item.type_name} • Tier ${item.tier} (ID #${item.id})`;
 
     modalBody.innerHTML = `
-      <div style="margin-bottom: 20px; font-size: 0.95rem; color: #cbd5e1; line-height: 1.6;">
-        ${item.desc}
+      <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+        <div class="item-slot-frame" style="width: 64px; height: 64px;">
+          <img src="${item.icon_img}" alt="${item.name}" class="item-slot-img" onerror="this.src='assets/logo.png'">
+        </div>
+        <div style="font-size: 0.95rem; color: #cbd5e1; line-height: 1.6;">
+          ${item.desc}
+        </div>
       </div>
       <div class="panel-box">
         <div class="panel-title">Encantamento e Restrições</div>
@@ -567,7 +682,6 @@
 
   // Setup Event Listeners
   function setupListeners() {
-    // Navigation Clicks
     navItems.forEach(item => {
       item.addEventListener('click', () => {
         const target = item.dataset.target;
@@ -575,13 +689,11 @@
       });
     });
 
-    // Modal Close
     modalCloseBtn.addEventListener('click', () => detailModal.classList.remove('open'));
     detailModal.addEventListener('click', e => {
       if (e.target === detailModal) detailModal.classList.remove('open');
     });
 
-    // Global Search
     globalSearch.addEventListener('input', e => {
       const q = e.target.value;
       if (state.currentTab === 'skills') {
@@ -600,7 +712,6 @@
       }
     });
 
-    // Filter Buttons
     document.getElementById('skillsFilterBar')?.addEventListener('click', e => {
       if (e.target.tagName === 'BUTTON') {
         document.querySelectorAll('#skillsFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
@@ -650,6 +761,5 @@
     setupListeners();
   }
 
-  // Bootstrap
   ensureDataLoaded();
 })();

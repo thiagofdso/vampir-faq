@@ -26,8 +26,9 @@
       "Escudo de veneno proporcional ao poder de feitiçaria",
       "Sustentação vampírica através do Chamado de Sangue"
     ],
-    "male_img": "IMG_Class_DarkMage_Male",
-    "female_img": "IMG_Class_DarkMage_Female"
+    "icon_img": "assets/classes/darkmage_icon.png",
+    "male_img": "assets/classes/darkmage_male.png",
+    "female_img": "assets/classes/darkmage_female.png"
   },
   {
     "id": 2,
@@ -56,8 +57,9 @@
       "Amplificação de Dano Crítico e Dano Corpo a Corpo",
       "Pele grossa e regeneração sombria baseada em ATQ"
     ],
-    "male_img": "IMG_Class_Reaper_Male",
-    "female_img": "IMG_Class_Reaper_Female"
+    "icon_img": "assets/classes/reaper_icon.png",
+    "male_img": "assets/classes/reaper_male.png",
+    "female_img": "assets/classes/reaper_female.png"
   },
   {
     "id": 3,
@@ -86,8 +88,9 @@
       "Auto-buffs de Esquiva (ESQ) e Precisão Ranged",
       "Controle de distanciamento e knockback de ameaças"
     ],
-    "male_img": "IMG_Class_Gunner_Male",
-    "female_img": "IMG_Class_Gunner_Female"
+    "icon_img": "assets/classes/gunner_icon.png",
+    "male_img": "assets/classes/gunner_male.png",
+    "female_img": "assets/classes/gunner_female.png"
   },
   {
     "id": 4,
@@ -116,8 +119,9 @@
       "Buffs de defesa física e redução de dano recebido",
       "Fúria de sangue que converte dano causado em PV direto"
     ],
-    "male_img": "IMG_Class_SwordMan_Male",
-    "female_img": "IMG_Class_SwordMan_Female"
+    "icon_img": "assets/classes/swordman_icon.png",
+    "male_img": "assets/classes/swordman_male.png",
+    "female_img": "assets/classes/swordman_female.png"
   },
   {
     "id": 5,
@@ -146,7 +150,8 @@
       "Libertação Absoluta (imunidade a CC e atordoamentos)",
       "Combos velozes e quebra de postura de chefes"
     ],
-    "male_img": "IMG_Class_Fighter_Male",
-    "female_img": "IMG_Class_Fighter_Female"
+    "icon_img": "assets/classes/fighter_icon.png",
+    "male_img": "assets/classes/fighter_male.png",
+    "female_img": "assets/classes/fighter_female.png"
   }
 ]
