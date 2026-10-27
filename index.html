@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VAMPIR: ProjectRED — Enciclopédia & Guia Oficial (FAQ)</title>
+  <link rel="icon" type="image/png" href="assets/logo.png">
+  
+  <!-- Google Fonts: Cinzel & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Left Navigation Sidebar -->
+    <aside class="sidebar">
+      <div class="brand-header">
+        <img src="assets/logo.png" alt="VAMPIR Logo" class="brand-logo">
+        <div class="brand-text">
+          <h1>VAMPIR</h1>
+          <span>ProjectRED Codex</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu" id="navMenu">
+        <a class="nav-item active" data-target="overview">
+          <span class="nav-icon">🏰</span>
+          <span>Visão Geral</span>
+        </a>
+        <a class="nav-item" data-target="classes">
+          <span class="nav-icon">🩸</span>
+          <span>Classes</span>
+          <span class="nav-count" id="countClasses">5</span>
+        </a>
+        <a class="nav-item" data-target="builds">
+          <span class="nav-icon">⚔️</span>
+          <span>Builds PvE</span>
+          <span class="nav-count" id="countBuilds">5</span>
+        </a>
+        <a class="nav-item" data-target="skills">
+          <span class="nav-icon">🔮</span>
+          <span>Habilidades</span>
+          <span class="nav-count" id="countSkills">1.3k</span>
+        </a>
+        <a class="nav-item" data-target="bosses">
+          <span class="nav-icon">💀</span>
+          <span>Inimigos & Chefes</span>
+          <span class="nav-count" id="countBosses">555</span>
+        </a>
+        <a class="nav-item" data-target="dungeons">
+          <span class="nav-icon">🏰</span>
+          <span>Masmorras</span>
+          <span class="nav-count" id="countDungeons">196</span>
+        </a>
+        <a class="nav-item" data-target="items">
+          <span class="nav-icon">🎒</span>
+          <span>Itens & Forja</span>
+          <span class="nav-count" id="countItems">300</span>
+        </a>
+        <a class="nav-item" data-target="faq">
+          <span class="nav-icon">❓</span>
+          <span>FAQ & Sistemas</span>
+          <span class="nav-count" id="countFaq">10</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="meta-status">
+          <div class="status-dot"></div>
+          <span>Unreal Engine 5.5.4 • Base Descriptografada</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-wrapper">
+      <!-- Top Action Bar -->
+      <header class="top-bar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="globalSearch" placeholder="Buscar classes, habilidades, chefes, masmorras ou itens...">
+        </div>
+        <div class="top-actions">
+          <div class="badge-tag">
+            <span>🛡️ NetmarbleNeo</span>
+          </div>
+          <div class="badge-tag">
+            <span>🔑 AES-256 Validado</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Views -->
+      <div class="content-body">
+        
+        <!-- ==============================================
+             1. OVERVIEW SECTION
+             ============================================== -->
+        <section id="overview" class="view-section active">
+          <div class="hero-card" style="background-image: url('assets/hero_bg.png');">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+              <span class="hero-pill">Enciclopédia de Engenharia Reversa</span>
+              <h2 class="hero-title">O Despertar da Linhagem Vampírica</h2>
+              <p class="hero-desc">
+                Bem-vindo ao banco de conhecimento central de <strong>VAMPIR (ProjectRED)</strong>. 
+                Explore dados extraídos diretamente dos pacotes criptografados do jogo, abrangendo as 5 classes primordiais, 
+                mais de 1.300 habilidades ativas e passivas, mecânicas de chefes em 6 fases e tabelas de itens e masmorras.
+              </p>
+            </div>
+          </div>
+
+          <!-- Metrics Grid -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-label">Classes Primordiais</div>
+              <div class="metric-value">5</div>
+              <div class="metric-desc">Víbora, Ceifador, Carnificina, Manchado de Sangue e Akasha</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Grimório de Habilidades</div>
+              <div class="metric-value">1.331+</div>
+              <div class="metric-desc">Habilidades mapeadas com MP, recarga e dano em área</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Chefes & Inimigos</div>
+              <div class="metric-value">555</div>
+              <div class="metric-desc">81 Grandes Chefes de Masmorra e 474 Chefes de Campo</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Instâncias & Masmorras</div>
+              <div class="metric-value">196</div>
+              <div class="metric-desc">Grupo, Torre Infinita, Cross-Server e Conquista de Guilda</div>
+            </div>
+          </div>
+
+          <!-- Feature Cards / Core Pillars -->
+          <div class="section-header">
+            <h3 class="section-title">Pilares do Sistema de Jogo</h3>
+            <p class="section-subtitle">Arquitetura de combate e mecânicas exclusivas reveladas na engenharia reversa</p>
+          </div>
+
+          <div class="cards-grid">
+            <div class="entity-card" onclick="window.navTo('classes')">
+              <div class="entity-header">
+                <span class="entity-badge badge-crimson">Combate</span>
+                <span class="entity-id">GAS / UE5</span>
+              </div>
+              <h4 class="entity-title">Classes & Linhagens</h4>
+              <p class="entity-desc">
+                Cada classe possui identidade única: a Víbora manipula feitiços DoT, o Ceifador assassina das sombras, 
+                a Carnificina domina a longa distância, o Manchado de Sangue absorve dano vital e a Akasha transcende o combate físico.
+              </p>
+              <div class="entity-meta-row">
+                <span>5 Classes Disponíveis</span>
+                <span style="color: var(--gold-primary);">Ver Detalhes →</span>
+              </div>
+            </div>
+
+            <div class="entity-card" onclick="window.navTo('builds')">
+              <div class="entity-header">
+                <span class="entity-badge badge-gold">Guia Estratégico</span>
+                <span class="entity-id">PvE Geral</span>
+              </div>
+              <h4 class="entity-title">Builds & Rotações</h4>
+              <p class="entity-desc">
+                Propostas completas de builds PvE com tabelas de habilidades, livros associados, prioridades de atributos e equipamentos ideais para progressão solo ou em grupo.
+              </p>
+              <div class="entity-meta-row">
+                <span>5 Builds Curadas</span>
+                <span style="color: var(--gold-primary);">Ver Builds →</span>
+              </div>
+            </div>
+
+            <div class="entity-card" onclick="window.navTo('faq')">
+              <div class="entity-header">
+                <span class="entity-badge badge-purple">Mecânica Central</span>
+                <span class="entity-id">Blood Engine</span>
+              </div>
+              <h4 class="entity-title">Pontos de Sangue & Drenagem</h4>
+              <p class="entity-desc">
+                Drenagem de sangue em alvos e execuções alimentam a barra de BP (Blood Points), 
+                desencadeando as temidas Formas de Sangue com amplificação de até +20% no poder ofensivo.
+              </p>
+              <div class="entity-meta-row">
+                <span>Sistema de Tumbas & BP</span>
+                <span style="color: var(--gold-primary);">Ler Guia →</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==============================================
+             2. CLASSES SECTION
+             ============================================== -->
+        <section id="classes" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">🩸 Classes Primordiais</h2>
+            <p class="section-subtitle">As 5 linhagens de vampiros que governam o mundo sombrio de Nocturne</p>
+          </div>
+          <div class="class-grid" id="classesContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+
+        <!-- ==============================================
+             3. BUILDS SECTION
+             ============================================== -->
+        <section id="builds" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">⚔️ Builds Recomendadas (PvE)</h2>
+            <p class="section-subtitle">Otimizações e rotações baseadas nas tabelas de habilidades e livros do jogo</p>
+          </div>
+          <div class="builds-selector" id="buildsTabs">
+            <!-- Dynamically populated tab buttons -->
+          </div>
+          <div id="buildDetailContainer">
+            <!-- Dynamically populated active build -->
+          </div>
+        </section>
+
+        <!-- ==============================================
+             4. SKILLS SECTION
+             ============================================== -->
+        <section id="skills" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">🔮 Grimório de Habilidades</h2>
+            <p class="section-subtitle">Catálogo de feitiços, golpes corpo a corpo, buffs e passivas extraídos de Skill.csv</p>
+          </div>
+          <div class="filter-bar" id="skillsFilterBar">
+            <button class="filter-btn active" data-class="all">Todas as Classes</button>
+            <button class="filter-btn" data-class="1">Víbora</button>
+            <button class="filter-btn" data-class="2">Ceifador</button>
+            <button class="filter-btn" data-class="3">Carnificina</button>
+            <button class="filter-btn" data-class="4">Manchado de Sangue</button>
+            <button class="filter-btn" data-class="5">Akasha</button>
+            <button class="filter-btn" data-class="0">Comuns / Gerais</button>
+          </div>
+          <div class="cards-grid" id="skillsContainer">
+            <!-- Dynamically populated -->
+          </div>
+          <div id="skillsPagination" style="margin-top: 24px; text-align: center;"></div>
+        </section>
+
+        <!-- ==============================================
+             5. BOSSES SECTION
+             ============================================== -->
+        <section id="bosses" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">💀 Inimigos & Grandes Chefes</h2>
+            <p class="section-subtitle">Catálogo de Chefes Mundiais, Guardiões de Masmorra e mecânicas de 6 fases</p>
+          </div>
+          <div class="filter-bar" id="bossesFilterBar">
+            <button class="filter-btn active" data-grade="all">Todos os Chefes</button>
+            <button class="filter-btn" data-grade="3">Grandes Chefes (81)</button>
+            <button class="filter-btn" data-grade="2">Chefes de Campo (474)</button>
+          </div>
+          <div class="cards-grid" id="bossesContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+
+        <!-- ==============================================
+             6. DUNGEONS SECTION
+             ============================================== -->
+        <section id="dungeons" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">🏰 Masmorras & Instâncias</h2>
+            <p class="section-subtitle">196 masmorras mapeadas do Nível 1 ao 84+, com regras de grupo e recompensas</p>
+          </div>
+          <div class="filter-bar" id="dungeonsFilterBar">
+            <button class="filter-btn active" data-dtype="all">Todas</button>
+            <button class="filter-btn" data-dtype="1">Masmorra de Grupo</button>
+            <button class="filter-btn" data-dtype="8">Torre Naricanje (Infinita)</button>
+            <button class="filter-btn" data-dtype="9">Inter-Servidor (Cross-Server)</button>
+            <button class="filter-btn" data-dtype="7">Linhagem de Sangue</button>
+            <button class="filter-btn" data-dtype="4">Guilda & Defesa</button>
+          </div>
+          <div class="cards-grid" id="dungeonsContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+
+        <!-- ==============================================
+             7. ITEMS SECTION
+             ============================================== -->
+        <section id="items" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">🎒 Itens, Armas & Sepultamento</h2>
+            <p class="section-subtitle">Equipamentos, armas de sangue, livros de habilidades e relíquias de caixão</p>
+          </div>
+          <div class="filter-bar" id="itemsFilterBar">
+            <button class="filter-btn active" data-itype="all">Todos os Itens</button>
+            <button class="filter-btn" data-itype="1">Armas</button>
+            <button class="filter-btn" data-itype="31">Livros de Habilidade</button>
+            <button class="filter-btn" data-itype="20">Poções & Consumíveis</button>
+            <button class="filter-btn" data-itype="70">Cartas de Habilidade</button>
+          </div>
+          <div class="cards-grid" id="itemsContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+
+        <!-- ==============================================
+             8. FAQ SECTION
+             ============================================== -->
+        <section id="faq" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">❓ Perguntas Frequentes & Sistemas</h2>
+            <p class="section-subtitle">Respostas técnicas e documentação das fórmulas internas de VAMPIR</p>
+          </div>
+          <div class="faq-list" id="faqContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Detail Inspection Modal -->
+  <div class="modal-backdrop" id="detailModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <h3 id="modalTitle" style="font-family: var(--font-serif); font-size: 1.4rem; color: #fff;"></h3>
+          <span id="modalSubtitle" style="font-size: 0.82rem; color: var(--gold-primary);"></span>
+        </div>
+        <button class="modal-close-btn" id="modalCloseBtn">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- Data Bundle (Offline & Zero-CORS support) -->
+  <script src="data/bundle.js"></script>
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+[
+  {
+    "id": 1,
+    "slug": "vipora",
+    "name": "Víbora",
+    "resource": "DarkMage",
+    "role": "Mago de Maldição / DPS Mágico à Distância",
+    "archetype": "Feitiçaria Ancestral & Venenos",
+    "weapon": "Orbe Mágico",
+    "desc": "Os Víboras são considerados seres perigosos até mesmo entre os vampiros.\n\nAtravés de rituais, eles transformaram o poder das trevas em maldições. Seu poder sinistro e amaldiçoado os tornou as entidades mais ameaçadoras de Nocturne.\n\nOnde quer que os Víboras surjam, o lugar se torna corrompido por veneno e maldições, preenchendo o mundo com a morte.",
+    "desc_short": "Um feiticeiro vampiro que controla o campo de batalha usando feitiçaria ancestral\n[Magia][Maldição]",
+    "move_speed": "550",
+    "body_radius": "25",
+    "color": "#8b5cf6",
+    "radar": {
+      "atq": 90,
+      "def": 60,
+      "hp": 65,
+      "alcance": 95,
+      "velocidade": 70,
+      "controle": 85
+    },
+    "highlights": [
+      "Controle de área com dano contínuo de veneno (DoT)",
+      "Redução massiva de Resistência Mágica dos alvos",
+      "Escudo de veneno proporcional ao poder de feitiçaria",
+      "Sustentação vampírica através do Chamado de Sangue"
+    ],
+    "male_img": "IMG_Class_DarkMage_Male",
+    "female_img": "IMG_Class_DarkMage_Female"
+  },
+  {
+    "id": 2,
+    "slug": "ceifador",
+    "name": "Ceifador",
+    "resource": "Reaper",
+    "role": "Assassino Corpo a Corpo / Dano de Ruptura (Burst)",
+    "archetype": "Retalhamento Sombrio & Execução",
+    "weapon": "Foice das Sombras",
+    "desc": "Os Ceifadores, nascidos do poder das trevas, manifestaram sua escuridão interior na forma de foices.\n\nAqueles que se opuseram a eles tiveram suas carnes e almas repetidamente retalhadas pelas foices sombrias até não restar vestígio algum, afundando nas sombras.\n\nComo a escuridão dos Ceifadores habita em cada sombra do mundo, ninguém pode escapar deles.",
+    "desc_short": "Um guerreiro vampiro que corta inimigos com uma foice feita de sombras\n[Corpo a corpo][Assassinato]",
+    "move_speed": "550",
+    "body_radius": "25",
+    "color": "#ec4899",
+    "radar": {
+      "atq": 95,
+      "def": 65,
+      "hp": 70,
+      "alcance": 50,
+      "velocidade": 95,
+      "controle": 80
+    },
+    "highlights": [
+      "Dano explosivo em alvos únicos e isolados",
+      "Prisão sombria e imobilização de alvos em fuga",
+      "Amplificação de Dano Crítico e Dano Corpo a Corpo",
+      "Pele grossa e regeneração sombria baseada em ATQ"
+    ],
+    "male_img": "IMG_Class_Reaper_Male",
+    "female_img": "IMG_Class_Reaper_Female"
+  },
+  {
+    "id": 3,
+    "slug": "carnificina",
+    "name": "Carnificina",
+    "resource": "Gunner",
+    "role": "Atirador Ranged DPS / Alta Cadência e Perfuração",
+    "archetype": "Artilharia Balística & Sangue Sagrado",
+    "weapon": "Armas de Fogo de Sangue Abençoado",
+    "desc": "Os Carnificina enfrentam seus inimigos com armas de fogo criadas não a partir do puro poder vampírico, mas sim da energia do sangue abençoado.\n\nSeus ataques perfuram o coração dos inimigos com mais rapidez e precisão do que qualquer vampiro, colocando-os cara a cara com a morte.\n\nEm tempos de crise para a linhagem, eles sempre abrirão o caminho em direção às trevas.",
+    "desc_short": "Um atirador vampiro que abre caminhos com balas que perfuram a escuridão\n[À distância][Ataque Rápido]",
+    "move_speed": "550",
+    "body_radius": "25",
+    "color": "#f97316",
+    "radar": {
+      "atq": 90,
+      "def": 55,
+      "hp": 60,
+      "alcance": 100,
+      "velocidade": 85,
+      "controle": 65
+    },
+    "highlights": [
+      "Maior alcance efetivo do jogo (até 8.5 metros)",
+      "Disparos rápidos consecutivos e perfuração de armadura",
+      "Auto-buffs de Esquiva (ESQ) e Precisão Ranged",
+      "Controle de distanciamento e knockback de ameaças"
+    ],
+    "male_img": "IMG_Class_Gunner_Male",
+    "female_img": "IMG_Class_Gunner_Female"
+  },
+  {
+    "id": 4,
+    "slug": "manchado_de_sangue",
+    "name": "Manchado de Sangue",
+    "resource": "SwordMan",
+    "role": "Cavaleiro / Tanque de Absorção e Autocura",
+    "archetype": "Sacrifício de Sangue & Lâmina Sádica",
+    "weapon": "Espada de Sangue Carmesim",
+    "desc": "Os Ensanguentados são vampiros que desfrutam do combate mais sádico.\n\nEles rasgam a própria carne para derramar sangue vermelho e forjar espadas de sangue carmesim antes de saltarem para a batalha.\n\nCom suas espadas impregnadas de uma ganância sem fim por sangue, eles transformam tudo no campo de batalha em suas presas.",
+    "desc_short": "Um cavaleiro vampiro que domina o campo de batalha com uma espada forjada em sangue\n[Corpo a corpo][Defesa]",
+    "move_speed": "550",
+    "body_radius": "25",
+    "color": "#ef4444",
+    "radar": {
+      "atq": 80,
+      "def": 95,
+      "hp": 95,
+      "alcance": 45,
+      "velocidade": 65,
+      "controle": 85
+    },
+    "highlights": [
+      "Alta sobrevivência com roubo de vida ativo",
+      "Puxão de inimigos (Sede de Sangue) e atordoamento em área",
+      "Buffs de defesa física e redução de dano recebido",
+      "Fúria de sangue que converte dano causado em PV direto"
+    ],
+    "male_img": "IMG_Class_SwordMan_Male",
+    "female_img": "IMG_Class_SwordMan_Female"
+  },
+  {
+    "id": 5,
+    "slug": "akasha",
+    "name": "Akasha",
+    "resource": "Fighter",
+    "role": "Brawler / Perseguidor e Rompedor de Defesas",
+    "archetype": "Mutação Corporal & Frenesi Vampírico",
+    "weapon": "Garras & Tonfas Corpóreas",
+    "desc": "Os Akasha usam o poder do sangue para aprimorar seus corpos e transformá-los em armas impiedosas.\n\nEles se dedicaram por longos períodos apenas a aperfeiçoar técnicas de treinamento corporal, até finalmente transcenderem todos os limites físicos por meio do poder do sangue.\n\nCom base em seus corpos formidáveis, os Akasha perseguem seus alvos implacavelmente e desferem um fim inescapável.",
+    "desc_short": "Um perseguidor vampiro que aprimora o próprio corpo ao extremo para emboscar inimigos\n[Corpo a corpo][Perseguição]",
+    "move_speed": "550",
+    "body_radius": "25",
+    "color": "#eab308",
+    "radar": {
+      "atq": 90,
+      "def": 80,
+      "hp": 85,
+      "alcance": 40,
+      "velocidade": 90,
+      "controle": 90
+    },
+    "highlights": [
+      "Roubo de atributos em tempo real (drena ATQ do alvo)",
+      "Frenesi Carmesim com aumento extremo de cadência de golpes",
+      "Libertação Absoluta (imunidade a CC e atordoamentos)",
+      "Combos velozes e quebra de postura de chefes"
+    ],
+    "male_img": "IMG_Class_Fighter_Male",
+    "female_img": "IMG_Class_Fighter_Female"
+  }
+]

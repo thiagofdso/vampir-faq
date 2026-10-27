@@ -1,0 +1,267 @@
+[
+  {
+    "id": "vipora-corrupcao",
+    "class_id": 1,
+    "class_name": "Víbora",
+    "title": "Build: Corrupção Abissal & Dano Contínuo (DoT)",
+    "objective": "Dano mágico sustentado, espalhamento de veneno e alta sobrevivência via escudos de feitiçaria e drenagem.",
+    "playstyle": "Mantenha o Escudo de Veneno ativo, aplique Sussurros do Sofrimento para reduzir a defesa mágica em área e espalhe a Explosão de Veneno para detonar as ondas de monstros.",
+    "skills": [
+      {
+        "id": "110017",
+        "name": "Explosão de Veneno",
+        "role": "Dois acertos e aplicação de DoT de veneno",
+        "slot": "1",
+        "book": "Livro de Habilidade: Explosão de Veneno (21011001)"
+      },
+      {
+        "id": "110021",
+        "name": "Sussurros do Sofrimento",
+        "role": "Dano mágico massivo e redução de defesa mágica do alvo",
+        "slot": "1",
+        "book": "Livro de Habilidade: Sussurros do Sofrimento (21011002)"
+      },
+      {
+        "id": "110022",
+        "name": "Surto de Poder",
+        "role": "Buff passivo/ativo que amplia o poder mágico",
+        "slot": "1",
+        "book": "Livro de Habilidade: Pico de Poder (21011004)"
+      },
+      {
+        "id": "110027",
+        "name": "Escudo de Veneno",
+        "role": "Barreira protetora que absorve dano baseado na inteligência",
+        "slot": "1",
+        "book": "Livro de Habilidade: Escudo de Peçonha (21012004)"
+      },
+      {
+        "id": "110034",
+        "name": "Chamado de Sangue",
+        "role": "Dano de sangue canalizado e recuperação de PV",
+        "slot": "1",
+        "book": "Livro de Habilidade: Chamado do Sangue (21011000)"
+      }
+    ],
+    "stat_priority": [
+      "Dano Mágico",
+      "Perfuração Mágica",
+      "Redução de Cooldown (Haste)",
+      "Pontos de Sangue (BP)",
+      "Defesa Mágica"
+    ],
+    "recommended_gear": "Orbes com bônus de Feitiçaria Sombria e Armaduras com regeneração de Mana e Escudo Protetor."
+  },
+  {
+    "id": "ceifador-sombra",
+    "class_id": 2,
+    "class_name": "Ceifador",
+    "title": "Build: Sombra Executora & Dano Crítico Melee",
+    "objective": "Eliminação cirúrgica de alvos de elite e chefes com golpes corpo a corpo de alta penetração e imobilização.",
+    "playstyle": "Aproxime-se com Prisão Sombria para congelar a movimentação inimiga, ative Energia Sombria para inflar seu dano base e execute com o Golpe Mortal.",
+    "skills": [
+      {
+        "id": "120011",
+        "name": "Golpe Mortal",
+        "role": "Ataque corpo a corpo concentrado (alcance de até 3m) com alto multiplicador crítico",
+        "slot": "1",
+        "book": "Livro de Habilidade: Golpe Mortal (21021001)"
+      },
+      {
+        "id": "120012",
+        "name": "Prisão Sombria",
+        "role": "Controle de grupo que prende o alvo nas sombras e impede fuga",
+        "slot": "1",
+        "book": "Livro de Habilidade: Aprisionamento Sombrio (21022001)"
+      },
+      {
+        "id": "120018",
+        "name": "Energia Sombria",
+        "role": "Aumenta exponencialmente o dano corpo a corpo e ataque crítico",
+        "slot": "1",
+        "book": "Livro de Habilidade: Energia Sombria (21021004)"
+      },
+      {
+        "id": "120019",
+        "name": "Pele Grossa",
+        "role": "Aumenta a resistência física e reduz atordoamentos sofridos",
+        "slot": "1",
+        "book": "Livro de Habilidade: Pele Grossa (21021005)"
+      },
+      {
+        "id": "120028",
+        "name": "Regeneração Sombria",
+        "role": "Cura contínua proporcional ao poder de ataque desferido",
+        "slot": "0",
+        "book": "Passiva Inata / Evolução"
+      }
+    ],
+    "stat_priority": [
+      "Dano Corpo a Corpo",
+      "Taxa Crítica",
+      "Dano Crítico",
+      "Velocidade de Ataque",
+      "Esquiva (ESQ)"
+    ],
+    "recommended_gear": "Foices com afiação sombria e trajes leves de assassinato com bônus de aceleração de movimento."
+  },
+  {
+    "id": "carnificina-artilharia",
+    "class_id": 3,
+    "class_name": "Carnificina",
+    "title": "Build: Artilharia Carmesim Ranged DPS",
+    "objective": "Metralhadora de projéteis abençoados, disparos em área a distâncias seguras (8.5m) e evasão tática.",
+    "playstyle": "Posicione-se na retaguarda. Ative Passo Ágil e Mirar para obter 100% de precisão e bônus de alcance, fuzilando os alvos com Tiro Selvagem e repelindo ameaças com Queda da Escuridão.",
+    "skills": [
+      {
+        "id": "130012",
+        "name": "Tiro Selvagem",
+        "role": "Sequência de 6 disparos ultra rápidos em até 8,5 metros",
+        "slot": "1",
+        "book": "Livro de Habilidade: Tiro Selvagem (21031002)"
+      },
+      {
+        "id": "130014",
+        "name": "Queda da Escuridão",
+        "role": "Disparo explosivo que lança os inimigos no ar (Knockup)",
+        "slot": "1",
+        "book": "Livro de Habilidade: Queda da Escuridão (21032002)"
+      },
+      {
+        "id": "130015",
+        "name": "Mirar",
+        "role": "Buff concentrado que amplia dano à distância e perfuração",
+        "slot": "1",
+        "book": "Livro de Habilidade: Mirar (21031004)"
+      },
+      {
+        "id": "130016",
+        "name": "Passo Ágil",
+        "role": "Amplia velocidade de deslocamento e taxa de evasão (ESQ)",
+        "slot": "1",
+        "book": "Livro de Habilidade: Passo Ágil (21031005)"
+      },
+      {
+        "id": "130030",
+        "name": "Chamado de Sangue",
+        "role": "Dreno balístico vampírico que devolve PV ao atirador",
+        "slot": "1",
+        "book": "Livro de Habilidade: Chamado do Sangue (21031000)"
+      }
+    ],
+    "stat_priority": [
+      "Dano à Distância",
+      "Perfuração de Armadura",
+      "Velocidade de Ataque",
+      "Esquiva",
+      "Consumo de Mana"
+    ],
+    "recommended_gear": "Armas de fogo duplas com bônus de cadência e canos estendidos para maximizar o raio de 8.5m."
+  },
+  {
+    "id": "manchado-baluarte",
+    "class_id": 4,
+    "class_name": "Manchado de Sangue",
+    "title": "Build: Baluarte Carmesim & Drenagem Inabalável",
+    "objective": "Tanque supremo de vanguarda que utiliza o próprio sangue para atrair inimigos, quebrar defesas e absorver dano.",
+    "playstyle": "Agrupe multidões com Sede de Sangue (puxão), ative Postura de Batalha para elevar a defesa e corte com Espada de Sangue e Fúria de Sangue para transformar o dano em autocura instantânea.",
+    "skills": [
+      {
+        "id": "140014",
+        "name": "Fúria de Sangue",
+        "role": "Golpe dilacerante que regenera PV equivalente a porcentagem do dano causado",
+        "slot": "1",
+        "book": "Livro de Habilidade: Fúria de Sangue (21042001)"
+      },
+      {
+        "id": "140018",
+        "name": "Postura de Batalha",
+        "role": "Aumenta consideravelmente o ataque corpo a corpo e a tenacidade",
+        "slot": "1",
+        "book": "Livro de Habilidade: Postura de Batalha (21041004)"
+      },
+      {
+        "id": "140020",
+        "name": "Espada de Sangue",
+        "role": "Ataque duplo de corte que fragmenta a armadura corpo a corpo do inimigo",
+        "slot": "1",
+        "book": "Livro de Habilidade: Espada de Sangue (21042000)"
+      },
+      {
+        "id": "140023",
+        "name": "Sede de Sangue",
+        "role": "Puxão magnético sanguíneo que aprisiona e imobiliza alvos ao seu redor",
+        "slot": "1",
+        "book": "Livro de Habilidade: Sede de Sangue (21043000)"
+      },
+      {
+        "id": "140027",
+        "name": "Regeneração de Sangue",
+        "role": "Recuperação passiva periódica de PV com base no poder de ataque",
+        "slot": "0",
+        "book": "Passiva Inata / Evolução"
+      }
+    ],
+    "stat_priority": [
+      "Pontos de Vida (HP Máximo)",
+      "Defesa Física / Redução de Dano",
+      "Roubo de Vida (Life Steal)",
+      "Resistência a Atordoamento",
+      "Dano Corpo a Corpo"
+    ],
+    "recommended_gear": "Espadas de sangue forjadas e armaduras pesadas de placas vampíricas com alta mitigação de impacto."
+  },
+  {
+    "id": "akasha-berserker",
+    "class_id": 5,
+    "class_name": "Akasha",
+    "title": "Build: Colosso Corpóreo & Roubo de Poder",
+    "objective": "Brawler implacável de combate corpo a corpo que enfraquece inimigos roubando seus atributos e ignorando controles.",
+    "playstyle": "Inicie o combate aplicando Toque Absorvente para subtrair ATQ do alvo e fortalecer seus punhos. Use Corte Sangrento para rasgar defesas e ative Frenesi Carmesim e Libertação Absoluta para se tornar imune a atordoamento.",
+    "skills": [
+      {
+        "id": "150014",
+        "name": "Toque Absorvente",
+        "role": "Ataque que rouba poder de ataque do inimigo e transfere para o personagem",
+        "slot": "1",
+        "book": "Livro de Habilidade: Toque Absorvente (21052000)"
+      },
+      {
+        "id": "150015",
+        "name": "Corte Sangrento",
+        "role": "Golpes duplos com redução pesada da defesa física do oponente",
+        "slot": "1",
+        "book": "Livro de Habilidade: Corte Sangrento (21051002)"
+      },
+      {
+        "id": "150017",
+        "name": "Chamado de Sangue",
+        "role": "Dano contundente com drenagem vital e regeneração de vida",
+        "slot": "1",
+        "book": "Livro de Habilidade: Chamado do Sangue (21051000)"
+      },
+      {
+        "id": "150019",
+        "name": "Frenesi Carmesim",
+        "role": "Super buff que expande o alcance e a velocidade dos golpes básicos",
+        "slot": "1",
+        "book": "Livro de Habilidade: Frenesi Carmesim (21053002)"
+      },
+      {
+        "id": "150029",
+        "name": "Libertação Absoluta",
+        "role": "Purifica e imuniza o personagem contra controles de grupo (Stun/Freeze/Slow)",
+        "slot": "1",
+        "book": "Livro de Habilidade: Libertação Absoluta (21054001)"
+      }
+    ],
+    "stat_priority": [
+      "Velocidade de Ataque",
+      "Dano Corpo a Corpo",
+      "Penetração de Defesa",
+      "Imunidade a CC",
+      "Vigor (HP)"
+    ],
+    "recommended_gear": "Tonfas e Garras afiadas de combate desarmado combinadas com manoplas reforçadas."
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "category": "Mecânicas Vampíricas",
+    "question": "O que são Pontos de Sangue (Blood Points / BP) e como funcionam?",
+    "answer": "Os Pontos de Sangue (BP) representam a energia vital e espiritual do vampiro. O BP é alimentado através de três mecanismos: 1) Drenagem Direta no Alvo (Target Blood Drain), 2) Drenagem de Execução em inimigos caídos, e 3) Alimentação de Lacaios/Seguidores (`Follower.DrainCountRecoveryPotionList`). O acúmulo de BP ativa as Formas de Sangue (`CostumeArmorSkin`), concedendo bônus de dano de até +20%, velocidade adicional e habilidades exclusivas de linhagem."
+  },
+  {
+    "category": "Mecânicas Vampíricas",
+    "question": "O que são os Caixões e as Cartas de Tumba (Tomb Cards)?",
+    "answer": "O sistema de Caixões (`TombCard`) é um pilar de descanso e fortalecimento do vampiro. Caixões variam de 'Caixão de Madeira Comum' a 'Caixão de Pedra Requintado' e 'Caixões Nobres'. Ao sincronizar Cartas de Tumba em sua tumba ancestral, o jogador desbloqueia bônus permanentes na Árvore da Linhagem (Bloodline Tree), como resistência a dano de luz, redução de tempo de atordoamento e slots extras para poções de sangue."
+  },
+  {
+    "category": "Combate & Chefes",
+    "question": "Como funcionam as 6 Fases dos Grandes Chefes?",
+    "answer": "Chefes de Masmorra e Raide possuem 6 fases (`EMonsterPhase`): Fase 1 (100-85%): rotação básica; Fase 2 (85-70%): primeiras invocações de lacaios; Fase 3 (70-50%): escudos protetores e campos de dano contínuo; Fase 4 (50-30%): ataques em cone e atordoamento; Fase 5 (30-15%): alertas sonoros dedicados (MetaSound) e teleporte; Fase 6 (<15%): Frenesi Mortal (Enrage), onde o chefe dobra a velocidade e o dano até ser derrotado."
+  },
+  {
+    "category": "Combate & Chefes",
+    "question": "Como funciona o sistema de Cooldown e delays de habilidades?",
+    "answer": "Cada habilidade em VAMPIR possui parâmetros de tempo calibrados: MinCoolTime (tempo base de recarga), MaxCoolTime (tempo com penalidades de ambiente), TotalTime (duração total da animação) e StackCount (cargas acumuláveis). Habilidades com a flag `Mobile=1` permitem que o vampiro se movimente enquanto conjura, enquanto `DashOffset` determina o avanço vetorial durante o golpe."
+  },
+  {
+    "category": "Equipamentos & Forja",
+    "question": "Como funciona o Encantamento de Itens e quais são os limites?",
+    "answer": "O limite máximo de encantamento é +15 (`Auction.FilterMaxEnchantLevel: 15`). O jogo oferece encantamento simples e multi-encantamento automático até o nível 11 (`ItemEnchant.MultiEnchantSequenceEnchantLevel: 11`). Encantamentos utilizam Pergaminhos Abençoados (sem risco de quebra) ou Pergaminhos Amaldiçoados/Comuns (com risco de rebaixamento de nível acima de +5)."
+  },
+  {
+    "category": "PvP & Mundo Aberto",
+    "question": "Como funciona o PvP em Zonas de Conflito e o Radar de Vingança?",
+    "answer": "O mapa é dividido em 3 zonas: Segurança (Safety), Neutra (Neutral) e Conflito (Conflict). Em zonas de conflito, jogadores podem ser atacados livremente. Caso você seja eliminado por um jogador, o sistema ativa o Radar de Vingança (`PVP.RevengeWorldGroupIdList`), rastreando a localização exata do agressor no mapa com atualização a cada 10 segundos (`PVP.LocationSearchPosRefreshTime: 10`) por até 24 horas (`PVP.ReactionTimeLimit: 86400`)."
+  },
+  {
+    "category": "Modos de Jogo & Raides",
+    "question": "Qual é a capacidade de Grupos, Raides e Servidores?",
+    "answer": "Grupos convencionais suportam até 5 membros (`Party.MaxMemberCount: 5`). Equipes de Raide suportam até 50 membros simultâneos (`RaidTeam.MaxMemberCount: 50`) com líder de raid e verificações de prontidão ('Ready Check Duration: 20s'). Em Masmorras Inter-Servidor (Cross-Server), o limite de entrada é de 200 jogadores por servidor conectado (`ServerDungeon.ServerEntryLimit: 200`)."
+  },
+  {
+    "category": "Automação & Suporte",
+    "question": "Como funciona o Modo de Manutenção Automática (SupportMode / AFK)?",
+    "answer": "O jogo conta com o recurso `SupportModeAutoMaintain`, que permite ao personagem continuar farmando ou completando rotinas automaticamente mesmo offline. O sistema monitora poções de vida (`AutoMaintain.HpPotionMinCount: 100`) e recarrega suprimentos em cidades antes de retornar ao ponto de caça."
+  },
+  {
+    "category": "Arquitetura & Engenharia",
+    "question": "Qual motor gráfico e arquitetura de segurança o jogo utiliza?",
+    "answer": "O VAMPIR foi desenvolvido na Unreal Engine 5.5.4 em ARM64 (`libUnreal.so`), utilizando o Gameplay Ability System (GAS), MetaSound para áudio espacial, e FluidNinja para simulação volumétrica de sangue e magia negra. Toda a lógica de combate é Server-Authoritative: cálculos de vida, recarga e dano são validados no servidor, impedindo modificações ilegais de memória de cliente (como Hit-Kill em memória local)."
+  },
+  {
+    "category": "Arquitetura & Engenharia",
+    "question": "Como os arquivos de dados (PAKs) foram decodificados?",
+    "answer": "Os arquivos de dados (.pak) estavam criptografados com o algoritmo AES-256-CBC. Através de engenharia reversa estática na biblioteca `libUnreal.so`, a chave mestra de 256 bits foi extraída no offset 0x756520: `4de16fa1dffb68f2b957d49e6beaebcaf7d6b41a0107cd548f0068ecde4d28ed`. Isso permitiu a extração completa de mais de 40 MB de tabelas de jogo originais."
+  }
+]
