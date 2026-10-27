@@ -48,7 +48,7 @@
         <a class="nav-item" data-target="bosses">
           <span class="nav-icon">💀</span>
           <span>Inimigos & Chefes</span>
-          <span class="nav-count" id="countBosses">555</span>
+          <span class="nav-count" id="countBosses">449</span>
         </a>
         <a class="nav-item" data-target="dungeons">
           <span class="nav-icon">🏰</span>
@@ -136,9 +136,9 @@
               <div class="metric-desc">Habilidades mapeadas com MP, recarga e dano em área</div>
             </div>
             <div class="metric-card">
-              <div class="metric-label">Chefes & Inimigos</div>
-              <div class="metric-value">555</div>
-              <div class="metric-desc">81 Grandes Chefes e 474 Chefes de Campo com HP real e mapas</div>
+              <div class="metric-label">Inimigos & Chefes</div>
+              <div class="metric-value">449 Únicos</div>
+              <div class="metric-desc">75 Chefes de Campo, 171 de Masmorra e 203 Elites (desduplicados)</div>
             </div>
             <div class="metric-card">
               <div class="metric-label">Instâncias & Masmorras</div>
@@ -271,16 +271,18 @@
         <section id="bosses" class="view-section">
           <div class="section-header">
             <h2 class="section-title">💀 Inimigos & Grandes Chefes</h2>
-            <p class="section-subtitle">Catálogo de Chefes Mundiais, Guardiões de Masmorra e mecânicas de 6 fases</p>
+            <p class="section-subtitle">Catálogo unificado e desduplicado com horários de respawn, habilidades reais e atributos</p>
           </div>
           <div class="filter-bar" id="bossesFilterBar">
-            <button class="filter-btn active" data-grade="all">Todos os Chefes</button>
-            <button class="filter-btn" data-grade="3">Grandes Chefes (81)</button>
-            <button class="filter-btn" data-grade="2">Chefes de Campo (474)</button>
+            <button class="filter-btn active" data-grade="all">Todos os Inimigos (449)</button>
+            <button class="filter-btn" data-grade="3">Chefes de Campo (75)</button>
+            <button class="filter-btn" data-grade="2">Chefes de Masmorra (171)</button>
+            <button class="filter-btn" data-grade="1">Monstros de Elite (203)</button>
           </div>
           <div class="cards-grid" id="bossesContainer">
             <!-- Dynamically populated -->
           </div>
+          <div id="bossesPagination" style="margin-top: 24px; text-align: center;"></div>
         </section>
 
         <!-- ==============================================

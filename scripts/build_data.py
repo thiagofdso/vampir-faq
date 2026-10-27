@@ -52,13 +52,43 @@ class_names = load_csv_dict(os.path.join(L10N_DIR, "Class_Name.csv"))
 skill_raw = load_csv_dict(os.path.join(CSV_DIR, "Skill.csv"))
 skill_names = load_csv_dict(os.path.join(L10N_DIR, "Skill_Name.csv"))
 npc_raw = load_csv_dict(os.path.join(CSV_DIR, "Npc.csv"))
+npc_list = load_csv_list(os.path.join(CSV_DIR, "Npc.csv"))
 npc_names = load_csv_dict(os.path.join(L10N_DIR, "Npc_Name.csv"))
 dungeon_raw = load_csv_dict(os.path.join(CSV_DIR, "Dungeon.csv"))
+dungeon_list = load_csv_list(os.path.join(CSV_DIR, "Dungeon.csv"))
 dungeon_names = load_csv_dict(os.path.join(L10N_DIR, "Dungeon_Name.csv"))
 item_raw = load_csv_dict(os.path.join(CSV_DIR, "Item.csv"))
 item_names = load_csv_dict(os.path.join(L10N_DIR, "Item_Name.csv"))
 skill_card_raw = load_csv_dict(os.path.join(CSV_DIR, "SkillCard.csv"), "ItemId")
 const_raw = load_csv_list(os.path.join(CSV_DIR, "Const.csv"))
+
+# Additional gameplay & monster tables from extracted CSVs
+npcbattle_list = load_csv_list(os.path.join(CSV_DIR, "NpcBattle.csv"))
+npc_battles_map = defaultdict(list)
+for r in npcbattle_list:
+    npc_battles_map[r.get("GroupId", "").strip()].append(r)
+
+npc_spawns_map = defaultdict(list)
+for r in load_csv_list(os.path.join(CSV_DIR, "NpcSpawn.csv")):
+    npc_spawns_map[r.get("NpcInfoId", "").strip()].append(r)
+
+npc_spawn_details_map = defaultdict(list)
+for r in load_csv_list(os.path.join(CSV_DIR, "NpcSpawnDetail.csv")):
+    npc_spawn_details_map[r.get("NpcSpawnId", "").strip()].append(r)
+
+npc_profiles_map = defaultdict(list)
+for r in load_csv_list(os.path.join(CSV_DIR, "NpcProfile.csv")):
+    npc_profiles_map[r.get("NpcInfoId", "").strip()].append(r)
+
+world_names_map = load_csv_dict(os.path.join(L10N_DIR, "World_Name.csv"))
+
+dungeon_boss_map = defaultdict(list)
+for r in dungeon_list:
+    bid = r.get("BossInfoId", "").strip()
+    if bid:
+        dname_row = dungeon_names.get(r.get("Id", "").strip(), {})
+        dname = dname_row.get("Name", "").strip() or f"Masmorra #{r.get('Id')}"
+        dungeon_boss_map[bid].append(dname)
 
 # ==========================================
 # 1. CLASSES
@@ -412,16 +442,33 @@ with open(os.path.join(OUT_DIR, "skills.json"), "w", encoding="utf-8") as f:
     json.dump(skills_catalog, f, indent=2, ensure_ascii=False)
 
 # ==========================================
-# 4. BOSSES & ENEMIES (WITH REAL PORTRAITS)
+# 4. BOSSES & ENEMIES (DEDUPLICATED & ENRICHED)
 # ==========================================
-print("Processing Bosses & NPCs with official portraits...")
-bosses_catalog = []
-
+print("Processing Bosses & Enemies with deduplication and rich combat data...")
+DAYS_MAP = {
+    '1': 'Segunda-feira', '2': 'Terça-feira', '3': 'Quarta-feira',
+    '4': 'Quinta-feira', '5': 'Sexta-feira', '6': 'Sábado', '7': 'Domingo'
+}
+APPEARANCE_TYPE_MAP = {
+    '0': 'Padrão / Terrestre',
+    '1': 'Mordida Selvagem (HumanNeckBite)',
+    '2': 'Estrangulamento (Strangulation)',
+    '3': 'Drenagem / Absorção (Absorption)',
+    '4': 'Voo / Fase Aérea (Flight)',
+    '5': 'Profeta / Invocador (Prophet)',
+    '6': 'Especial Mortífero (NotDeadly)',
+    '7': 'Forma Rara'
+}
+ATTRIBUTE_MAP = {
+    '1': 'Fogo / Carmesim',
+    '2': 'Gelo / Água',
+    '3': 'Veneno / Trevas',
+    '7': 'Neutro / Físico'
+}
 grade_map = {
-    "0": "Monstro Normal",
     "1": "Monstro de Elite",
-    "2": "Chefe de Campo (Field Boss)",
-    "3": "Grande Chefe (Main Boss / Raid)"
+    "2": "Chefe de Masmorra (Boss)",
+    "3": "Chefe de Campo (Field Boss)"
 }
 
 default_boss_portraits = [
@@ -436,70 +483,182 @@ default_boss_portraits = [
     "hermitfiendboss05.png"
 ]
 
-for nid, nrow in npc_raw.items():
-    grade = nrow.get("GradeType", "0")
-    if grade not in ["2", "3"]:
-        continue
-    
-    nname_row = npc_names.get(nid)
-    title = nname_row.get("Title", "").strip() if nname_row else ""
-    name = nname_row.get("Name", "").strip() if nname_row else ""
-    name_en = nrow.get("NameEN", "").strip()
-    
-    display_name = name if name else (name_en if name_en else f"Monstro #{nid}")
-    
-    # Match image
-    img_field = nrow.get("Img", "").strip()
+# Exclude invisible UE5 collision dummies / triggers (BP_Monster_Invisible01)
+visible_npcs = [
+    n for n in npc_list
+    if n.get("GradeType") in ["1", "2", "3"] and "invisible" not in n.get("Blueprint", "").lower()
+]
+
+# Deduplicate into unique combat profiles
+groups = defaultdict(list)
+for n in visible_npcs:
+    nid = n.get("Id", "").strip()
+    name_row = npc_names.get(nid, {})
+    name = name_row.get("Name", "").strip() or n.get("NameEN", "").strip() or f"Monstro #{nid}"
+    bp = n.get("Blueprint", "").strip()
+    grade = n.get("GradeType", "0")
+
+    # Disambiguate appendages if name is identical in localization
+    if bp == "BP_MonsterAlrauneTentacleFrontBoss":
+        name = "Alraune (Tentáculos Frontais)"
+    elif bp == "BP_MonsterAlrauneTentacleBackBoss":
+        name = "Alraune (Tentáculos Traseiros)"
+
+    groups[(name, bp, grade)].append(n)
+
+bosses_catalog = []
+for (name, bp, grade), items in groups.items():
+    primary = items[0]
+    pid = primary.get("Id", "").strip()
+    title_row = npc_names.get(pid, {})
+    title = title_row.get("Title", "").strip()
+    if not title:
+        title = "Chefe Mundial" if grade == "3" else ("Guardião de Masmorra" if grade == "2" else "Inimigo de Elite")
+
+    levels = sorted(list(set(int(x.get("Level", 0)) for x in items if x.get("Level", "").isdigit())))
+    min_lvl = levels[0] if levels else 1
+    max_lvl = levels[-1] if levels else 1
+    lvl_disp = f"Nv. {min_lvl}" if min_lvl == max_lvl else f"Nv. {min_lvl} - {max_lvl}"
+
+    # Tiers
+    tiers = []
+    seen_tiers = set()
+    for item in items:
+        bg = item.get("BattleGroupId", "").strip()
+        lvl = int(item.get("Level") or 0)
+        bat_rows = npc_battles_map.get(bg, [{}])
+        bat = bat_rows[0] if bat_rows else {}
+        hp = int(bat.get("HP") or 0)
+        atk = int(bat.get("AttackPower") or 0)
+        df = int(bat.get("DefensePower") or 0)
+        sig = (lvl, hp, atk, df)
+        if sig not in seen_tiers:
+            seen_tiers.add(sig)
+            tiers.append({
+                "id": item.get("Id", "").strip(),
+                "level": lvl,
+                "hp": hp,
+                "atk": atk,
+                "def": df,
+                "dungeon": ", ".join(dungeon_boss_map.get(item.get("Id", "").strip(), []))
+            })
+    tiers.sort(key=lambda x: x["level"])
+    peak_tier = tiers[-1] if tiers else {"hp": 0, "atk": 0, "def": 0}
+
+    # Skills from NpcProfile + NpcBattle
+    skill_ids = []
+    for item in items:
+        for p in npc_profiles_map.get(item.get("Id", "").strip(), []):
+            for sid in p.get("UseSkillId", "").split(","):
+                sid = sid.strip()
+                if sid and sid not in skill_ids:
+                    skill_ids.append(sid)
+        bg = item.get("BattleGroupId", "").strip()
+        for bat in npc_battles_map.get(bg, []):
+            for sid in bat.get("SkillIdList", "").split(","):
+                sid = sid.strip()
+                if sid and sid not in skill_ids:
+                    skill_ids.append(sid)
+
+    skills_data = []
+    for sid in skill_ids:
+        sk = skill_raw.get(sid, {})
+        sn = skill_names.get(sid, {})
+        sname = sn.get("Name", "").strip()
+        sdesc = sn.get("Description", "").strip() or sn.get("EffectDescription", "").strip()
+        cd_raw = sk.get("MinCoolTime") or sk.get("MaxCoolTime") or "0"
+        cd = f"{float(cd_raw)/1000:.1f}s" if cd_raw.isdigit() and int(cd_raw) > 0 else "-"
+        dist_raw = sk.get("MaxCastDistance") or sk.get("AiMaxCastDistance") or "0"
+        dist = f"{int(dist_raw)//100}m" if dist_raw.isdigit() and int(dist_raw) > 0 else "-"
+        skills_data.append({
+            "id": sid,
+            "name": sname if sname else f"Habilidade #{sid}",
+            "desc": sdesc if sdesc else "Ataque ou manobra de combate do chefe.",
+            "cooldown": cd,
+            "range": dist
+        })
+
+    # Spawns & Schedule
+    w_set = set()
+    sched_list = []
+    for item in items:
+        nid = item.get("Id", "").strip()
+        for sp in npc_spawns_map.get(nid, []):
+            wid = sp.get("WorldInfoId", "").strip()
+            wn = world_names_map.get(wid, {}).get("Name", "").strip()
+            if wn:
+                w_set.add(wn)
+            for sd in npc_spawn_details_map.get(sp.get("Id", "").strip(), []):
+                dow = DAYS_MAP.get(sd.get("DayOfWeek", "").strip(), "Diário")
+                h = sd.get("Hour", "00").strip().zfill(2)
+                m = sd.get("Minute", "00").strip().zfill(2)
+                s_str = f"{dow} às {h}:{m}"
+                if s_str not in sched_list:
+                    sched_list.append(s_str)
+
+    # Portrait matching
+    img_field = primary.get("Img", "").strip()
     clean_img = img_field.replace("IMG_Monster_Portrait_", "").lower() + ".png"
-    bp = nrow.get("Blueprint", "").lower()
-    
+    bp_clean = bp.lower()
     matched_img = ""
     if clean_img in monster_pngs:
         matched_img = clean_img
     else:
-        # Search blueprint keyword match
         for m in monster_pngs:
             token = m.replace(".png", "")
-            if token in bp or token in clean_img:
+            if token in bp_clean or token in clean_img:
                 matched_img = m
                 break
-                
     if not matched_img:
-        # Pick themed portrait based on id hash
-        idx = int(nid) % len(default_boss_portraits)
-        matched_img = default_boss_portraits[idx]
+        matched_img = default_boss_portraits[int(pid) % len(default_boss_portraits)]
 
-    phases = [
-        {"phase": "Fase 1 (100% - 85% HP)", "desc": "Padrão de ataque base e ataques telegrafados com aviso visual no chão."},
-        {"phase": "Fase 2 (85% - 70% HP)", "desc": "Primeira invocação de lacaios e aumento de velocidade de movimento."},
-        {"phase": "Fase 3 (70% - 50% HP)", "desc": "Ativação de mecânica de escudo protetor e dano em área contínuo."},
-        {"phase": "Fase 4 (50% - 30% HP)", "desc": "Mudança de postura agressiva e habilidades de atordoamento em cone."},
-        {"phase": "Fase 5 (30% - 15% HP)", "desc": "Sobrecarga de fúria e emissão de alertas de áudio específicos (MetaSound)."},
-        {"phase": "Fase 6 (< 15% HP)", "desc": "Frenesi Mortal (Enrage): ataques com dano duplicado até a derrota final."}
-    ] if grade == "3" else [
-        {"phase": "Fase 1 (100% - 50% HP)", "desc": "Combate de área aberta com convocação de monstros auxiliares."},
-        {"phase": "Fase 2 (< 50% HP)", "desc": "Frenesi com aumento de dano e raio de ataque expandido."}
-    ]
+    # Dungeons
+    dung_list = []
+    for item in items:
+        for d in dungeon_boss_map.get(item.get("Id", "").strip(), []):
+            if d not in dung_list:
+                dung_list.append(d)
+
+    bg0 = primary.get("BattleGroupId", "").strip()
+    bat0 = npc_battles_map.get(bg0, [{}])[0] if npc_battles_map.get(bg0) else {}
+    sight_raw = bat0.get("SightRange", "0")
+    sight_disp = f"{int(sight_raw)//100}m" if sight_raw.isdigit() and int(sight_raw) > 0 else "Padrão"
+    attr_disp = ATTRIBUTE_MAP.get(bat0.get("Attribute", "7"), "Neutro / Físico")
+    appear_disp = APPEARANCE_TYPE_MAP.get(primary.get("MonsterAppearanceType", "0"), "Padrão / Terrestre")
 
     bosses_catalog.append({
-        "id": nid,
-        "name": display_name,
-        "title": title if title else ("Governante Sombrio" if grade == "3" else "Territorial"),
+        "id": pid,
+        "name": name,
+        "title": title,
         "grade_code": grade,
         "grade_name": grade_map.get(grade, "Chefe"),
-        "level": nrow.get("Level", "1"),
+        "level": str(max_lvl),
+        "level_display": lvl_disp,
+        "levels": levels,
+        "tiers": tiers,
+        "instance_count": len(items),
+        "instance_ids": [x.get("Id", "").strip() for x in items],
         "portrait_img": f"assets/monsters/{matched_img}",
-        "blueprint": nrow.get("Blueprint", ""),
-        "scale_factor": nrow.get("ScaleFactor", "1.0"),
-        "body_radius": nrow.get("BodyRadius", "50"),
-        "walk_speed": nrow.get("WalkSpeed", "120"),
-        "run_speed": nrow.get("RunSpeed", "400"),
-        "phases": phases,
-        "audio_alert": "MetaSound Event / Alerta Sonoro de Habilidade Mortal" if grade == "3" else "Alerta de Área",
-        "reward_preview": "Equipamentos Épicos/Lendários, Livros de Habilidade Raros, Essências de Sangue" if grade == "3" else "Materiais de Forja, Fragmentos de Sangue"
+        "blueprint": bp,
+        "scale_factor": primary.get("ScaleFactor", "1.0"),
+        "body_radius": primary.get("BodyRadius", "50"),
+        "walk_speed": primary.get("WalkSpeed", "120"),
+        "run_speed": primary.get("RunSpeed", "400"),
+        "appearance_type": appear_disp,
+        "is_aggressive": bat0.get("Aggressive") == "1",
+        "sight_range": sight_disp,
+        "attribute": attr_disp,
+        "world_map": ", ".join(sorted(w_set)) if w_set else "Masmorra / Campo Dimensional",
+        "spawn_schedule": ", ".join(sched_list),
+        "dungeons": dung_list,
+        "skills": skills_data,
+        "hp_raw": str(peak_tier["hp"]),
+        "atk_raw": str(peak_tier["atk"]),
+        "def_raw": str(peak_tier["def"]),
+        "reward_preview": "Equipamentos Épicos/Lendários, Livros Raros, Essências de Sangue" if grade in ["2", "3"] else "Materiais de Refino, Fragmentos de Sangue"
     })
 
-bosses_catalog.sort(key=lambda x: (int(x["grade_code"]), int(x["level"] if x["level"].isdigit() else 0)), reverse=True)
+bosses_catalog.sort(key=lambda x: (int(x["grade_code"]), int(x["level"])), reverse=True)
 with open(os.path.join(OUT_DIR, "bosses.json"), "w", encoding="utf-8") as f:
     json.dump(bosses_catalog, f, indent=2, ensure_ascii=False)
 
@@ -853,39 +1012,6 @@ if os.path.exists(receitas_path):
         json.dump(crafting_catalog, f, indent=2, ensure_ascii=False)
     print(f"  ✓ Processed {len(crafting_catalog)} crafting recipes.")
 
-# ==========================================
-# 9. ENRICH BOSSES WITH COMBAT STATS & MAPS
-# ==========================================
-print("Enriching Bosses with HP/ATK/DEF and World Spawns...")
-battles_map = {}
-npc_batalha_file = os.path.join(JOGO_DIR, "npcs_batalha.csv")
-if os.path.exists(npc_batalha_file):
-    with open(npc_batalha_file, encoding='utf-8-sig') as f:
-        for r in csv.DictReader(f):
-            b_list = json.loads(r['npcbattle_registros_json']) if r.get('npcbattle_registros_json') else []
-            if b_list: battles_map[r['Id']] = b_list[0]
-
-spawns_map = {}
-aparecimentos_file = os.path.join(JOGO_DIR, "aparecimentos_npc.csv")
-if os.path.exists(aparecimentos_file):
-    with open(aparecimentos_file, encoding='utf-8-sig') as f:
-        for r in csv.DictReader(f):
-            nid = r.get('NpcInfoId')
-            wn = r.get('mundo_nome_pt')
-            if nid and nid not in spawns_map and wn:
-                spawns_map[nid] = wn
-
-for b in bosses_catalog:
-    nid = b['id']
-    bat = battles_map.get(nid, {})
-    b['hp_raw'] = bat.get('HP', '0')
-    b['atk_raw'] = bat.get('AttackPower', '0')
-    b['def_raw'] = bat.get('DefensePower', '0')
-    b['is_aggressive'] = bat.get('Aggressive') == '1'
-    b['world_map'] = spawns_map.get(nid, "Masmorra / Campo Dimensional")
-
-with open(os.path.join(OUT_DIR, "bosses.json"), "w", encoding="utf-8") as f:
-    json.dump(bosses_catalog, f, indent=2, ensure_ascii=False)
 
 # ==========================================
 # 10. GAME CONSTANTS & FAQ

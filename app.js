@@ -16,6 +16,7 @@
     skillsPerPage: 36,
     bossesFilter: 'all',
     bossesSearchTerm: '',
+    bossesPage: 1,
     dungeonsFilter: 'all',
     dungeonsSearchTerm: '',
     itemsFilter: 'all',
@@ -397,9 +398,10 @@
     renderSkills();
   };
 
-  // Render Bosses with Official High-Res Portraits
+  // Render Bosses with Official High-Res Portraits & Deduplication
   function renderBosses() {
     const container = document.getElementById('bossesContainer');
+    const pagination = document.getElementById('bossesPagination');
     if (!container || !state.data.bosses) return;
 
     let filtered = state.data.bosses;
@@ -413,40 +415,74 @@
       filtered = filtered.filter(b =>
         b.name.toLowerCase().includes(q) ||
         b.title.toLowerCase().includes(q) ||
-        b.id.includes(q)
+        b.id.includes(q) ||
+        (b.instance_ids && b.instance_ids.some(id => id.includes(q))) ||
+        (b.blueprint && b.blueprint.toLowerCase().includes(q)) ||
+        (b.world_map && b.world_map.toLowerCase().includes(q))
       );
     }
 
-    container.innerHTML = filtered.slice(0, 100).map(b => `
-      <div class="entity-card boss-card" onclick="window.inspectBoss('${b.id}')">
-        <!-- Boss Official Artwork Banner -->
-        <div class="boss-banner-frame">
-          <img src="${b.portrait_img}" alt="${b.name}" class="boss-portrait-banner" onerror="this.src='assets/splash.png'">
-          <div class="boss-banner-overlay"></div>
-          <span class="entity-badge ${b.grade_code === '3' ? 'badge-crimson' : 'badge-gold'} boss-grade-tag">
-            ${b.grade_name}
-          </span>
-          <span class="entity-badge badge-blue boss-level-tag">Nv. ${b.level}</span>
-        </div>
+    const totalFiltered = filtered.length;
+    const pageSize = 48;
+    const paginated = filtered.slice(0, state.bossesPage * pageSize);
 
-        <div style="padding: 16px 20px 20px;">
-          <div class="entity-title" style="margin-top: 4px;">${b.name}</div>
-          <div style="font-size: 0.82rem; color: var(--gold-primary); margin-bottom: 8px;">
-            ${b.title}
+    container.innerHTML = paginated.map(b => {
+      const badgeColor = b.grade_code === '3' ? 'badge-crimson' : (b.grade_code === '2' ? 'badge-gold' : 'badge-blue');
+      return `
+        <div class="entity-card boss-card" onclick="window.inspectBoss('${b.id}')">
+          <!-- Boss Official Artwork Banner -->
+          <div class="boss-banner-frame">
+            <img src="${b.portrait_img}" alt="${b.name}" class="boss-portrait-banner" onerror="this.src='assets/splash.png'">
+            <div class="boss-banner-overlay"></div>
+            <span class="entity-badge ${badgeColor} boss-grade-tag">
+              ${b.grade_name}
+            </span>
+            <span class="entity-badge badge-blue boss-level-tag">${b.level_display || 'Nv. ' + b.level}</span>
           </div>
-          <p class="entity-desc">
-            <strong>Mapa:</strong> ${b.world_map || 'Masmorra / Campo Dimensional'}<br>
-            <strong>Recompensas:</strong> ${b.reward_preview}
-          </p>
-          <div class="entity-meta-row">
-            <span>❤️ HP: <strong style="color: #ef4444;">${formatBigNumber(b.hp_raw)}</strong></span>
-            <span>⚔️ ATQ: <strong style="color: #eab308;">${formatBigNumber(b.atk_raw)}</strong></span>
-            <span style="color: var(--crimson-light); font-weight: 600;">Ver Fases →</span>
+
+          <div style="padding: 16px 20px 20px;">
+            <div class="entity-title" style="margin-top: 4px;">${b.name}</div>
+            <div style="font-size: 0.82rem; color: var(--gold-primary); margin-bottom: 8px;">
+              ${b.title}
+            </div>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
+              ${b.instance_count > 1 ? `<span class="entity-badge badge-gold" style="font-size: 0.72rem;">👥 ${b.instance_count} Instâncias</span>` : ''}
+              ${b.skills && b.skills.length ? `<span class="entity-badge badge-crimson" style="font-size: 0.72rem;">⚔️ ${b.skills.length} Golpes</span>` : ''}
+              ${b.spawn_schedule ? `<span class="entity-badge badge-blue" style="font-size: 0.72rem;">⏰ ${b.spawn_schedule}</span>` : ''}
+            </div>
+
+            <p class="entity-desc">
+              <strong>Local:</strong> ${b.world_map || 'Masmorra / Campo Dimensional'}<br>
+              <strong>Atributo:</strong> ${b.attribute} • <strong>Aggro:</strong> ${b.is_aggressive ? 'Hostil' : 'Passivo'}
+            </p>
+            <div class="entity-meta-row">
+              <span>❤️ HP: <strong style="color: #ef4444;">${formatBigNumber(b.hp_raw)}</strong></span>
+              <span>⚔️ ATQ: <strong style="color: #eab308;">${formatBigNumber(b.atk_raw)}</strong></span>
+              <span style="color: var(--crimson-light); font-weight: 600;">Detalhes →</span>
+            </div>
           </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
+
+    if (pagination) {
+      if (paginated.length < totalFiltered) {
+        pagination.innerHTML = `
+          <button class="filter-btn active" onclick="window.loadMoreBosses()">
+            Carregar Mais Inimigos (${paginated.length} de ${totalFiltered})
+          </button>
+        `;
+      } else {
+        pagination.innerHTML = `<span style="font-size: 0.85rem; color: var(--text-dim);">Exibindo todos os ${totalFiltered} inimigos correspondentes.</span>`;
+      }
+    }
   }
+
+  window.loadMoreBosses = function() {
+    state.bossesPage++;
+    renderBosses();
+  };
 
   // Render Dungeons with Background Artworks
   function renderDungeons() {
@@ -735,33 +771,136 @@
   };
 
   window.inspectBoss = function(id) {
-    const b = state.data.bosses.find(x => x.id === id);
+    const b = state.data.bosses.find(x => x.id === id || (x.instance_ids && x.instance_ids.includes(id)));
     if (!b) return;
 
     modalTitle.innerText = b.name;
-    modalSubtitle.innerText = `${b.title} • Nível ${b.level} (${b.grade_name})`;
+    modalSubtitle.innerText = `${b.title} • ${b.level_display || 'Nv. ' + b.level} (${b.grade_name})`;
+
+    // Multi-tier table
+    let tiersHtml = '';
+    if (b.tiers && b.tiers.length > 1) {
+      tiersHtml = `
+        <div style="margin-bottom: 20px;">
+          <h4 style="font-family: var(--font-serif); color: var(--gold-primary); margin-bottom: 10px;">
+            📊 Variações de Nível & Andar (${b.tiers.length} Tiers)
+          </h4>
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
+              <thead>
+                <tr style="border-bottom: 1px solid var(--border-gold); color: var(--gold-light);">
+                  <th style="padding: 6px 8px;">Nível</th>
+                  <th style="padding: 6px 8px;">Vida (HP)</th>
+                  <th style="padding: 6px 8px;">Ataque</th>
+                  <th style="padding: 6px 8px;">Defesa</th>
+                  <th style="padding: 6px 8px;">Masmorra / Instância</th>
+                  <th style="padding: 6px 8px;">ID do Registro</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${b.tiers.map(t => `
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 6px 8px; color: var(--blue-primary); font-weight: 700;">Nv. ${t.level}</td>
+                    <td style="padding: 6px 8px; color: #ef4444; font-weight: 600;">${formatBigNumber(t.hp)}</td>
+                    <td style="padding: 6px 8px; color: #eab308;">${formatBigNumber(t.atk)}</td>
+                    <td style="padding: 6px 8px; color: #3b82f6;">${formatBigNumber(t.def)}</td>
+                    <td style="padding: 6px 8px; color: var(--text-muted);">${t.dungeon || '-'}</td>
+                    <td style="padding: 6px 8px; color: var(--text-dim); font-family: monospace;">#${t.id}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    // Real Combat Skills
+    let skillsHtml = '';
+    if (b.skills && b.skills.length > 0) {
+      skillsHtml = `
+        <div style="margin-bottom: 20px;">
+          <h4 style="font-family: var(--font-serif); color: var(--gold-primary); margin-bottom: 10px;">
+            ⚔️ Habilidades de Combate do Chefe (${b.skills.length})
+          </h4>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            ${b.skills.map(s => `
+              <div class="panel-box" style="border-left: 3px solid var(--crimson-primary);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-weight: 700; color: #fff; font-size: 0.95rem;">${s.name}</span>
+                  <div style="display: flex; gap: 8px;">
+                    ${s.cooldown !== '-' ? `<span class="entity-badge badge-gold">⏱️ Recarga: ${s.cooldown}</span>` : ''}
+                    ${s.range !== '-' ? `<span class="entity-badge badge-blue">🎯 Alcance: ${s.range}</span>` : ''}
+                  </div>
+                </div>
+                <div style="color: #cbd5e1; font-size: 0.85rem; margin-top: 6px; line-height: 1.4;">
+                  ${s.desc}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    // Spawns & Schedule Box
+    let spawnHtml = '';
+    if (b.spawn_schedule || b.world_map) {
+      spawnHtml = `
+        <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid var(--gold-primary);">
+          <div class="panel-title">🗺️ Aparição & Horários de Respawn</div>
+          <div style="color: #fff; font-size: 0.9rem; line-height: 1.6; margin-top: 4px;">
+            <strong>Mundo / Mapa:</strong> ${b.world_map || 'Masmorra / Campo Dimensional'}<br>
+            ${b.spawn_schedule ? `<strong>Horário Programado:</strong> <span style="color: var(--gold-light); font-weight: 700;">${b.spawn_schedule}</span><br>` : ''}
+            ${b.dungeons && b.dungeons.length ? `<strong>Masmorras Vinculadas:</strong> ${b.dungeons.join(', ')}<br>` : ''}
+            ${b.instance_count > 1 ? `<strong>Instâncias Registradas:</strong> <span style="color: var(--blue-primary);">${b.instance_count} nós/cópias ativos</span> (IDs: ${b.instance_ids.slice(0, 10).join(', ')}${b.instance_ids.length > 10 ? '...' : ''})` : `<strong>ID do Registro:</strong> #${b.id}`}
+          </div>
+        </div>
+      `;
+    }
 
     modalBody.innerHTML = `
       <div style="margin-bottom: 20px; text-align: center;">
         <img src="${b.portrait_img}" alt="${b.name}" style="max-height: 220px; border-radius: 8px; border: 1px solid var(--border-gold); box-shadow: 0 0 20px rgba(0,0,0,0.8);" onerror="this.src='assets/splash.png'">
       </div>
-      <div style="margin-bottom: 20px;">
-        <h4 style="font-family: var(--font-serif); color: var(--gold-primary); margin-bottom: 10px;">
-          Mecânica de Fases de Combate (EMonsterPhase)
-        </h4>
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          ${b.phases.map(p => `
-            <div class="panel-box" style="border-left: 3px solid var(--crimson-primary);">
-              <div style="font-weight: 700; color: #fff; font-size: 0.9rem;">${p.phase}</div>
-              <div style="color: #cbd5e1; font-size: 0.85rem; margin-top: 4px;">${p.desc}</div>
-            </div>
-          `).join('')}
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px;">
+        <div class="panel-box">
+          <div class="panel-title">Vida (HP)</div>
+          <div style="font-size: 1.1rem; color: #ef4444; font-weight: 700;">${formatBigNumber(b.hp_raw)}</div>
+        </div>
+        <div class="panel-box">
+          <div class="panel-title">Poder de Ataque</div>
+          <div style="font-size: 1.1rem; color: #eab308; font-weight: 700;">${formatBigNumber(b.atk_raw)}</div>
+        </div>
+        <div class="panel-box">
+          <div class="panel-title">Defesa</div>
+          <div style="font-size: 1.1rem; color: #3b82f6; font-weight: 700;">${formatBigNumber(b.def_raw)}</div>
+        </div>
+        <div class="panel-box">
+          <div class="panel-title">Raio de Visão</div>
+          <div style="font-size: 1.1rem; color: #fff; font-weight: 700;">${b.sight_range}</div>
+        </div>
+        <div class="panel-box">
+          <div class="panel-title">Comportamento</div>
+          <div style="font-size: 1.0rem; color: ${b.is_aggressive ? '#ef4444' : '#10b981'}; font-weight: 700;">${b.is_aggressive ? 'Hostil (Aggro)' : 'Passivo'}</div>
+        </div>
+        <div class="panel-box">
+          <div class="panel-title">Elemento / Tipo</div>
+          <div style="font-size: 1.0rem; color: var(--gold-primary); font-weight: 700;">${b.attribute}</div>
         </div>
       </div>
+
+      ${tiersHtml}
+      ${skillsHtml}
+      ${spawnHtml}
+
       <div class="panel-box">
-        <div class="panel-title">Dados de Spawn & Dimensões</div>
-        <div style="font-size: 0.85rem; color: var(--text-muted); font-family: monospace;">
-          Blueprint: ${b.blueprint || 'Padrão'} | Escala: ${b.scale_factor}x | Velocidade Corrida: ${b.run_speed}
+        <div class="panel-title">⚙️ Parâmetros de Motor & IA (Unreal Engine 5)</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); font-family: monospace; line-height: 1.6;">
+          Blueprint: <strong>${b.blueprint || 'Padrão'}</strong><br>
+          Mecânica Especial / Animação: <strong>${b.appearance_type}</strong><br>
+          Escala de Modelo: ${b.scale_factor}x | Raio do Corpo: ${b.body_radius} | Velocidade (Caminhar: ${b.walk_speed} / Corrida: ${b.run_speed})
         </div>
       </div>
     `;
@@ -906,6 +1045,7 @@
         renderSkills();
       } else if (state.currentTab === 'bosses') {
         state.bossesSearchTerm = q;
+        state.bossesPage = 1;
         renderBosses();
       } else if (state.currentTab === 'dungeons') {
         state.dungeonsSearchTerm = q;
@@ -939,6 +1079,7 @@
         document.querySelectorAll('#bossesFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
         state.bossesFilter = e.target.dataset.grade;
+        state.bossesPage = 1;
         renderBosses();
       }
     });
