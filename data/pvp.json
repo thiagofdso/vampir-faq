@@ -1,0 +1,237 @@
+{
+  "arena": {
+    "title": "Arena de Sangue (Coliseu 5v5)",
+    "subtitle": "Combate tático competitivo em arena fechada com regras sincronizadas",
+    "format": "5 vs 5 (Equipe Vermelha vs Equipe Azul)",
+    "duration": "300 Segundos (5 Minutos)",
+    "target_score": "10 Abates (Primeira equipe a atingir vence)",
+    "map_image": "assets/pvp/arena_guidemap_deathmatch.png",
+    "map_name": "Ruínas Rubras de Sangue (Dungeon ID 90101)",
+    "special_mechanic": "Spawn de Barreiras Mágicas e Relíquias Ativas (Skills #326001 e #326002)",
+    "leagues": [
+      {
+        "name": "Fera (Beast)",
+        "bp_req": "0 - 599.999 BP",
+        "badge": "badge-gray",
+        "desc": "Liga de entrada para novatos e testes de composição."
+      },
+      {
+        "name": "Predador (Predator)",
+        "bp_req": "600.000 - 899.999 BP",
+        "badge": "badge-green",
+        "desc": "Confrontos intermediários com exigência de sinergia básica."
+      },
+      {
+        "name": "Soberano (Sovereign)",
+        "bp_req": "900.000 - 1.199.999 BP",
+        "badge": "badge-blue",
+        "desc": "Combates ranqueados avançados com foco em controle de grupo (CC)."
+      },
+      {
+        "name": "Imortal (Immortal)",
+        "bp_req": "1.200.000 - 1.499.999 BP",
+        "badge": "badge-gold",
+        "desc": "Elite do servidor; erros de posicionamento são fatais."
+      },
+      {
+        "name": "Mítico (Mythic)",
+        "bp_req": "1.500.000+ BP",
+        "badge": "badge-crimson",
+        "desc": "O topo supremo; apenas os maiores campeões e lendas de clãs."
+      }
+    ],
+    "traits": [
+      {
+        "id": "101",
+        "name": "Defesa (Guardião)",
+        "icon": "assets/pvp/trait_guardian.png",
+        "skillset": "SkillSet #325101",
+        "desc": "Aumenta a armadura física e mágica em 25%, gera escudo de sangue ao sofrer atordoamento e reduz dano em área (AoE) recebido por aliados próximos."
+      },
+      {
+        "id": "102",
+        "name": "Proteção (Bênção)",
+        "icon": "assets/pvp/trait_blessing.png",
+        "skillset": "SkillSet #325102",
+        "desc": "Acelera a taxa de regeneração contínua de PV, dissipa lentidões e sangramentos, e concede aura de absorção para a linha de trás."
+      },
+      {
+        "id": "103",
+        "name": "Esmagamento (Crushing)",
+        "icon": "assets/pvp/trait_crushing.png",
+        "skillset": "SkillSet #325103",
+        "desc": "Ignora 30% da resistência a dano crítico do alvo, quebra escudos de sangue instantaneamente e inflige penalidade severa de cura."
+      },
+      {
+        "id": "104",
+        "name": "Assassinato (Assassination)",
+        "icon": "assets/pvp/trait_assassination.png",
+        "skillset": "SkillSet #325104",
+        "desc": "Amplifica o dano pelas costas (Back Attack) em 40%, concede bônus de velocidade de movimento e executa inimigos com menos de 25% de vida."
+      }
+    ]
+  },
+  "conquest": {
+    "title": "Guerra de Conquista & Cerco de Guildas",
+    "subtitle": "Conflito massivo semanal pelo controle territorial e soberania de clã",
+    "schedule": "Todos os Sábados às 20h30 (Duração: 31 Minutos cronometrados)",
+    "countdown": "10 Segundos de Preparação / 180s para Desocupação Pós-Guerra",
+    "maps": [
+      {
+        "name": "Guerra de Ocupação (Occupation War)",
+        "type": "Disputa de Altares & Zonas de Controle",
+        "image": "assets/pvp/conquest_guidemap_occupation.png",
+        "desc": "As guildas disputam 5 Altares de Sangue espalhados pela fortaleza. Cada altar controlado acumula pontos de ocupação por segundo. A destruição das Torres de Defesa abre caminhos para o Núcleo Central."
+      },
+      {
+        "name": "Guerra de Raide (Raid War)",
+        "type": "Assalto a Chefes & Fortificações",
+        "image": "assets/pvp/conquest_guidemap_raid.png",
+        "desc": "Modo de combate híbrido com chefes titânicos de cerco (ConquestBoss). Eliminar os mini-chefes e o chefe principal de conquista concede bônus multiplicadores massivos para a pontuação de território."
+      }
+    ],
+    "tiers": [
+      {
+        "tier": "5",
+        "name": "Tier 5 - Diamante",
+        "points": "850+ Pontos",
+        "badge": "badge-blue",
+        "privilege": "Controle Máximo, Taxa de Leilão Reduzida, Título de Soberano."
+      },
+      {
+        "tier": "4",
+        "name": "Tier 4 - Platina",
+        "points": "750 a 849 Pontos",
+        "badge": "badge-gold",
+        "privilege": "Acesso a Masmorras de Conquista Exclusivas e Loja de Clã Nv. 5."
+      },
+      {
+        "tier": "3",
+        "name": "Tier 3 - Ouro",
+        "points": "650 a 749 Pontos",
+        "badge": "badge-crimson",
+        "privilege": "Baús de Recompensa Semanal e Emblemas de Ocupação."
+      },
+      {
+        "tier": "2",
+        "name": "Tier 2 - Prata",
+        "points": "550 a 649 Pontos",
+        "badge": "badge-gray",
+        "privilege": "Fundos Expandidos e Bônus de EXP de Guilda."
+      },
+      {
+        "tier": "1",
+        "name": "Tier 1 - Bronze",
+        "points": "0 a 549 Pontos",
+        "badge": "badge-gray",
+        "privilege": "Recompensas de Participação Básica de Batalha."
+      }
+    ]
+  },
+  "pk_system": {
+    "title": "Sistema de PK Aberto & Notoriedade de Sangue",
+    "subtitle": "Regras de combate em mundo aberto, penalidades de karma e radar de retaliação",
+    "icon": "assets/pvp/flat_pvppenalty.png",
+    "penalty_mark": "assets/pvp/pvppenalty_01.png",
+    "penalty_levels": [
+      {
+        "level": "1",
+        "points": "4.000 pts",
+        "status": "Suspeito (PvpPenalty_01)",
+        "effects": "Marca visual discreta sobre a cabeça. -5% em Ataque e Defesa. Guardas de capitais ficam em estado de alerta.",
+        "color": "#f59e0b"
+      },
+      {
+        "level": "2",
+        "points": "7.500 pts",
+        "status": "Hostil (PvpPenalty_02)",
+        "effects": "Marca avermelhada pulsante. -10% em todos os atributos base. Proibido montar em veículos dentro de áreas seguras.",
+        "color": "#f97316"
+      },
+      {
+        "level": "3",
+        "points": "10.000 pts",
+        "status": "Criminoso (PvpPenalty_03)",
+        "effects": "-20% de atributos de combate. Queda de EXP dobrada ao ser abatido. Perda de 50% de eficiência de poções de cura.",
+        "color": "#ef4444"
+      },
+      {
+        "level": "4",
+        "points": "12.500 pts",
+        "status": "Vilão Infame (PvpPenalty_04)",
+        "effects": "-35% de atributos. Bloqueio absoluto de teleporte rápido e proibição de acessar leilão e correio de jogo.",
+        "color": "#dc2626"
+      },
+      {
+        "level": "5",
+        "points": "15.000 pts",
+        "status": "Demônio / Fora da Lei (PvpPenalty_05)",
+        "effects": "-50% em combate total. Localização revelada no minimapa para todo o servidor. Qualquer jogador pode eliminá-lo sem acumular karma.",
+        "color": "#991b1b"
+      }
+    ],
+    "revenge_radar": {
+      "title": "Radar de Vingança (AlertTarget / Revenge World)",
+      "max_targets": "Até 50 Assassinos Monitorados",
+      "radar_range": "3.000 Unidades de Distância no Mapa",
+      "duration": "24 Horas de Rastreamento Ativo (86.400 segundos)",
+      "refresh_rate": "Atualização de Posição a cada 10 Segundos",
+      "desc": "Se você for eliminado por outro jogador em zona neutra ou de conflito, ele é incluído na sua lista de alvos de vingança. Ao se aproximar de você, um alerta sonoro e visual avisa sua presença, permitindo emboscadas e retaliação."
+    },
+    "pvp_stats": [
+      {
+        "stat": "AttackPowerPvp",
+        "name": "Poder de Ataque PvP",
+        "desc": "Aumenta diretamente o dano final causado a outros jogadores."
+      },
+      {
+        "stat": "DamageReductionPvp",
+        "name": "Redução de Dano PvP",
+        "desc": "Diminui o dano sofrido por ataques diretos de vampiros rivais."
+      },
+      {
+        "stat": "CriticalRatePvp",
+        "name": "Taxa Crítica PvP",
+        "desc": "Probabilidade de acerto crítico calculada independentemente do PvE."
+      },
+      {
+        "stat": "CriticalResistanceRatePvp",
+        "name": "Resistência Crítica PvP",
+        "desc": "Reduz a chance de receber golpes críticos de inimigos."
+      },
+      {
+        "stat": "DamageMultiplierPvp",
+        "name": "Multiplicador de Dano PvP",
+        "desc": "Amplifica o multiplicador de dano em caso de acerto crítico no PvP."
+      },
+      {
+        "stat": "DamageReducerPvp",
+        "name": "Atenuador de Dano PvP",
+        "desc": "Reduz a gravidade dos golpes de alto impacto sofridos."
+      },
+      {
+        "stat": "HitValuePvp",
+        "name": "Precisão de Acerto PvP",
+        "desc": "Contrarresta o valor de esquiva do adversário."
+      },
+      {
+        "stat": "DodgeValuePvp",
+        "name": "Esquiva PvP",
+        "desc": "Aumenta a probabilidade de anular dano total de ataques normais."
+      },
+      {
+        "stat": "IgnoreCriticalDamageMultiplierPvp",
+        "name": "Ignorar Multiplicador Crítico",
+        "desc": "Cancela bônus de dano de golpes letais sofridos."
+      }
+    ]
+  },
+  "world_tournament": {
+    "title": "Torneio Mundial dos Vampiros (Vampir Tournament World)",
+    "subtitle": "O campeonato de elite interservidores entre os maiores clãs do ecossistema",
+    "format": "Torneio eliminatório em 5 rodadas (Round 0 a Round 4)",
+    "schedule": "Sazonal (Fins de Temporada de Conquista)",
+    "desc": "As guildas campeãs de cada servidor são transportadas para uma arena colossal de outro plano. Cada vitória distribui recompensas monumentais para os combatentes e bônus passivos para toda a comunidade de seu servidor de origem.",
+    "rewards_sample": "Caixas de Linhagem Soberana, Títulos Cósmicos, Diamantes e Asas de Predador Mítico."
+  }
+}

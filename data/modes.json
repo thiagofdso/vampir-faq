@@ -1,0 +1,209 @@
+[
+  {
+    "id": "party_dungeons",
+    "category": "pve_coop",
+    "category_label": "Cooperativo em Grupo",
+    "title": "Masmorras em Grupo (Party Dungeons)",
+    "subtitle": "77 instâncias cooperativas para grupos de até 5 jogadores",
+    "icon_img": "assets/dungeons/dungeon_vampiregraveyard_01.png",
+    "instances_count": 77,
+    "level_range": "Nv. 20 - Nv. 84+",
+    "capacity": "4 a 5 Jogadores (Grupo)",
+    "cost": "Bilhete de Masmorra em Grupo (PartyDungeonTicket) ou Gold",
+    "reset_type": "Diário / Semanal",
+    "description": "Masmorras desafiadoras projetadas para esquadrões coordenados com divisão rígida de funções (Tanque, DPS Burst, DPS Sustentado e Suporte de Sangue). Cada masmorra culmina em um chefe com múltiplas fases de mecânica que pune posicionamento inadequado.",
+    "key_locations": [
+      "Vila Lamentosa (Lament Village)",
+      "Santuário Profanado (Defiled Sanctuary)",
+      "Trono da Serpente (Serpent Throne)",
+      "Monastério do Silêncio (Silent Monastery)"
+    ],
+    "rewards": [
+      "Equipamentos Raros e Heroicos de Nível Alto",
+      "Livros de Habilidade de Classe e Grimórios",
+      "Materiais Nobres de Forja (Fragmentos de Arma/Armadura)",
+      "Pontos de Conquista e Moedas de Honra"
+    ],
+    "badge": "Cooperativo Hardcore"
+  },
+  {
+    "id": "infinite_dungeons",
+    "category": "pve_solo",
+    "category_label": "Progressão Solo / Torre",
+    "title": "Masmorras Infinitas & Torre da Ascensão",
+    "subtitle": "50 andares de escalada solo com dificuldade exponencial",
+    "icon_img": "assets/dungeons/dungeon_bloodcave_01.png",
+    "instances_count": 50,
+    "level_range": "Nv. 30 - Nv. 90+",
+    "capacity": "1 Jogador (Solo)",
+    "cost": "Bilhete de Temporada Infinita (InfiniteDungeonSeasonTicket)",
+    "reset_type": "Temporada Mensal (InfiniteDungeonSeason)",
+    "description": "O teste supremo de habilidade individual. Cada andar apresenta hordas de elite sob efeito de modificadores de combate que limitam cura ou amplificam dano elemental. Atingir os andares mais altos garante títulos exclusivos e posições no ranking sazonal com distribuição massiva de Diamantes.",
+    "key_locations": [
+      "Abismo da Criação (Creation Abyss)",
+      "Legado Desbotado (Faded Legacy)",
+      "Oficina Antiga (Ancient Workshop)",
+      "Origem da Evolução (Origin of Evolution)"
+    ],
+    "rewards": [
+      "Cristais Cinzentos Superiores e Trindades",
+      "Moedas de Temporada para Loja da Torre",
+      "Sefiras Místicas de Grau Épico",
+      "Diamantes e Pontos de Realização de Temporada"
+    ],
+    "badge": "Desafio Sazonal"
+  },
+  {
+    "id": "cross_server_dungeons",
+    "category": "cross_server",
+    "category_label": "Inter-Servidor (Cross-Server)",
+    "title": "Masmorras Inter-Servidores (Cross-Server Hubs)",
+    "subtitle": "30 zonas massivas com limite de até 200 jogadores por servidor conectado",
+    "icon_img": "assets/dungeons/dungeon_vampirecastle_01.png",
+    "instances_count": 30,
+    "level_range": "Nv. 55 - Nv. 100",
+    "capacity": "Até 200 Jogadores por Servidor (Multisservidor)",
+    "cost": "Bilhete de Grupo de Servidores (ServerGroupDungeonTicket)",
+    "reset_type": "Janelas Horárias Específicas / Rotação",
+    "description": "Campos de batalha e masmorras colossais compartilhadas entre grupos de servidores de uma mesma região (ServerGroup). Reúne chefes de campo de nível Mítico e áreas de PvP aberto onde guildas de diferentes servidores duelam pelo controle de corredores e espólios raros.",
+    "key_locations": [
+      "Berço da Radiança (Cradle of Radiance)",
+      "Salão da Graça Sagrada (Hall of Holy Grace)",
+      "Zona Proibida da Radiância (Forbidden Zone)",
+      "Terra da Eternidade (Land of Eternity)"
+    ],
+    "rewards": [
+      "Equipamentos de Linhagem Mítica",
+      "Selo da Graça Sagrada e Selo da Radiância",
+      "Núcleos de Matriz Cósmica e Joias Raras",
+      "Emblemas de Mudança de Classe"
+    ],
+    "badge": "Cross-Server Massivo"
+  },
+  {
+    "id": "bloodline_dungeons",
+    "category": "lore_progression",
+    "category_label": "Linhagem & Tradição",
+    "title": "Masmorras da Linhagem Vampírica (Bloodline)",
+    "subtitle": "12 rituais arcanos narrativos dos 10 capítulos ancestrais",
+    "icon_img": "assets/items/flat_relic.png",
+    "instances_count": 12,
+    "level_range": "Nv. 15 - Nv. 80",
+    "capacity": "1 Jogador (Instanciado Cinematográfico)",
+    "cost": "Progresso na Campanha da Linhagem (Bloodline Questline)",
+    "reset_type": "Único / Replay de Domínio",
+    "description": "Instâncias rituais onde o vampiro revive os confrontos decisivos da história de Krvna. As lutas ocorrem em cenários cinemáticos isolados (BeforeStartInstance / StartRunInInstance) e desbloqueiam novos ramos na Árvore da Vida e despertares passivos da linhagem.",
+    "key_locations": [
+      "Cerimônia de Sucessão de Sangue",
+      "Guerra nas Sombras & Noite da Escolha",
+      "Batalha Histórica de Krvna",
+      "Santuário Ancestral de Bezdan"
+    ],
+    "rewards": [
+      "Desbloqueio de Nós na Árvore da Vida (LifeTree Matrix)",
+      "Cartas de Tumba e Aprimoramento de Caixão",
+      "Habilidades Passivas Hereditárias",
+      "Pontos de Sangue Permanentes (Max BloodPoint)"
+    ],
+    "badge": "Progressão de Lore"
+  },
+  {
+    "id": "guild_defense",
+    "category": "guild",
+    "category_label": "Defesa de Guilda",
+    "title": "Defesa de Relíquia da Guilda (Guild Defense)",
+    "subtitle": "Modo Tower Defense cooperativo contra 5+ ondas de invasores",
+    "icon_img": "assets/pvp/flat_guildconquest.png",
+    "instances_count": 1,
+    "level_range": "Guilda Nv. 3+ / Jogadores Nv. 40+",
+    "capacity": "Todos os membros da guilda (Até 50 Jogadores)",
+    "cost": "Sem custo de bilhete (Agendado pela Liderança)",
+    "reset_type": "Semanal",
+    "description": "A guilda inteira se reúne no Santuário para proteger a Relíquia Central contra 5 ondas sequenciais de monstros implacáveis. Cada membro pode ativar Totens de Operação (OperationGroup) para invocar barreiras defensivas ou buffs aleatórios (RandomEffectGroup). Se a quantidade de monstros vivos exceder 100, é aplicada uma penalidade severa à guilda.",
+    "key_locations": [
+      "Santuário da Relíquia da Guilda (Dungeon ID 71001)"
+    ],
+    "rewards": [
+      "Pontos de Experiência de Guardião da Guilda (GuildGuardianExp)",
+      "Moedas de Contribuição de Guilda e Fundos de Clã",
+      "Baús de Recompensa Pessoal de Onda (PersonalRewardGroup)",
+      "Baús Coletivos do Tesouro da Guilda"
+    ],
+    "badge": "Cooperativo de Clã"
+  },
+  {
+    "id": "guild_crypt",
+    "category": "guild",
+    "category_label": "Cripta Subterrânea",
+    "title": "Cripta da Guilda (Guild Crypt)",
+    "subtitle": "Instalação subterrânea com 4 sistemas autônomos de progressão",
+    "icon_img": "assets/items/flat_itemcraft.png",
+    "instances_count": 4,
+    "level_range": "Guilda Nv. 2+",
+    "capacity": "Membros da Guilda",
+    "cost": "Fundos e Essências de Sangue da Guilda",
+    "reset_type": "Contínuo / Invocações Diárias",
+    "description": "A base subterrânea secreta do clã. Composta por 4 alas operacionais mapeadas em GuildCrypt.csv: 1) Invocação de Chefes de Sangue (MI_Crypt_Summon), 2) Caçada de Cripta (MI_Crypt_BossHunt), 3) Mercador Errante de Relíquias (MI_Crypt_WandererTrade) e 4) Bancada de Encantamento Coletivo (MI_Crypt_Enchant).",
+    "key_locations": [
+      "Cripta dos Ancestrais - Nível 1 a 4"
+    ],
+    "rewards": [
+      "Essências Raras de Troca com Mercadores Errantes",
+      "Encantamentos Compartilhados de Clã",
+      "Drops de Chefes Invocados em Grupo",
+      "Subida de Nível do Guardião da Guilda"
+    ],
+    "badge": "Infraestrutura de Clã"
+  },
+  {
+    "id": "elite_boss_zones",
+    "category": "world_pve",
+    "category_label": "Chefes de Campo & Raides",
+    "title": "Zonas de Chefes de Elite (Elite Boss Zones)",
+    "subtitle": "10 zonas abertas com chefes colossais de spawn programado",
+    "icon_img": "assets/dungeons/dungeon_vampiregraveyard_02.png",
+    "instances_count": 10,
+    "level_range": "Nv. 45 - Nv. 90",
+    "capacity": "Raides de até 50 Jogadores / Aberto ao Mundo",
+    "cost": "Acesso Livre (Respawn Cronometrado)",
+    "reset_type": "Horários Fixos de Aparição (NpcSpawnDetail)",
+    "description": "Grandes batalhas de campo aberto onde chefes de classificação Elite e Chefe Mundial surgem em horários específicos. Exigem grupos com líder de raide habilitado (Ready Check Duration: 20s). As recompensas são fracionadas entre maior dano causado, último golpe e participação geral (EliteBossZoneParticipantsReward).",
+    "key_locations": [
+      "Vale Naricanje (Naricanje Valley)",
+      "Parque Temático da Meia-Noite (Midnight Theme Park)",
+      "Floresta da Manhã Serena",
+      "Jardim Proibido"
+    ],
+    "rewards": [
+      "Baús de Chefe de Campo (itembox_fieldboss_01.png)",
+      "Equipamentos de Grau Heroico e Lendário",
+      "Receitas Épicas de Forja e Minérios Raros",
+      "Emblemas de Desafio e Moedas de Honra"
+    ],
+    "badge": "Mundo Aberto"
+  },
+  {
+    "id": "support_mode",
+    "category": "automation",
+    "category_label": "Automação & Autoplay",
+    "title": "Modo de Suporte & Farm Offline (SupportMode)",
+    "subtitle": "Sistema inteligente de continuidade de jogo desconectado",
+    "icon_img": "assets/items/flat_itemcraft2.png",
+    "instances_count": 1,
+    "level_range": "Nv. 1+",
+    "capacity": "Individual (Offline)",
+    "cost": "Gratuito (Temporizador Recarregável)",
+    "reset_type": "Diário (Tempo de Jogo Offline)",
+    "description": "Permite ao vampiro continuar acumulando experiência, ouro e materiais mesmo após encerrar o aplicativo no Android ou PC. O sistema monitora o estoque de poções (AutoMaintain.HpPotionMinCount: 100), realiza compras automáticas na cidade e executa a limpeza expressa de missões diárias pendentes (DailyQuestQuickClear).",
+    "key_locations": [
+      "Qualquer Campo de Caça Habilitado para Suporte"
+    ],
+    "rewards": [
+      "Experiência e Ouro Contínuos durante o Deslogue",
+      "Coleta Automática de Materiais de Criação",
+      "Conclusão Instantânea de Missões Diárias",
+      "Conserva Poções e Recursos em Ciclo Seguro"
+    ],
+    "badge": "Qualidade de Vida"
+  }
+]

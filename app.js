@@ -31,6 +31,8 @@
     craftingSearchTerm: '',
     craftingPage: 1,
     craftingPerPage: 24,
+    modesFilter: 'all',
+    pvpTab: 'arena',
     activeBuildIndex: 0,
     activeVariantIndex: 0
   };
@@ -101,6 +103,10 @@
     if (tabId === 'dungeons') renderDungeons();
     if (tabId === 'items') renderItems();
     if (tabId === 'builds') renderBuilds();
+    if (tabId === 'quests') renderQuests();
+    if (tabId === 'crafting') renderCrafting();
+    if (tabId === 'modes') renderModes();
+    if (tabId === 'pvp') renderPvP();
   }
 
   window.navTo = function(tabId) {
@@ -784,6 +790,234 @@
     document.getElementById('crafting').scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Render Game Modes
+  function renderModes() {
+    const container = document.getElementById('modesContainer');
+    if (!container || !state.data.modes) return;
+
+    let filtered = state.data.modes;
+    if (state.modesFilter !== 'all') {
+      filtered = filtered.filter(m => m.category === state.modesFilter);
+    }
+
+    container.innerHTML = filtered.map(m => `
+      <div class="entity-card mode-card" onclick="window.inspectMode('${m.id}')" style="display: flex; flex-direction: column;">
+        <div class="entity-header">
+          <div class="item-slot-frame" style="width: 52px; height: 52px; border-color: rgba(212,175,55,0.4);">
+            <img src="${m.icon_img}" alt="${m.title}" class="item-slot-img" onerror="this.src='assets/logo.png'">
+          </div>
+          <div style="flex: 1; margin-left: 12px;">
+            <div class="entity-title" style="font-size: 1.05rem;">${m.title}</div>
+            <div style="display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap;">
+              <span class="entity-badge badge-gold" style="font-size: 0.68rem;">${m.category_label}</span>
+              <span class="entity-badge badge-crimson" style="font-size: 0.68rem;">${m.badge}</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin: 12px 0; font-size: 0.83rem; color: #cbd5e1; line-height: 1.5; flex: 1;">
+          ${m.description}
+        </div>
+
+        <div style="background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 0.78rem; display: flex; flex-direction: column; gap: 4px; border: 1px solid rgba(255,255,255,0.05);">
+          <div style="display: flex; justify-content: space-between;"><strong style="color: #94a3b8;">Capacidade:</strong> <span style="color: #38bdf8;">${m.capacity}</span></div>
+          <div style="display: flex; justify-content: space-between;"><strong style="color: #94a3b8;">Nível Recomendado:</strong> <span style="color: #fbbf24;">${m.level_range}</span></div>
+          <div style="display: flex; justify-content: space-between;"><strong style="color: #94a3b8;">Requisito de Entrada:</strong> <span style="color: #e2e8f0; font-size: 0.72rem;">${m.cost}</span></div>
+        </div>
+
+        <div class="entity-meta-row" style="margin-top: auto;">
+          <span>${m.instances_count} Instâncias</span>
+          <span style="color: var(--crimson-light); font-weight: 600;">Ver Detalhes →</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Render PvP Systems
+  function renderPvP() {
+    const container = document.getElementById('pvpContentContainer');
+    if (!container || !state.data.pvp) return;
+
+    const p = state.data.pvp;
+
+    if (state.pvpTab === 'arena') {
+      const a = p.arena;
+      container.innerHTML = `
+        <div style="background: rgba(138, 3, 3, 0.12); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: var(--radius-md); padding: 20px; margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
+            <div>
+              <h3 style="font-family: var(--font-serif); font-size: 1.5rem; color: #fff; margin-bottom: 4px;">${a.title}</h3>
+              <p style="color: var(--gold-primary); font-size: 0.9rem; margin-bottom: 8px;">${a.subtitle}</p>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <span class="entity-badge badge-crimson" style="font-size: 0.8rem;">Formato: ${a.format}</span>
+              <span class="entity-badge badge-gold" style="font-size: 0.8rem;">Duração: ${a.duration}</span>
+              <span class="entity-badge badge-blue" style="font-size: 0.8rem;">Vitória: ${a.target_score}</span>
+            </div>
+          </div>
+          <div style="font-size: 0.85rem; color: #cbd5e1; margin-top: 10px; line-height: 1.5;">
+            <strong>Mecânicas de Combate:</strong> Partida de 5v5 cronometrada em arena espelhada (Vermelho vs Azul) com barreiras de spawn mágicas e controle de relíquias ativas. A primeira equipe a somar 10 mortes conquista a vitória.
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 24px;">
+          <div>
+            <h4 style="font-size: 1.1rem; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+              <span>🗺️ Mapa Tático da Arena</span>
+              <span style="font-size: 0.75rem; color: var(--gold-primary);">(${a.map_name})</span>
+            </h4>
+            <div class="tactical-map-container">
+              <img src="${a.map_image}" alt="Mapa da Arena" class="tactical-map-img" onerror="this.src='assets/logo.png'">
+            </div>
+          </div>
+
+          <div>
+            <h4 style="font-size: 1.1rem; color: #fff; margin-bottom: 12px;">🏆 As 5 Ligas Competitivas</h4>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              ${a.leagues.map(l => `
+                <div class="league-row">
+                  <div style="flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <strong style="color: #fff; font-size: 0.95rem;">${l.name}</strong>
+                      <span class="entity-badge ${l.badge}" style="font-size: 0.7rem;">${l.bp_req}</span>
+                    </div>
+                    <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 3px;">${l.desc}</div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+
+        <h4 style="font-size: 1.1rem; color: #fff; margin-bottom: 14px;">⚡ As 4 Especializações de Arena (Arena Traits)</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+          ${a.traits.map(t => `
+            <div class="trait-card">
+              <div class="item-slot-frame" style="width: 48px; height: 48px;">
+                <img src="${t.icon}" alt="${t.name}" class="item-slot-img" onerror="this.src='assets/logo.png'">
+              </div>
+              <div style="flex: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                  <strong style="color: #fff; font-size: 0.92rem;">${t.name}</strong>
+                  <span style="font-size: 0.68rem; color: #38bdf8;">${t.skillset}</span>
+                </div>
+                <div style="font-size: 0.78rem; color: #cbd5e1; margin-top: 4px; line-height: 1.4;">
+                  ${t.desc}
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    } else if (state.pvpTab === 'conquest') {
+      const c = p.conquest;
+      container.innerHTML = `
+        <div style="background: rgba(138, 3, 3, 0.12); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: var(--radius-md); padding: 20px; margin-bottom: 24px;">
+          <h3 style="font-family: var(--font-serif); font-size: 1.5rem; color: #fff; margin-bottom: 4px;">${c.title}</h3>
+          <p style="color: var(--gold-primary); font-size: 0.9rem; margin-bottom: 10px;">${c.subtitle}</p>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <span class="entity-badge badge-crimson" style="font-size: 0.8rem;">🗓️ ${c.schedule}</span>
+            <span class="entity-badge badge-gold" style="font-size: 0.8rem;">⏱️ ${c.countdown}</span>
+          </div>
+        </div>
+
+        <h4 style="font-size: 1.1rem; color: #fff; margin-bottom: 14px;">🗺️ Mapas de Guerra & Fortificações</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; margin-bottom: 24px;">
+          ${c.maps.map(m => `
+            <div style="background: rgba(15,20,30,0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-md); overflow: hidden;">
+              <div class="tactical-map-container" style="border: none; border-radius: 0; margin-bottom: 0;">
+                <img src="${m.image}" alt="${m.name}" class="tactical-map-img" style="max-height: 320px;" onerror="this.src='assets/logo.png'">
+              </div>
+              <div style="padding: 16px;">
+                <h5 style="color: #fff; font-size: 1rem; margin-bottom: 2px;">${m.name}</h5>
+                <span class="entity-badge badge-blue" style="font-size: 0.7rem; margin-bottom: 8px;">${m.type}</span>
+                <p style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.5; margin-top: 6px;">${m.desc}</p>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <h4 style="font-size: 1.1rem; color: #fff; margin-bottom: 12px;">💎 Tiers de Conquista & Privilégios de Guilda</h4>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          ${c.tiers.map(t => `
+            <div class="league-row">
+              <span class="entity-badge ${t.badge}" style="font-size: 0.8rem; width: 130px; text-align: center;">${t.name}</span>
+              <strong style="color: #fbbf24; width: 120px; font-family: monospace;">${t.points}</strong>
+              <div style="flex: 1; font-size: 0.82rem; color: #cbd5e1;">${t.privilege}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    } else if (state.pvpTab === 'pk') {
+      const k = p.pk_system;
+      container.innerHTML = `
+        <div style="background: rgba(138, 3, 3, 0.12); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: var(--radius-md); padding: 20px; margin-bottom: 24px;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <img src="${k.penalty_mark}" alt="Marca de Penalidade" style="width: 48px; height: 48px; object-fit: contain;" onerror="this.src='assets/logo.png'">
+            <div>
+              <h3 style="font-family: var(--font-serif); font-size: 1.5rem; color: #fff; margin-bottom: 4px;">${k.title}</h3>
+              <p style="color: var(--gold-primary); font-size: 0.9rem;">${k.subtitle}</p>
+            </div>
+          </div>
+        </div>
+
+        <h4 style="font-size: 1.1rem; color: #fff; margin-bottom: 14px;">💀 Os 5 Níveis de Penalidade de Karma (PvpPenaltySetting)</h4>
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;">
+          ${k.penalty_levels.map(l => `
+            <div style="background: rgba(0,0,0,0.35); border-left: 4px solid ${l.color}; border-radius: 6px; padding: 12px 16px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+              <span class="entity-badge" style="background: ${l.color}; color: #fff; font-weight: 700;">Nível ${l.level}</span>
+              <strong style="color: #fbbf24; font-family: monospace; width: 100px;">${l.points}</strong>
+              <div style="font-weight: 600; color: #fff; width: 180px;">${l.status}</div>
+              <div style="flex: 1; font-size: 0.82rem; color: #cbd5e1; min-width: 250px;">${l.effects}</div>
+            </div>
+          `).join('')}
+        </div>
+
+        <div style="background: rgba(15,20,30,0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-md); padding: 18px; margin-bottom: 24px;">
+          <h4 style="font-size: 1.1rem; color: #fff; margin-bottom: 8px;">📡 ${k.revenge_radar.title}</h4>
+          <p style="font-size: 0.84rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 12px;">${k.revenge_radar.desc}</p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px;">
+            <div><strong style="color: #94a3b8; font-size: 0.72rem; text-transform: uppercase;">Capacidade</strong><div style="color: #38bdf8; font-weight: 600;">${k.revenge_radar.max_targets}</div></div>
+            <div><strong style="color: #94a3b8; font-size: 0.72rem; text-transform: uppercase;">Alcance de Detecção</strong><div style="color: #fbbf24; font-weight: 600;">${k.revenge_radar.radar_range}</div></div>
+            <div><strong style="color: #94a3b8; font-size: 0.72rem; text-transform: uppercase;">Duração do Alerta</strong><div style="color: #a78bfa; font-weight: 600;">${k.revenge_radar.duration}</div></div>
+            <div><strong style="color: #94a3b8; font-size: 0.72rem; text-transform: uppercase;">Taxa de Atualização</strong><div style="color: #34d399; font-weight: 600;">${k.revenge_radar.refresh_rate}</div></div>
+          </div>
+        </div>
+
+        <h4 style="font-size: 1.1rem; color: #fff; margin-bottom: 12px;">⚔️ Atributos Exclusivos de Combate PvP (EStat)</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px;">
+          ${k.pvp_stats.map(s => `
+            <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; padding: 10px 14px;">
+              <div style="color: #f87171; font-weight: 600; font-size: 0.88rem;">${s.name}</div>
+              <div style="font-size: 0.7rem; color: #94a3b8; font-family: monospace;">${s.stat}</div>
+              <div style="font-size: 0.78rem; color: #cbd5e1; margin-top: 4px;">${s.desc}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    } else if (state.pvpTab === 'tournament') {
+      const t = p.world_tournament;
+      container.innerHTML = `
+        <div style="background: rgba(138, 3, 3, 0.12); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: var(--radius-md); padding: 20px; margin-bottom: 24px;">
+          <h3 style="font-family: var(--font-serif); font-size: 1.5rem; color: #fff; margin-bottom: 4px;">${t.title}</h3>
+          <p style="color: var(--gold-primary); font-size: 0.9rem; margin-bottom: 8px;">${t.subtitle}</p>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <span class="entity-badge badge-crimson">${t.format}</span>
+            <span class="entity-badge badge-gold">${t.schedule}</span>
+          </div>
+        </div>
+        <div style="background: rgba(15,20,30,0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-md); padding: 18px; margin-bottom: 20px;">
+          <h4 style="font-size: 1.1rem; color: #fff; margin-bottom: 8px;">Regras do Campeonato Inter-Servidores</h4>
+          <p style="font-size: 0.86rem; color: #cbd5e1; line-height: 1.6;">${t.desc}</p>
+        </div>
+        <div style="background: rgba(0,0,0,0.3); border-radius: var(--radius-md); padding: 16px; border: 1px solid rgba(212,175,55,0.2);">
+          <h5 style="color: #fbbf24; margin-bottom: 6px;">Premiações de Soberania</h5>
+          <p style="color: #34d399; font-size: 0.85rem;">${t.rewards_sample}</p>
+        </div>
+      `;
+    }
+  }
+
   // Render FAQ
   function renderFaq() {
     const container = document.getElementById('faqContainer');
@@ -1123,6 +1357,55 @@
         <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.08);">
           ${c.tradeable_on_big ? '💎 Em caso de Grande Sucesso, o item gerado possui FreeTradeRate=10000 e pode ser vendido livremente no Mercado de Leilões.' : '🔒 O item forjado é vinculado à conta do personagem.'}
         </div>
+      </div>
+    `;
+
+    detailModal.classList.add('open');
+  };
+
+  window.inspectMode = function(id) {
+    const m = state.data.modes.find(x => x.id === id);
+    if (!m) return;
+
+    modalTitle.innerText = m.title;
+    modalSubtitle.innerText = `${m.category_label} • ${m.capacity} • ${m.level_range}`;
+
+    modalBody.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+        <div class="item-slot-frame" style="width: 64px; height: 64px;">
+          <img src="${m.icon_img}" alt="${m.title}" class="item-slot-img" onerror="this.src='assets/logo.png'">
+        </div>
+        <div style="flex: 1;">
+          <div style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 4px;">${m.title}</div>
+          <div style="font-size: 0.85rem; color: #94a3b8;">${m.subtitle}</div>
+        </div>
+      </div>
+
+      <div class="panel-box" style="margin-bottom: 16px;">
+        <div class="panel-title">Mecânica & Diretrizes do Modo</div>
+        <div style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.6; margin-top: 6px;">
+          ${m.description}
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 14px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+          <div><strong style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase;">Capacidade de Grupo</strong><div style="color: #38bdf8; font-weight: 600;">${m.capacity}</div></div>
+          <div><strong style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase;">Faixa de Nível</strong><div style="color: #fbbf24; font-weight: 600;">${m.level_range}</div></div>
+          <div><strong style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase;">Custo / Ingresso</strong><div style="color: #e2e8f0; font-size: 0.82rem;">${m.cost}</div></div>
+          <div><strong style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase;">Ciclo de Reinício</strong><div style="color: #a78bfa; font-size: 0.82rem;">${m.reset_type}</div></div>
+        </div>
+      </div>
+
+      <div class="panel-box" style="margin-bottom: 16px;">
+        <div class="panel-title">Principais Zonas e Cenários</div>
+        <ul style="padding-left: 20px; margin: 8px 0; color: #e2e8f0; font-size: 0.88rem; line-height: 1.6;">
+          ${m.key_locations.map(loc => `<li>${loc}</li>`).join('')}
+        </ul>
+      </div>
+
+      <div class="panel-box" style="margin-bottom: 16px;">
+        <div class="panel-title">Principais Recompensas & Espólios</div>
+        <ul style="padding-left: 20px; margin: 8px 0; color: #34d399; font-size: 0.88rem; line-height: 1.6;">
+          ${m.rewards.map(r => `<li>${r}</li>`).join('')}
+        </ul>
       </div>
     `;
 

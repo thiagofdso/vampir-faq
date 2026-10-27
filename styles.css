@@ -1159,3 +1159,80 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.15);
   object-fit: cover;
 }
+
+/* Tactical Map and PvP Enhancements */
+.tactical-map-container {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-gold);
+  background: #0d1117;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  margin-bottom: 20px;
+}
+
+.tactical-map-img {
+  width: 100%;
+  max-height: 480px;
+  object-fit: contain;
+  display: block;
+  background: radial-gradient(circle at center, #161b22 0%, #090d16 100%);
+}
+
+.pvp-subnav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 12px;
+}
+
+.pvp-subnav-btn {
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pvp-subnav-btn:hover {
+  background: rgba(220, 38, 38, 0.15);
+  border-color: var(--crimson-primary);
+  color: #fff;
+}
+
+.pvp-subnav-btn.active {
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.25) 0%, rgba(138, 3, 3, 0.4) 100%);
+  border-color: var(--crimson-primary);
+  color: #fff;
+  box-shadow: 0 0 12px rgba(220, 38, 38, 0.3);
+}
+
+.league-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 8px;
+}
+
+.trait-card {
+  background: rgba(15, 20, 30, 0.6);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+

@@ -1057,7 +1057,381 @@ if os.path.exists(receitas_path):
 
 
 # ==========================================
-# 10. GAME CONSTANTS & FAQ
+# 9. GAME MODES (196+ Instances across 8 Disciplines)
+# ==========================================
+print("Processing Game Modes catalog...")
+modes_catalog = [
+    {
+        "id": "party_dungeons",
+        "category": "pve_coop",
+        "category_label": "Cooperativo em Grupo",
+        "title": "Masmorras em Grupo (Party Dungeons)",
+        "subtitle": "77 instâncias cooperativas para grupos de até 5 jogadores",
+        "icon_img": "assets/dungeons/dungeon_vampiregraveyard_01.png",
+        "instances_count": 77,
+        "level_range": "Nv. 20 - Nv. 84+",
+        "capacity": "4 a 5 Jogadores (Grupo)",
+        "cost": "Bilhete de Masmorra em Grupo (PartyDungeonTicket) ou Gold",
+        "reset_type": "Diário / Semanal",
+        "description": "Masmorras desafiadoras projetadas para esquadrões coordenados com divisão rígida de funções (Tanque, DPS Burst, DPS Sustentado e Suporte de Sangue). Cada masmorra culmina em um chefe com múltiplas fases de mecânica que pune posicionamento inadequado.",
+        "key_locations": [
+            "Vila Lamentosa (Lament Village)",
+            "Santuário Profanado (Defiled Sanctuary)",
+            "Trono da Serpente (Serpent Throne)",
+            "Monastério do Silêncio (Silent Monastery)"
+        ],
+        "rewards": [
+            "Equipamentos Raros e Heroicos de Nível Alto",
+            "Livros de Habilidade de Classe e Grimórios",
+            "Materiais Nobres de Forja (Fragmentos de Arma/Armadura)",
+            "Pontos de Conquista e Moedas de Honra"
+        ],
+        "badge": "Cooperativo Hardcore"
+    },
+    {
+        "id": "infinite_dungeons",
+        "category": "pve_solo",
+        "category_label": "Progressão Solo / Torre",
+        "title": "Masmorras Infinitas & Torre da Ascensão",
+        "subtitle": "50 andares de escalada solo com dificuldade exponencial",
+        "icon_img": "assets/dungeons/dungeon_bloodcave_01.png",
+        "instances_count": 50,
+        "level_range": "Nv. 30 - Nv. 90+",
+        "capacity": "1 Jogador (Solo)",
+        "cost": "Bilhete de Temporada Infinita (InfiniteDungeonSeasonTicket)",
+        "reset_type": "Temporada Mensal (InfiniteDungeonSeason)",
+        "description": "O teste supremo de habilidade individual. Cada andar apresenta hordas de elite sob efeito de modificadores de combate que limitam cura ou amplificam dano elemental. Atingir os andares mais altos garante títulos exclusivos e posições no ranking sazonal com distribuição massiva de Diamantes.",
+        "key_locations": [
+            "Abismo da Criação (Creation Abyss)",
+            "Legado Desbotado (Faded Legacy)",
+            "Oficina Antiga (Ancient Workshop)",
+            "Origem da Evolução (Origin of Evolution)"
+        ],
+        "rewards": [
+            "Cristais Cinzentos Superiores e Trindades",
+            "Moedas de Temporada para Loja da Torre",
+            "Sefiras Místicas de Grau Épico",
+            "Diamantes e Pontos de Realização de Temporada"
+        ],
+        "badge": "Desafio Sazonal"
+    },
+    {
+        "id": "cross_server_dungeons",
+        "category": "cross_server",
+        "category_label": "Inter-Servidor (Cross-Server)",
+        "title": "Masmorras Inter-Servidores (Cross-Server Hubs)",
+        "subtitle": "30 zonas massivas com limite de até 200 jogadores por servidor conectado",
+        "icon_img": "assets/dungeons/dungeon_vampirecastle_01.png",
+        "instances_count": 30,
+        "level_range": "Nv. 55 - Nv. 100",
+        "capacity": "Até 200 Jogadores por Servidor (Multisservidor)",
+        "cost": "Bilhete de Grupo de Servidores (ServerGroupDungeonTicket)",
+        "reset_type": "Janelas Horárias Específicas / Rotação",
+        "description": "Campos de batalha e masmorras colossais compartilhadas entre grupos de servidores de uma mesma região (ServerGroup). Reúne chefes de campo de nível Mítico e áreas de PvP aberto onde guildas de diferentes servidores duelam pelo controle de corredores e espólios raros.",
+        "key_locations": [
+            "Berço da Radiança (Cradle of Radiance)",
+            "Salão da Graça Sagrada (Hall of Holy Grace)",
+            "Zona Proibida da Radiância (Forbidden Zone)",
+            "Terra da Eternidade (Land of Eternity)"
+        ],
+        "rewards": [
+            "Equipamentos de Linhagem Mítica",
+            "Selo da Graça Sagrada e Selo da Radiância",
+            "Núcleos de Matriz Cósmica e Joias Raras",
+            "Emblemas de Mudança de Classe"
+        ],
+        "badge": "Cross-Server Massivo"
+    },
+    {
+        "id": "bloodline_dungeons",
+        "category": "lore_progression",
+        "category_label": "Linhagem & Tradição",
+        "title": "Masmorras da Linhagem Vampírica (Bloodline)",
+        "subtitle": "12 rituais arcanos narrativos dos 10 capítulos ancestrais",
+        "icon_img": "assets/items/flat_relic.png",
+        "instances_count": 12,
+        "level_range": "Nv. 15 - Nv. 80",
+        "capacity": "1 Jogador (Instanciado Cinematográfico)",
+        "cost": "Progresso na Campanha da Linhagem (Bloodline Questline)",
+        "reset_type": "Único / Replay de Domínio",
+        "description": "Instâncias rituais onde o vampiro revive os confrontos decisivos da história de Krvna. As lutas ocorrem em cenários cinemáticos isolados (BeforeStartInstance / StartRunInInstance) e desbloqueiam novos ramos na Árvore da Vida e despertares passivos da linhagem.",
+        "key_locations": [
+            "Cerimônia de Sucessão de Sangue",
+            "Guerra nas Sombras & Noite da Escolha",
+            "Batalha Histórica de Krvna",
+            "Santuário Ancestral de Bezdan"
+        ],
+        "rewards": [
+            "Desbloqueio de Nós na Árvore da Vida (LifeTree Matrix)",
+            "Cartas de Tumba e Aprimoramento de Caixão",
+            "Habilidades Passivas Hereditárias",
+            "Pontos de Sangue Permanentes (Max BloodPoint)"
+        ],
+        "badge": "Progressão de Lore"
+    },
+    {
+        "id": "guild_defense",
+        "category": "guild",
+        "category_label": "Defesa de Guilda",
+        "title": "Defesa de Relíquia da Guilda (Guild Defense)",
+        "subtitle": "Modo Tower Defense cooperativo contra 5+ ondas de invasores",
+        "icon_img": "assets/pvp/flat_guildconquest.png",
+        "instances_count": 1,
+        "level_range": "Guilda Nv. 3+ / Jogadores Nv. 40+",
+        "capacity": "Todos os membros da guilda (Até 50 Jogadores)",
+        "cost": "Sem custo de bilhete (Agendado pela Liderança)",
+        "reset_type": "Semanal",
+        "description": "A guilda inteira se reúne no Santuário para proteger a Relíquia Central contra 5 ondas sequenciais de monstros implacáveis. Cada membro pode ativar Totens de Operação (OperationGroup) para invocar barreiras defensivas ou buffs aleatórios (RandomEffectGroup). Se a quantidade de monstros vivos exceder 100, é aplicada uma penalidade severa à guilda.",
+        "key_locations": [
+            "Santuário da Relíquia da Guilda (Dungeon ID 71001)"
+        ],
+        "rewards": [
+            "Pontos de Experiência de Guardião da Guilda (GuildGuardianExp)",
+            "Moedas de Contribuição de Guilda e Fundos de Clã",
+            "Baús de Recompensa Pessoal de Onda (PersonalRewardGroup)",
+            "Baús Coletivos do Tesouro da Guilda"
+        ],
+        "badge": "Cooperativo de Clã"
+    },
+    {
+        "id": "guild_crypt",
+        "category": "guild",
+        "category_label": "Cripta Subterrânea",
+        "title": "Cripta da Guilda (Guild Crypt)",
+        "subtitle": "Instalação subterrânea com 4 sistemas autônomos de progressão",
+        "icon_img": "assets/items/flat_itemcraft.png",
+        "instances_count": 4,
+        "level_range": "Guilda Nv. 2+",
+        "capacity": "Membros da Guilda",
+        "cost": "Fundos e Essências de Sangue da Guilda",
+        "reset_type": "Contínuo / Invocações Diárias",
+        "description": "A base subterrânea secreta do clã. Composta por 4 alas operacionais mapeadas em GuildCrypt.csv: 1) Invocação de Chefes de Sangue (MI_Crypt_Summon), 2) Caçada de Cripta (MI_Crypt_BossHunt), 3) Mercador Errante de Relíquias (MI_Crypt_WandererTrade) e 4) Bancada de Encantamento Coletivo (MI_Crypt_Enchant).",
+        "key_locations": [
+            "Cripta dos Ancestrais - Nível 1 a 4"
+        ],
+        "rewards": [
+            "Essências Raras de Troca com Mercadores Errantes",
+            "Encantamentos Compartilhados de Clã",
+            "Drops de Chefes Invocados em Grupo",
+            "Subida de Nível do Guardião da Guilda"
+        ],
+        "badge": "Infraestrutura de Clã"
+    },
+    {
+        "id": "elite_boss_zones",
+        "category": "world_pve",
+        "category_label": "Chefes de Campo & Raides",
+        "title": "Zonas de Chefes de Elite (Elite Boss Zones)",
+        "subtitle": "10 zonas abertas com chefes colossais de spawn programado",
+        "icon_img": "assets/dungeons/dungeon_vampiregraveyard_02.png",
+        "instances_count": 10,
+        "level_range": "Nv. 45 - Nv. 90",
+        "capacity": "Raides de até 50 Jogadores / Aberto ao Mundo",
+        "cost": "Acesso Livre (Respawn Cronometrado)",
+        "reset_type": "Horários Fixos de Aparição (NpcSpawnDetail)",
+        "description": "Grandes batalhas de campo aberto onde chefes de classificação Elite e Chefe Mundial surgem em horários específicos. Exigem grupos com líder de raide habilitado (Ready Check Duration: 20s). As recompensas são fracionadas entre maior dano causado, último golpe e participação geral (EliteBossZoneParticipantsReward).",
+        "key_locations": [
+            "Vale Naricanje (Naricanje Valley)",
+            "Parque Temático da Meia-Noite (Midnight Theme Park)",
+            "Floresta da Manhã Serena",
+            "Jardim Proibido"
+        ],
+        "rewards": [
+            "Baús de Chefe de Campo (itembox_fieldboss_01.png)",
+            "Equipamentos de Grau Heroico e Lendário",
+            "Receitas Épicas de Forja e Minérios Raros",
+            "Emblemas de Desafio e Moedas de Honra"
+        ],
+        "badge": "Mundo Aberto"
+    },
+    {
+        "id": "support_mode",
+        "category": "automation",
+        "category_label": "Automação & Autoplay",
+        "title": "Modo de Suporte & Farm Offline (SupportMode)",
+        "subtitle": "Sistema inteligente de continuidade de jogo desconectado",
+        "icon_img": "assets/items/flat_itemcraft2.png",
+        "instances_count": 1,
+        "level_range": "Nv. 1+",
+        "capacity": "Individual (Offline)",
+        "cost": "Gratuito (Temporizador Recarregável)",
+        "reset_type": "Diário (Tempo de Jogo Offline)",
+        "description": "Permite ao vampiro continuar acumulando experiência, ouro e materiais mesmo após encerrar o aplicativo no Android ou PC. O sistema monitora o estoque de poções (AutoMaintain.HpPotionMinCount: 100), realiza compras automáticas na cidade e executa a limpeza expressa de missões diárias pendentes (DailyQuestQuickClear).",
+        "key_locations": [
+            "Qualquer Campo de Caça Habilitado para Suporte"
+        ],
+        "rewards": [
+            "Experiência e Ouro Contínuos durante o Deslogue",
+            "Coleta Automática de Materiais de Criação",
+            "Conclusão Instantânea de Missões Diárias",
+            "Conserva Poções e Recursos em Ciclo Seguro"
+        ],
+        "badge": "Qualidade de Vida"
+    }
+]
+
+with open(os.path.join(OUT_DIR, "modes.json"), "w", encoding="utf-8") as f:
+    json.dump(modes_catalog, f, indent=2, ensure_ascii=False)
+print(f"  ✓ Processed {len(modes_catalog)} game mode categories.")
+
+# ==========================================
+# 10. PVP & WAR SYSTEMS (Arena 5v5, Conquest, World Tournament, PK Karma & Revenge Radar)
+# ==========================================
+print("Processing PvP and War systems...")
+pvp_catalog = {
+    "arena": {
+        "title": "Arena de Sangue (Coliseu 5v5)",
+        "subtitle": "Combate tático competitivo em arena fechada com regras sincronizadas",
+        "format": "5 vs 5 (Equipe Vermelha vs Equipe Azul)",
+        "duration": "300 Segundos (5 Minutos)",
+        "target_score": "10 Abates (Primeira equipe a atingir vence)",
+        "map_image": "assets/pvp/arena_guidemap_deathmatch.png",
+        "map_name": "Ruínas Rubras de Sangue (Dungeon ID 90101)",
+        "special_mechanic": "Spawn de Barreiras Mágicas e Relíquias Ativas (Skills #326001 e #326002)",
+        "leagues": [
+            {"name": "Fera (Beast)", "bp_req": "0 - 599.999 BP", "badge": "badge-gray", "desc": "Liga de entrada para novatos e testes de composição."},
+            {"name": "Predador (Predator)", "bp_req": "600.000 - 899.999 BP", "badge": "badge-green", "desc": "Confrontos intermediários com exigência de sinergia básica."},
+            {"name": "Soberano (Sovereign)", "bp_req": "900.000 - 1.199.999 BP", "badge": "badge-blue", "desc": "Combates ranqueados avançados com foco em controle de grupo (CC)."},
+            {"name": "Imortal (Immortal)", "bp_req": "1.200.000 - 1.499.999 BP", "badge": "badge-gold", "desc": "Elite do servidor; erros de posicionamento são fatais."},
+            {"name": "Mítico (Mythic)", "bp_req": "1.500.000+ BP", "badge": "badge-crimson", "desc": "O topo supremo; apenas os maiores campeões e lendas de clãs."}
+        ],
+        "traits": [
+            {
+                "id": "101",
+                "name": "Defesa (Guardião)",
+                "icon": "assets/pvp/trait_guardian.png",
+                "skillset": "SkillSet #325101",
+                "desc": "Aumenta a armadura física e mágica em 25%, gera escudo de sangue ao sofrer atordoamento e reduz dano em área (AoE) recebido por aliados próximos."
+            },
+            {
+                "id": "102",
+                "name": "Proteção (Bênção)",
+                "icon": "assets/pvp/trait_blessing.png",
+                "skillset": "SkillSet #325102",
+                "desc": "Acelera a taxa de regeneração contínua de PV, dissipa lentidões e sangramentos, e concede aura de absorção para a linha de trás."
+            },
+            {
+                "id": "103",
+                "name": "Esmagamento (Crushing)",
+                "icon": "assets/pvp/trait_crushing.png",
+                "skillset": "SkillSet #325103",
+                "desc": "Ignora 30% da resistência a dano crítico do alvo, quebra escudos de sangue instantaneamente e inflige penalidade severa de cura."
+            },
+            {
+                "id": "104",
+                "name": "Assassinato (Assassination)",
+                "icon": "assets/pvp/trait_assassination.png",
+                "skillset": "SkillSet #325104",
+                "desc": "Amplifica o dano pelas costas (Back Attack) em 40%, concede bônus de velocidade de movimento e executa inimigos com menos de 25% de vida."
+            }
+        ]
+    },
+    "conquest": {
+        "title": "Guerra de Conquista & Cerco de Guildas",
+        "subtitle": "Conflito massivo semanal pelo controle territorial e soberania de clã",
+        "schedule": "Todos os Sábados às 20h30 (Duração: 31 Minutos cronometrados)",
+        "countdown": "10 Segundos de Preparação / 180s para Desocupação Pós-Guerra",
+        "maps": [
+            {
+                "name": "Guerra de Ocupação (Occupation War)",
+                "type": "Disputa de Altares & Zonas de Controle",
+                "image": "assets/pvp/conquest_guidemap_occupation.png",
+                "desc": "As guildas disputam 5 Altares de Sangue espalhados pela fortaleza. Cada altar controlado acumula pontos de ocupação por segundo. A destruição das Torres de Defesa abre caminhos para o Núcleo Central."
+            },
+            {
+                "name": "Guerra de Raide (Raid War)",
+                "type": "Assalto a Chefes & Fortificações",
+                "image": "assets/pvp/conquest_guidemap_raid.png",
+                "desc": "Modo de combate híbrido com chefes titânicos de cerco (ConquestBoss). Eliminar os mini-chefes e o chefe principal de conquista concede bônus multiplicadores massivos para a pontuação de território."
+            }
+        ],
+        "tiers": [
+            {"tier": "5", "name": "Tier 5 - Diamante", "points": "850+ Pontos", "badge": "badge-blue", "privilege": "Controle Máximo, Taxa de Leilão Reduzida, Título de Soberano."},
+            {"tier": "4", "name": "Tier 4 - Platina", "points": "750 a 849 Pontos", "badge": "badge-gold", "privilege": "Acesso a Masmorras de Conquista Exclusivas e Loja de Clã Nv. 5."},
+            {"tier": "3", "name": "Tier 3 - Ouro", "points": "650 a 749 Pontos", "badge": "badge-crimson", "privilege": "Baús de Recompensa Semanal e Emblemas de Ocupação."},
+            {"tier": "2", "name": "Tier 2 - Prata", "points": "550 a 649 Pontos", "badge": "badge-gray", "privilege": "Fundos Expandidos e Bônus de EXP de Guilda."},
+            {"tier": "1", "name": "Tier 1 - Bronze", "points": "0 a 549 Pontos", "badge": "badge-gray", "privilege": "Recompensas de Participação Básica de Batalha."}
+        ]
+    },
+    "pk_system": {
+        "title": "Sistema de PK Aberto & Notoriedade de Sangue",
+        "subtitle": "Regras de combate em mundo aberto, penalidades de karma e radar de retaliação",
+        "icon": "assets/pvp/flat_pvppenalty.png",
+        "penalty_mark": "assets/pvp/pvppenalty_01.png",
+        "penalty_levels": [
+            {
+                "level": "1",
+                "points": "4.000 pts",
+                "status": "Suspeito (PvpPenalty_01)",
+                "effects": "Marca visual discreta sobre a cabeça. -5% em Ataque e Defesa. Guardas de capitais ficam em estado de alerta.",
+                "color": "#f59e0b"
+            },
+            {
+                "level": "2",
+                "points": "7.500 pts",
+                "status": "Hostil (PvpPenalty_02)",
+                "effects": "Marca avermelhada pulsante. -10% em todos os atributos base. Proibido montar em veículos dentro de áreas seguras.",
+                "color": "#f97316"
+            },
+            {
+                "level": "3",
+                "points": "10.000 pts",
+                "status": "Criminoso (PvpPenalty_03)",
+                "effects": "-20% de atributos de combate. Queda de EXP dobrada ao ser abatido. Perda de 50% de eficiência de poções de cura.",
+                "color": "#ef4444"
+            },
+            {
+                "level": "4",
+                "points": "12.500 pts",
+                "status": "Vilão Infame (PvpPenalty_04)",
+                "effects": "-35% de atributos. Bloqueio absoluto de teleporte rápido e proibição de acessar leilão e correio de jogo.",
+                "color": "#dc2626"
+            },
+            {
+                "level": "5",
+                "points": "15.000 pts",
+                "status": "Demônio / Fora da Lei (PvpPenalty_05)",
+                "effects": "-50% em combate total. Localização revelada no minimapa para todo o servidor. Qualquer jogador pode eliminá-lo sem acumular karma.",
+                "color": "#991b1b"
+            }
+        ],
+        "revenge_radar": {
+            "title": "Radar de Vingança (AlertTarget / Revenge World)",
+            "max_targets": "Até 50 Assassinos Monitorados",
+            "radar_range": "3.000 Unidades de Distância no Mapa",
+            "duration": "24 Horas de Rastreamento Ativo (86.400 segundos)",
+            "refresh_rate": "Atualização de Posição a cada 10 Segundos",
+            "desc": "Se você for eliminado por outro jogador em zona neutra ou de conflito, ele é incluído na sua lista de alvos de vingança. Ao se aproximar de você, um alerta sonoro e visual avisa sua presença, permitindo emboscadas e retaliação."
+        },
+        "pvp_stats": [
+            {"stat": "AttackPowerPvp", "name": "Poder de Ataque PvP", "desc": "Aumenta diretamente o dano final causado a outros jogadores."},
+            {"stat": "DamageReductionPvp", "name": "Redução de Dano PvP", "desc": "Diminui o dano sofrido por ataques diretos de vampiros rivais."},
+            {"stat": "CriticalRatePvp", "name": "Taxa Crítica PvP", "desc": "Probabilidade de acerto crítico calculada independentemente do PvE."},
+            {"stat": "CriticalResistanceRatePvp", "name": "Resistência Crítica PvP", "desc": "Reduz a chance de receber golpes críticos de inimigos."},
+            {"stat": "DamageMultiplierPvp", "name": "Multiplicador de Dano PvP", "desc": "Amplifica o multiplicador de dano em caso de acerto crítico no PvP."},
+            {"stat": "DamageReducerPvp", "name": "Atenuador de Dano PvP", "desc": "Reduz a gravidade dos golpes de alto impacto sofridos."},
+            {"stat": "HitValuePvp", "name": "Precisão de Acerto PvP", "desc": "Contrarresta o valor de esquiva do adversário."},
+            {"stat": "DodgeValuePvp", "name": "Esquiva PvP", "desc": "Aumenta a probabilidade de anular dano total de ataques normais."},
+            {"stat": "IgnoreCriticalDamageMultiplierPvp", "name": "Ignorar Multiplicador Crítico", "desc": "Cancela bônus de dano de golpes letais sofridos."}
+        ]
+    },
+    "world_tournament": {
+        "title": "Torneio Mundial dos Vampiros (Vampir Tournament World)",
+        "subtitle": "O campeonato de elite interservidores entre os maiores clãs do ecossistema",
+        "format": "Torneio eliminatório em 5 rodadas (Round 0 a Round 4)",
+        "schedule": "Sazonal (Fins de Temporada de Conquista)",
+        "desc": "As guildas campeãs de cada servidor são transportadas para uma arena colossal de outro plano. Cada vitória distribui recompensas monumentais para os combatentes e bônus passivos para toda a comunidade de seu servidor de origem.",
+        "rewards_sample": "Caixas de Linhagem Soberana, Títulos Cósmicos, Diamantes e Asas de Predador Mítico."
+    }
+}
+
+with open(os.path.join(OUT_DIR, "pvp.json"), "w", encoding="utf-8") as f:
+    json.dump(pvp_catalog, f, indent=2, ensure_ascii=False)
+print("  ✓ Processed PvP & War systems.")
+
+
+# ==========================================
+# 11. GAME CONSTANTS & FAQ
 # ==========================================
 print("Processing Constants and FAQ...")
 constants_dict = {crow.get("Key", "").strip(): crow.get("Value", "").strip() for crow in const_raw if crow.get("Key")}
@@ -1129,6 +1503,8 @@ bundle_data = {
     "items": curated_items,
     "quests": quests_catalog,
     "crafting": crafting_catalog,
+    "modes": modes_catalog,
+    "pvp": pvp_catalog,
     "constants": constants_dict,
     "faq": faq_catalog
 }

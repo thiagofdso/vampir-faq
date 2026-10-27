@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=2.1.0">
 </head>
 <body>
   <div class="app-container">
@@ -69,6 +69,16 @@
           <span class="nav-icon"><img src="assets/items/flat_itemcraft.png" style="width: 18px; height: 18px; vertical-align: middle;" onerror="this.outerHTML='🔨'"></span>
           <span>Forja & Criação</span>
           <span class="nav-count" id="countCrafting">602</span>
+        </a>
+        <a class="nav-item" data-target="modes">
+          <span class="nav-icon">🎯</span>
+          <span>Modos de Jogo</span>
+          <span class="nav-count" id="countModes">8</span>
+        </a>
+        <a class="nav-item" data-target="pvp">
+          <span class="nav-icon"><img src="assets/pvp/flat_conquest.png" style="width: 18px; height: 18px; vertical-align: middle;" onerror="this.outerHTML='⚔️'"></span>
+          <span>PvP & Guerras</span>
+          <span class="nav-count" id="countPvp">5v5</span>
         </a>
         <a class="nav-item" data-target="faq">
           <span class="nav-icon">❓</span>
@@ -380,7 +390,64 @@
         </section>
 
         <!-- ==============================================
-             10. FAQ SECTION
+             10. GAME MODES SECTION
+             ============================================== -->
+        <section id="modes" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">🎯 Modos de Jogo & Instâncias</h2>
+            <p class="section-subtitle">196+ instâncias catalogadas: cooperativo, escalada solo, inter-servidores, rituais de linhagem e defesa de guilda</p>
+          </div>
+          <div class="filter-bar" id="modesFilterBar">
+            <button class="filter-btn active" data-mcat="all">Todos os Modos</button>
+            <button class="filter-btn" data-mcat="pve_coop">Cooperativo em Grupo</button>
+            <button class="filter-btn" data-mcat="pve_solo">Masmorra Infinita</button>
+            <button class="filter-btn" data-mcat="cross_server">Inter-Servidor</button>
+            <button class="filter-btn" data-mcat="bloodline">Linhagem de Sangue</button>
+            <button class="filter-btn" data-mcat="guild">Guilda & Defesa</button>
+            <button class="filter-btn" data-mcat="world_pve">Chefes de Campo</button>
+            <button class="filter-btn" data-mcat="automation">Automação & Farm</button>
+          </div>
+          <div class="cards-grid" id="modesContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+
+        <!-- ==============================================
+             11. PVP & WAR SECTION
+             ============================================== -->
+        <section id="pvp" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <img src="assets/pvp/flat_conquest.png" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 8px;" onerror="this.outerHTML='⚔️'">
+              PvP, Arena & Conquista Territorial
+            </h2>
+            <p class="section-subtitle">Arena 5v5 ranqueada, Guerra de Conquista aos sábados, Torneio Mundial dos Vampiros e sistema de PK com Radar de Vingança</p>
+          </div>
+
+          <div class="pvp-subnav" id="pvpSubNav">
+            <button class="pvp-subnav-btn active" data-pvptab="arena">
+              <span>🏟️ Arena 5v5 (Coliseu)</span>
+            </button>
+            <button class="pvp-subnav-btn" data-pvptab="conquest">
+              <img src="assets/pvp/flat_conquest.png" style="width: 16px; height: 16px;" onerror="this.outerHTML='🏰'">
+              <span>Guerra de Conquista</span>
+            </button>
+            <button class="pvp-subnav-btn" data-pvptab="pk">
+              <img src="assets/pvp/flat_pvppenalty.png" style="width: 16px; height: 16px;" onerror="this.outerHTML='💀'">
+              <span>PK Aberto & Karma</span>
+            </button>
+            <button class="pvp-subnav-btn" data-pvptab="tournament">
+              <span>🏆 Torneio Mundial</span>
+            </button>
+          </div>
+
+          <div id="pvpContentContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+
+        <!-- ==============================================
+             12. FAQ SECTION
              ============================================== -->
         <section id="faq" class="view-section">
           <div class="section-header">
@@ -411,8 +478,8 @@
   </div>
 
   <!-- Data Bundle (Offline & Zero-CORS support) -->
-  <script src="data/bundle.js"></script>
+  <script src="data/bundle.js?v=2.1.0"></script>
   <!-- Application Logic -->
-  <script src="app.js"></script>
+  <script src="app.js?v=2.1.0"></script>
 </body>
 </html>
