@@ -21,6 +21,8 @@
     dungeonsSearchTerm: '',
     itemsFilter: 'all',
     itemsSearchTerm: '',
+    itemsPage: 1,
+    itemsPerPage: 36,
     questsFilter: 'all',
     questsSearchTerm: '',
     questsPage: 1,
@@ -526,9 +528,10 @@
     `).join('');
   }
 
-  // Render Items with Official Weapon & Gear Icons
+  // Render Items with Official Weapon, Box, Sephira & Relic Icons
   function renderItems() {
     const container = document.getElementById('itemsContainer');
+    const pagination = document.getElementById('itemsPagination');
     if (!container || !state.data.items) return;
 
     let filtered = state.data.items;
@@ -542,11 +545,19 @@
       filtered = filtered.filter(i =>
         i.name.toLowerCase().includes(q) ||
         i.desc.toLowerCase().includes(q) ||
-        i.id.includes(q)
+        i.id.includes(q) ||
+        i.type_name.toLowerCase().includes(q)
       );
     }
 
-    container.innerHTML = filtered.map(item => `
+    const total = filtered.length;
+    const pages = Math.ceil(total / state.itemsPerPage) || 1;
+    if (state.itemsPage > pages) state.itemsPage = 1;
+
+    const start = (state.itemsPage - 1) * state.itemsPerPage;
+    const currentList = filtered.slice(start, start + state.itemsPerPage);
+
+    container.innerHTML = currentList.map(item => `
       <div class="entity-card item-card" onclick="window.inspectItem('${item.id}')">
         <div class="entity-header">
           <div class="item-slot-frame">
@@ -562,12 +573,20 @@
         </div>
         <p class="entity-desc">${item.desc}</p>
         <div class="entity-meta-row">
-          <span>Peso: ${item.weight}</span>
+          <span>Peso: ${item.weight || '0'}</span>
           <span style="color: var(--crimson-light);">${item.max_enchant}</span>
         </div>
       </div>
     `).join('');
+
+    renderPagination(pagination, state.itemsPage, pages, 'window.changeItemsPage');
   }
+
+  window.changeItemsPage = function(page) {
+    state.itemsPage = page;
+    renderItems();
+    document.getElementById('items').scrollIntoView({ behavior: 'smooth' });
+  };
 
   // Shared Numeric Pagination Component
   function renderPagination(container, currentPage, totalPages, callbackName) {
@@ -1109,6 +1128,7 @@
         renderDungeons();
       } else if (state.currentTab === 'items') {
         state.itemsSearchTerm = q;
+        state.itemsPage = 1;
         renderItems();
       } else if (state.currentTab === 'quests') {
         state.questsSearchTerm = q;
@@ -1155,6 +1175,7 @@
         document.querySelectorAll('#itemsFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
         state.itemsFilter = e.target.dataset.itype;
+        state.itemsPage = 1;
         renderItems();
       }
     });

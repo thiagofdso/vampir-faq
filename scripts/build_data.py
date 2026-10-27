@@ -753,11 +753,16 @@ for iid, irow in item_raw.items():
     itype = irow.get("Type", "")
     tier = irow.get("Tier", "1")
     rarity = irow.get("Rarity", "102")
+    raw_img = irow.get("Img", "").strip()
     
     # Categorization and clean title
     if itype == "1":
-        cat = "1"
-        type_label = "Arma & Equipamento"
+        if any(k in raw_img.lower() for k in ["relic", "burial", "objet"]) or any(k in name.lower() for k in ["relíquia", "fúnebre"]):
+            cat = "relic"
+            type_label = "Relíquia & Equipamento Fúnebre"
+        else:
+            cat = "1"
+            type_label = "Arma & Equipamento"
         clean_name = re.sub(r'\{[^}]+\}', '', name).strip()
         clean_desc = re.sub(r'\{[^}]+\}', '', desc).strip()
     elif itype == "31":
@@ -784,14 +789,19 @@ for iid, irow in item_raw.items():
         else:
             clean_name = re.sub(r'\{[^}]+\}', 'Nv. 1', name).strip()
             clean_desc = "Carta mística de aprimoramento de habilidade."
-    elif itype == "4":
-        cat = "4"
-        type_label = "Baú de Recompensas"
+    elif itype in ["32", "42"] or "sephira" in raw_img.lower() or "sefira" in name.lower():
+        cat = "32"
+        type_label = "Sefira Mística"
         clean_name = re.sub(r'\{[^}]+\}', '', name).strip()
         clean_desc = re.sub(r'\{[^}]+\}', '', desc).strip()
-    elif itype in ["32", "49", "53"]:
-        cat = "32"
-        type_label = "Sefira & Relíquia"
+    elif any(k in raw_img.lower() for k in ["burial", "objet", "relic"]) or any(k in name.lower() for k in ["relíquia", "sepultamento", "fúnebre"]):
+        cat = "relic"
+        type_label = "Relíquia & Sepultamento"
+        clean_name = re.sub(r'\{[^}]+\}', '', name).strip()
+        clean_desc = re.sub(r'\{[^}]+\}', '', desc).strip()
+    elif itype in ["4", "25"] or "itembox" in raw_img.lower() or "baú" in name.lower():
+        cat = "4"
+        type_label = "Baú de Tesouro"
         clean_name = re.sub(r'\{[^}]+\}', '', name).strip()
         clean_desc = re.sub(r'\{[^}]+\}', '', desc).strip()
     else:
@@ -802,11 +812,26 @@ for iid, irow in item_raw.items():
 
     # Image matching
     raw_img = irow.get("Img", "").strip()
-    clean_img_file = raw_img.replace("IMG_", "").lower() + ".png"
+    clean_img_file = raw_img.replace("IMG_", "").replace("TEX_", "").lower() + ".png"
     
     item_img = ""
     if clean_img_file in item_pngs:
         item_img = f"assets/items/{clean_img_file}"
+    elif cat == "4":
+        for b in ["itembox_fieldboss_01.png", "itembox_equipment_01.png", "itembox_enchantscroll_01.png", "itembox_burialgoods_01.png"]:
+            if b in item_pngs:
+                item_img = f"assets/items/{b}"
+                break
+    elif cat == "32":
+        for s in ["sephira_01.png", "flat_sephira.png", "sephira_11.png"]:
+            if s in item_pngs:
+                item_img = f"assets/items/{s}"
+                break
+    elif cat == "relic":
+        for r in ["flat_relic.png", "itembox_relic_01.png", "itembox_burialgoods_01.png", "itembox_objetitem_01.png"]:
+            if r in item_pngs:
+                item_img = f"assets/items/{r}"
+                break
     elif cat == "potion":
         for p in ["hppotion_01.png", "attackpowerpotion_01.png", "potion_event_01.png"]:
             if p in item_pngs:
@@ -818,12 +843,12 @@ for iid, irow in item_raw.items():
                 item_img = f"assets/items/{c}"
                 break
     elif cat == "1":
-        for w in ["weapon_bloodsword_common_01.png"]:
+        for w in ["weapon_bloodsword_common_01.png", "armor_armor_common_01.png"]:
             if w in item_pngs:
                 item_img = f"assets/items/{w}"
                 break
     elif cat == "31":
-        for b in ["flat_skillcard.png", "accessory_eventseal01_common.png"]:
+        for b in ["skillbook_allclass.png", "skillbook_darkmage.png", "skillbook_swordman.png"]:
             if b in item_pngs:
                 item_img = f"assets/items/{b}"
                 break
@@ -846,7 +871,7 @@ for iid, irow in item_raw.items():
         "weight": irow.get("Weight", "0")
     })
 
-# Curate a balanced collection across ALL categories so no tab is ever empty:
+# Curate a balanced collection across ALL categories with real extracted icons prioritized:
 curated_items = []
 
 # 1. All Potions & Consumables (56 items)
@@ -861,11 +886,14 @@ curated_items.extend(items_by_cat["1"][:120])
 # 4. Skill Books (80 items)
 curated_items.extend(items_by_cat["31"][:80])
 
-# 5. Chests (40 items)
-curated_items.extend(items_by_cat["4"][:40])
+# 5. Chests & Baús (80 items with authentic icons)
+curated_items.extend(items_by_cat["4"][:80])
 
-# 6. Sephiras & Relics (40 items)
-curated_items.extend(items_by_cat["32"][:40])
+# 6. Sephiras Místicas (72 items - all core Sephiras)
+curated_items.extend(items_by_cat["32"][:72])
+
+# 7. Relíquias & Equipamento Fúnebre (60 items)
+curated_items.extend(items_by_cat["relic"][:60])
 
 with open(os.path.join(OUT_DIR, "items.json"), "w", encoding="utf-8") as f:
     json.dump(curated_items, f, indent=2, ensure_ascii=False)
