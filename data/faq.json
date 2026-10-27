@@ -22,7 +22,7 @@
   {
     "category": "Equipamentos & Forja",
     "question": "Como funciona o Encantamento de Itens e quais são os limites?",
-    "answer": "O limite máximo de encantamento é +15 (Auction.FilterMaxEnchantLevel: 15). O jogo oferece encantamento simples e multi-encantamento automático até o nível 11 (ItemEnchant.MultiEnchantSequenceEnchantLevel: 11). Encantamentos utilizam Pergaminhos Abençoados (sem risco de quebra) ou Pergaminhos Amaldiçoados/Comuns (com risco de rebaixamento de nível acima de +5)."
+    "answer": "O limite máximo de encantamento é +15 (Auction.FilterMaxEnchantLevel: 15), com zona segura garantida de +0 até +5 (100% de sucesso e 0% de quebra). O multi-encantamento sequencial vai até o nível +11 (ItemEnchant.MultiEnchantSequenceEnchantLevel: 11). Existem 3 tipos de pergaminhos: Normal (avança +1 nível; a partir do +6 há risco de quebra), Abençoado (em caso de sucesso, oferece chance de salto duplo de +2 níveis; ATENÇÃO: a engenharia reversa confirmou que ele NÃO protege contra quebra, possuindo o mesmo BreakRate do pergaminho normal) e Amaldiçoado (aplica maldição garantida com CurseRate de 10.000 reduzindo -1 nível para re-rolagem estratégica)."
   },
   {
     "category": "PvP & Mundo Aberto",

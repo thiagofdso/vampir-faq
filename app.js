@@ -33,6 +33,7 @@
     craftingPerPage: 24,
     modesFilter: 'all',
     pvpTab: 'arena',
+    enchantTab: 'scrolls',
     activeBuildIndex: 0,
     activeVariantIndex: 0
   };
@@ -65,18 +66,23 @@
     }
 
     try {
-      const [classes, builds, skills, bosses, dungeons, items, faq, constants] = await Promise.all([
+      const [classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, faq, constants] = await Promise.all([
         fetch('data/classes.json').then(r => r.json()),
         fetch('data/builds.json').then(r => r.json()),
         fetch('data/skills.json').then(r => r.json()),
         fetch('data/bosses.json').then(r => r.json()),
         fetch('data/dungeons.json').then(r => r.json()),
         fetch('data/items.json').then(r => r.json()),
+        fetch('data/quests.json').then(r => r.json()),
+        fetch('data/crafting.json').then(r => r.json()),
+        fetch('data/modes.json').then(r => r.json()),
+        fetch('data/pvp.json').then(r => r.json()),
+        fetch('data/enchantment.json').then(r => r.json()),
         fetch('data/faq.json').then(r => r.json()),
         fetch('data/constants.json').then(r => r.json())
       ]);
 
-      state.data = { classes, builds, skills, bosses, dungeons, items, faq, constants };
+      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, faq, constants };
       initApp();
     } catch (e) {
       console.error('Failed to load JSON data asynchronously:', e);
@@ -107,6 +113,7 @@
     if (tabId === 'crafting') renderCrafting();
     if (tabId === 'modes') renderModes();
     if (tabId === 'pvp') renderPvP();
+    if (tabId === 'enchantment') renderEnchantment();
   }
 
   window.navTo = function(tabId) {
@@ -1018,6 +1025,246 @@
     }
   }
 
+  // Render Item Enchantment / Upgrade
+  function renderEnchantment() {
+    const container = document.getElementById('enchantmentContentContainer');
+    if (!container || !state.data.enchantment) return;
+
+    const enc = state.data.enchantment;
+
+    if (state.enchantTab === 'scrolls') {
+      container.innerHTML = `
+        <!-- Summary Metric Badges -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px;">
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Regras Mapeadas</div>
+            <div style="font-size: 1.6rem; font-weight: 700; color: var(--gold-primary); font-family: monospace;">${enc.summary.total_rules.toLocaleString()}</div>
+            <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">Extraídas de ItemEnchant.csv</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Tipos de Equipamentos</div>
+            <div style="font-size: 1.6rem; font-weight: 700; color: #38bdf8; font-family: monospace;">${enc.summary.equipment_types_count} Categorias</div>
+            <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">Armas, Armaduras, Joias, Relíquias</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Zona Segura Garantida</div>
+            <div style="font-size: 1.6rem; font-weight: 700; color: #34d399; font-family: monospace;">+0 até +5</div>
+            <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">100% Sucesso • 0% Quebra</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Multi-Encantamento</div>
+            <div style="font-size: 1.6rem; font-weight: 700; color: #a78bfa; font-family: monospace;">Até +11</div>
+            <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">ItemEnchant.MultiEnchant... = 11</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Nível Máximo do Jogo</div>
+            <div style="font-size: 1.6rem; font-weight: 700; color: var(--crimson-light); font-family: monospace;">+15</div>
+            <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">Auction.FilterMaxEnchantLevel</div>
+          </div>
+        </div>
+
+        <h3 style="font-size: 1.2rem; color: #fff; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+          <span>📜 Os 3 Pergaminhos de Aprimoramento</span>
+          <span style="font-size: 0.75rem; color: var(--gold-primary); font-weight: normal;">(EOperationType)</span>
+        </h3>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 28px;">
+          ${enc.scrolls.map(s => `
+            <div style="background: rgba(15,20,30,0.65); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-md); padding: 20px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+                  <div style="display: flex; gap: 10px;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                      <img src="${s.weapon_icon}" alt="Arma" title="Versão de Armas" style="width: 44px; height: 44px; object-fit: contain; filter: drop-shadow(0 0 6px rgba(0,0,0,0.8));">
+                      <span style="font-size: 0.65rem; color: #94a3b8;">Arma</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                      <img src="${s.armor_icon}" alt="Armadura" title="Versão de Armaduras" style="width: 44px; height: 44px; object-fit: contain; filter: drop-shadow(0 0 6px rgba(0,0,0,0.8));">
+                      <span style="font-size: 0.65rem; color: #94a3b8;">Armadura</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                      <img src="${s.acc_icon}" alt="Acessório" title="Versão de Acessórios" style="width: 44px; height: 44px; object-fit: contain; filter: drop-shadow(0 0 6px rgba(0,0,0,0.8));">
+                      <span style="font-size: 0.65rem; color: #94a3b8;">Acessório</span>
+                    </div>
+                  </div>
+                  <span class="entity-badge ${s.badge}">${s.tag}</span>
+                </div>
+
+                <h4 style="color: #fff; font-size: 1.1rem; margin-bottom: 6px;">${s.name}</h4>
+                <div style="font-size: 0.75rem; color: var(--gold-primary); font-family: monospace; margin-bottom: 12px;">EOperationType: ${s.type_code}</div>
+                <p style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 16px;">${s.description}</p>
+              </div>
+
+              <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; font-size: 0.8rem; display: flex; flex-direction: column; gap: 6px;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #94a3b8;">Zona Segura:</span>
+                  <strong style="color: #34d399;">${s.safe_zone}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #94a3b8;">Regra de Risco:</span>
+                  <strong style="color: #f87171;">${s.risk_start}</strong>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Technical Mechanics Breakdown -->
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.25); border-radius: var(--radius-md); padding: 20px;">
+          <h4 style="font-size: 1.05rem; color: var(--gold-primary); margin-bottom: 10px;">⚙️ Modos de Aprimoramento no Cliente</h4>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; font-size: 0.85rem; color: #cbd5e1; line-height: 1.6;">
+            <div>
+              <strong style="color: #fff; display: block; margin-bottom: 4px;">1. Aprimoramento Simples (Single Step)</strong>
+              Consome 1 pergaminho e ouro proporcional à categoria. Em caso de sucesso, o item ganha +1 nível. A partir do +6, se falhar na rolagem de BreakRate, o item quebra e é destruído irreversivelmente.
+            </div>
+            <div>
+              <strong style="color: #fff; display: block; margin-bottom: 4px;">2. Multi-Encantamento Sequencial (Auto-Enchant)</strong>
+              O jogo permite definir uma meta automática de nível até o limite de <strong>+11</strong> (<code style="color: #fbbf24;">MultiEnchantSequenceEnchantLevel</code>). A sequência para automaticamente se a meta for atingida ou se o item quebrar.
+            </div>
+            <div>
+              <strong style="color: #fff; display: block; margin-bottom: 4px;">3. Estratégia do Pergaminho Amaldiçoado</strong>
+              Com 100% de taxa de redução (<code style="color: #f87171;">CurseRate = 10.000</code>), ele é empregado por jogadores avançados para rebaixar itens do +7 de volta ao +6 para tentar novamente o salto duplo do pergaminho abençoado (+6 ➔ +8).
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (state.enchantTab === 'rates') {
+      container.innerHTML = `
+        <h3 style="font-size: 1.2rem; color: #fff; margin-bottom: 6px;">⚖️ Análise Comparativa de Taxas no Primeiro Nível de Risco (+6)</h3>
+        <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 18px;">
+          Do +0 ao +5 todas as categorias possuem 100% de sucesso. Ao tentar elevar para +6, entram em vigor as taxas de quebra e diferenciação de custos:
+        </p>
+
+        <div style="overflow-x: auto; margin-bottom: 24px;">
+          <table class="skills-table" style="background: rgba(15,20,30,0.6); border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08);">
+            <thead>
+              <tr style="background: rgba(0,0,0,0.5);">
+                <th style="padding: 14px;">Categoria de Equipamento</th>
+                <th style="padding: 14px;">Custo em Ouro</th>
+                <th style="padding: 14px;">Sucesso Normal</th>
+                <th style="padding: 14px;">Taxa de Quebra (BreakRate)</th>
+                <th style="padding: 14px;">Salto Duplo (Abençoado)</th>
+                <th style="padding: 14px;">Perfil de Risco</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${enc.transition_rates.map(r => `
+                <tr>
+                  <td style="padding: 14px; font-weight: 600; color: #fff;">${r.category}</td>
+                  <td style="padding: 14px; color: #fbbf24; font-family: monospace; font-weight: 600;">${r.gold_cost}</td>
+                  <td style="padding: 14px; color: #34d399; font-weight: 600;">${r.normal_success}</td>
+                  <td style="padding: 14px; color: #f87171; font-weight: 700;">${r.break_rate}</td>
+                  <td style="padding: 14px; color: #a78bfa; font-weight: 600;">${r.big_success}</td>
+                  <td style="padding: 14px;"><span class="entity-badge ${r.risk_badge}">${r.risk_profile}</span></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+          <div style="background: rgba(0,0,0,0.25); border-left: 3px solid #34d399; padding: 14px 18px; border-radius: 4px;">
+            <strong style="color: #34d399; display: block; margin-bottom: 4px;">Armas: Maior Tolerância Inicial</strong>
+            <p style="font-size: 0.82rem; color: #cbd5e1; margin: 0; line-height: 1.5;">
+              As armas possuem 85% de sucesso e apenas 15% de quebra no +6. Isso incentiva os jogadores a buscarem o +7 para desbloquear o salto de dano e precisão com menor receio de perda imediata.
+            </p>
+          </div>
+          <div style="background: rgba(0,0,0,0.25); border-left: 3px solid #f87171; padding: 14px 18px; border-radius: 4px;">
+            <strong style="color: #f87171; display: block; margin-bottom: 4px;">Acessórios: Os Mais Arriscados</strong>
+            <p style="font-size: 0.82rem; color: #cbd5e1; margin: 0; line-height: 1.5;">
+              Com 60% de taxa de quebra já no +6 e custo elevado (8.500 Gold), os anéis e braceletes representam o maior sumidouro de recursos do jogo, tornando joias +7 ou superiores raríssimas no mercado.
+            </p>
+          </div>
+          <div style="background: rgba(0,0,0,0.25); border-left: 3px solid var(--gold-primary); padding: 14px 18px; border-radius: 4px;">
+            <strong style="color: var(--gold-primary); display: block; margin-bottom: 4px;">Relíquias Funerárias: Custo Máximo</strong>
+            <p style="font-size: 0.82rem; color: #cbd5e1; margin: 0; line-height: 1.5;">
+              Máscaras, Cálices e Perfumes cobram 15.000 Gold por tentativa com taxa de 50/50 no +6, configurando investimentos de ponta para a linhagem de sangue no end-game.
+            </p>
+          </div>
+        </div>
+      `;
+    } else if (state.enchantTab === 'progression_weapon') {
+      container.innerHTML = `
+        <h3 style="font-size: 1.2rem; color: #fff; margin-bottom: 6px;">🗡️ Tabela de Progressão de Armas (+0 a +15)</h3>
+        <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 18px;">
+          Exemplo com a Espada Comum (ItemEnchantLevel 0 a 15). Atributos cumulativos com marcos de precisão e bônus de ataque:
+        </p>
+
+        <div style="overflow-x: auto;">
+          <table class="skills-table" style="background: rgba(15,20,30,0.6); border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08);">
+            <thead>
+              <tr style="background: rgba(0,0,0,0.5);">
+                <th style="padding: 12px 14px;">Nível</th>
+                <th style="padding: 12px 14px;">Sucesso</th>
+                <th style="padding: 12px 14px;">Quebra</th>
+                <th style="padding: 12px 14px;">Custo (Gold)</th>
+                <th style="padding: 12px 14px;">Poder de Ataque</th>
+                <th style="padding: 12px 14px;">Precisão (HitValue)</th>
+                <th style="padding: 12px 14px;">Crítico</th>
+                <th style="padding: 12px 14px;">Status / Marco</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${enc.sword_progression.map(s => {
+                const isSafe = s.break === '0%';
+                const isMilestone = s.level === '+7' || s.level === '+10' || s.level === '+15';
+                const rowBg = isMilestone ? 'background: rgba(212, 175, 55, 0.08);' : (isSafe ? '' : 'background: rgba(220, 38, 38, 0.04);');
+                return `
+                  <tr style="${rowBg}">
+                    <td style="padding: 12px 14px; font-weight: 700; color: ${isSafe ? '#34d399' : (isMilestone ? 'var(--gold-primary)' : '#f87171')}; font-size: 1rem; font-family: monospace;">${s.level}</td>
+                    <td style="padding: 12px 14px; color: #34d399; font-weight: 600;">${s.succ}</td>
+                    <td style="padding: 12px 14px; color: ${isSafe ? '#94a3b8' : '#f87171'}; font-weight: ${isSafe ? 'normal' : '700'};">${s.break}</td>
+                    <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">${s.gold}</td>
+                    <td style="padding: 12px 14px; font-weight: 700; color: #fff;">${s.atk}</td>
+                    <td style="padding: 12px 14px; color: ${s.hit !== '—' ? '#38bdf8' : '#64748b'}; font-weight: ${s.hit !== '—' ? '700' : 'normal'};">${s.hit}</td>
+                    <td style="padding: 12px 14px; color: #cbd5e1;">${s.crit}</td>
+                    <td style="padding: 12px 14px; font-size: 0.8rem; color: ${isMilestone ? 'var(--gold-primary)' : '#94a3b8'}; font-weight: ${isMilestone ? '600' : 'normal'};">${s.status}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    } else if (state.enchantTab === 'progression_acc') {
+      container.innerHTML = `
+        <h3 style="font-size: 1.2rem; color: #fff; margin-bottom: 6px;">💍 Tabela de Progressão de Acessórios & Joias</h3>
+        <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 18px;">
+          Exemplo com Cinto/Bracelete Ancestral. Acessórios concedem mitigação direta de dano físico e precisão contra magias inimigas:
+        </p>
+
+        <div style="overflow-x: auto;">
+          <table class="skills-table" style="background: rgba(15,20,30,0.6); border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08);">
+            <thead>
+              <tr style="background: rgba(0,0,0,0.5);">
+                <th style="padding: 12px 14px;">Nível</th>
+                <th style="padding: 12px 14px;">Redução de Dano (AttackPowerReduction)</th>
+                <th style="padding: 12px 14px;">Precisão de Habilidade (HitValueSkill)</th>
+                <th style="padding: 12px 14px;">Redução Crítica (CriticalRateReduction)</th>
+                <th style="padding: 12px 14px;">Status / Marco</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${enc.accessory_progression.map(a => {
+                const isMilestone = a.level === '+5' || a.level === '+10' || a.level === '+15';
+                const rowBg = isMilestone ? 'background: rgba(56, 189, 248, 0.08);' : '';
+                return `
+                  <tr style="${rowBg}">
+                    <td style="padding: 12px 14px; font-weight: 700; color: ${isMilestone ? '#38bdf8' : '#fff'}; font-size: 1rem; font-family: monospace;">${a.level}</td>
+                    <td style="padding: 12px 14px; color: #34d399; font-weight: 700;">${a.dmg_red}</td>
+                    <td style="padding: 12px 14px; color: ${a.skill_hit !== '—' ? '#38bdf8' : '#64748b'}; font-weight: ${a.skill_hit !== '—' ? '700' : 'normal'};">${a.skill_hit}</td>
+                    <td style="padding: 12px 14px; color: #cbd5e1;">${a.crit_red}</td>
+                    <td style="padding: 12px 14px; font-size: 0.8rem; color: ${isMilestone ? '#38bdf8' : '#94a3b8'}; font-weight: ${isMilestone ? '600' : 'normal'};">${a.status}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+  }
+
   // Render FAQ
   function renderFaq() {
     const container = document.getElementById('faqContainer');
@@ -1531,6 +1778,16 @@
         renderPvP();
       }
     });
+
+    document.getElementById('enchantSubNav')?.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (btn) {
+        document.querySelectorAll('#enchantSubNav .pvp-subnav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.enchantTab = btn.dataset.enchtab;
+        renderEnchantment();
+      }
+    });
   }
 
   function initApp() {
@@ -1544,6 +1801,7 @@
     renderCrafting();
     renderModes();
     renderPvP();
+    renderEnchantment();
     renderFaq();
     setupListeners();
   }

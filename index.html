@@ -80,6 +80,11 @@
           <span>PvP & Guerras</span>
           <span class="nav-count" id="countPvp">5v5</span>
         </a>
+        <a class="nav-item" data-target="enchantment">
+          <span class="nav-icon"><img src="assets/items/flat_enchant.png" style="width: 18px; height: 18px; vertical-align: middle;" onerror="this.outerHTML='✨'"></span>
+          <span>Aprimoramento</span>
+          <span class="nav-count" id="countEnchantment">5.0k</span>
+        </a>
         <a class="nav-item" data-target="faq">
           <span class="nav-icon">❓</span>
           <span>FAQ & Sistemas</span>
@@ -447,7 +452,54 @@
         </section>
 
         <!-- ==============================================
-             12. FAQ SECTION
+             12. ENCHANTMENT & UPGRADE SECTION
+             ============================================== -->
+        <section id="enchantment" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <img src="assets/items/flat_enchant.png" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 8px;" onerror="this.outerHTML='✨'">
+              Aprimoramento de Equipamentos & Encantamento
+            </h2>
+            <p class="section-subtitle">5.071 regras de aprimoramento em 26 tipos de equipamentos, taxas de quebra, pergaminhos e progressão até +15</p>
+          </div>
+
+          <!-- Alert banner about Blessed scroll discovery -->
+          <div style="background: rgba(220, 38, 38, 0.12); border: 1px solid rgba(220, 38, 38, 0.35); border-left: 4px solid var(--crimson-primary); border-radius: var(--radius-md); padding: 16px 20px; margin-bottom: 24px;">
+            <div style="display: flex; align-items: flex-start; gap: 14px;">
+              <span style="font-size: 1.6rem; line-height: 1;">⚠️</span>
+              <div>
+                <strong style="color: #fff; font-size: 1rem; display: block; margin-bottom: 4px;">Descoberta Crítica de Engenharia Reversa: O Mito do Pergaminho Abençoado</strong>
+                <p style="font-size: 0.86rem; color: #cbd5e1; line-height: 1.5; margin: 0;">
+                  A análise estática das tabelas extraídas do client (<code style="color: #fca5a5;">ItemEnchant.csv</code>) revelou que o <strong>Pergaminho Abençoado NÃO previne a quebra do item</strong>. Seu valor de <code style="color: #fca5a5;">BreakRate</code> é rigorosamente idêntico ao do pergaminho normal (ex: 15% em armas no +6). Sua vantagem exclusiva é adicionar <code style="color: #fca5a5;">BigSuccessRate = 1000</code> (10% de chance de dar um salto duplo de <strong>+2 níveis</strong> em caso de sucesso).
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="pvp-subnav" id="enchantSubNav">
+            <button class="pvp-subnav-btn active" data-enchtab="scrolls">
+              <img src="assets/items/weaponenchantmaterial_02.png" style="width: 16px; height: 16px;" onerror="this.outerHTML='📜'">
+              <span>Pergaminhos & Tipos</span>
+            </button>
+            <button class="pvp-subnav-btn" data-enchtab="rates">
+              <img src="assets/items/flat_enchantmulti.png" style="width: 16px; height: 16px;" onerror="this.outerHTML='⚖️'">
+              <span>Taxas por Categoria (+6)</span>
+            </button>
+            <button class="pvp-subnav-btn" data-enchtab="progression_weapon">
+              <span>🗡️ Progressão de Armas (+0 a +15)</span>
+            </button>
+            <button class="pvp-subnav-btn" data-enchtab="progression_acc">
+              <span>💍 Progressão de Acessórios</span>
+            </button>
+          </div>
+
+          <div id="enchantmentContentContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+
+        <!-- ==============================================
+             13. FAQ SECTION
              ============================================== -->
         <section id="faq" class="view-section">
           <div class="section-header">

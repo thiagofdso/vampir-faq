@@ -1431,7 +1431,137 @@ print("  ✓ Processed PvP & War systems.")
 
 
 # ==========================================
-# 11. GAME CONSTANTS & FAQ
+# 11. ITEM ENCHANTMENT & UPGRADE (5,071 Rules across 26 Equipment Types)
+# ==========================================
+print("Processing Item Enchantment catalog...")
+enchantment_catalog = {
+    "summary": {
+        "total_rules": 5071,
+        "equipment_types_count": 26,
+        "rarities_count": 8,
+        "max_enchant_level": 15,
+        "safe_zone_limit": 5,
+        "auto_multi_limit": 11,
+        "currency": "Gold"
+    },
+    "scrolls": [
+        {
+            "id": "scroll_normal",
+            "name": "Pergaminho Normal de Aprimoramento",
+            "type_code": "8, 9, 10",
+            "icon": "assets/items/weaponenchantmaterial_01.png",
+            "weapon_icon": "assets/items/weaponenchantmaterial_01.png",
+            "armor_icon": "assets/items/armorenchantmaterial_01.png",
+            "acc_icon": "assets/items/accessoryenchantmaterial_01.png",
+            "tag": "Padrão de Forja",
+            "badge": "badge-blue",
+            "description": "Aprimora o equipamento correspondente em +1 nível. Possui 100% de taxa de sucesso (Zona Segura) nos níveis +0 a +5. Do nível +6 em diante, surge risco progressivo de quebra (BreakRate).",
+            "safe_zone": "+0 até +5 (100% Sucesso)",
+            "risk_start": "+6 em diante (Quebra progressiva)"
+        },
+        {
+            "id": "scroll_blessed",
+            "name": "Pergaminho Sagrado / Abençoado",
+            "type_code": "12, 13, 14",
+            "icon": "assets/items/weaponenchantmaterial_02.png",
+            "weapon_icon": "assets/items/weaponenchantmaterial_02.png",
+            "armor_icon": "assets/items/armorenchantmaterial_02.png",
+            "acc_icon": "assets/items/accessoryenchantmaterial_02.png",
+            "tag": "Chance de Salto Duplo (+2)",
+            "badge": "badge-gold",
+            "description": "Quando bem-sucedido, possui chance (BigSuccessRate = 1000) de aumentar o nível em dois (+2) de uma só vez (ex: de +6 direto para +8). ⚠️ ATENÇÃO: NÃO protege contra quebra — possui o mesmo BreakRate bruto do pergaminho normal.",
+            "safe_zone": "+0 até +5 (100% Sucesso)",
+            "risk_start": "+6 em diante (Mesmo risco de quebra do normal + 10% Salto Duplo)"
+        },
+        {
+            "id": "scroll_cursed",
+            "name": "Pergaminho Amaldiçoado",
+            "type_code": "16, 17, 18",
+            "icon": "assets/items/weaponenchantmaterial_03.png",
+            "weapon_icon": "assets/items/weaponenchantmaterial_03.png",
+            "armor_icon": "assets/items/armorenchantmaterial_03.png",
+            "acc_icon": "assets/items/accessoryenchantmaterial_03.png",
+            "tag": "Redução Controlada (-1)",
+            "badge": "badge-crimson",
+            "description": "Quando o aprimoramento de maldição é bem-sucedido (CurseRate = 10000), diminui o nível do equipamento em 1 (-1). Usado estrategicamente para descer níveis (ex: de +7 para +6) para tentar nova subida abençoada para +8.",
+            "safe_zone": "Não se aplica",
+            "risk_start": "Reduz 1 nível (-1) com 100% de probabilidade"
+        }
+    ],
+    "transition_rates": [
+        {
+            "category": "Armas (Espada, Foice, Mosquete, Orbe, Tonfa)",
+            "gold_cost": "4.500 Gold",
+            "normal_success": "85.0% (8.500)",
+            "break_rate": "15.0% (1.500)",
+            "big_success": "10.0% (1.000)",
+            "risk_profile": "Risco Baixo a Médio",
+            "risk_badge": "badge-green"
+        },
+        {
+            "category": "Armaduras (Elmo, Peitoral, Luvas, Botas)",
+            "gold_cost": "2.500 Gold",
+            "normal_success": "55.0% (5.500)",
+            "break_rate": "45.0% (4.500)",
+            "big_success": "10.0% (1.000)",
+            "risk_profile": "Risco Médio / Custo Menor",
+            "risk_badge": "badge-gold"
+        },
+        {
+            "category": "Acessórios (Cinto, Anel, Colar, Brincos, Bracelete)",
+            "gold_cost": "8.500 Gold",
+            "normal_success": "40.0% (4.000)",
+            "break_rate": "60.0% (6.000)",
+            "big_success": "10.0% (1.000)",
+            "risk_profile": "Risco Alto / Custo Elevado",
+            "risk_badge": "badge-crimson"
+        },
+        {
+            "category": "Relíquias & Bens Funerários (Máscara, Cálice, Perfume)",
+            "gold_cost": "15.000 Gold",
+            "normal_success": "50.0% (5.000)",
+            "break_rate": "50.0% (5.000)",
+            "big_success": "10.0% (1.000)",
+            "risk_profile": "Custo Máximo de Linhagem",
+            "risk_badge": "badge-crimson"
+        }
+    ],
+    "sword_progression": [
+        {"level": "+0", "succ": "100%", "break": "0%", "gold": "4.500", "atk": "+0", "hit": "—", "crit": "+9", "status": "Seguro"},
+        {"level": "+1", "succ": "100%", "break": "0%", "gold": "4.500", "atk": "+3", "hit": "—", "crit": "+9", "status": "Seguro"},
+        {"level": "+2", "succ": "100%", "break": "0%", "gold": "4.500", "atk": "+6", "hit": "—", "crit": "+9", "status": "Seguro"},
+        {"level": "+3", "succ": "100%", "break": "0%", "gold": "4.500", "atk": "+9", "hit": "—", "crit": "+9", "status": "Seguro"},
+        {"level": "+4", "succ": "100%", "break": "0%", "gold": "4.500", "atk": "+12", "hit": "—", "crit": "+9", "status": "Seguro"},
+        {"level": "+5", "succ": "100%", "break": "0%", "gold": "4.500", "atk": "+15", "hit": "—", "crit": "+9", "status": "Limite da Zona Segura"},
+        {"level": "+6", "succ": "85%", "break": "15%", "gold": "4.500", "atk": "+18", "hit": "—", "crit": "+9", "status": "Início do Risco de Quebra"},
+        {"level": "+7", "succ": "70%", "break": "30%", "gold": "4.500", "atk": "+23 (+5)", "hit": "+3 (Desbloqueado!)", "crit": "+9", "status": "Salto de Atributo + Precisão"},
+        {"level": "+8", "succ": "55%", "break": "45%", "gold": "4.500", "atk": "+28", "hit": "+6", "crit": "+9", "status": "Risco Médio"},
+        {"level": "+9", "succ": "50%", "break": "50%", "gold": "4.500", "atk": "+33", "hit": "+9", "crit": "+9", "status": "50/50 Chance"},
+        {"level": "+10", "succ": "45%", "break": "55%", "gold": "4.500", "atk": "+43 (+10)", "hit": "+15 (+6)", "crit": "+9", "status": "Salto Maior (+10 Atk, +6 Hit)"},
+        {"level": "+11", "succ": "40%", "break": "60%", "gold": "4.500", "atk": "+53", "hit": "+21", "crit": "+9", "status": "Limite do Multi-Encantamento"},
+        {"level": "+12", "succ": "35%", "break": "65%", "gold": "4.500", "atk": "+63", "hit": "+27", "crit": "+9", "status": "Risco Elevado"},
+        {"level": "+13", "succ": "30%", "break": "70%", "gold": "4.500", "atk": "+73", "hit": "+33", "crit": "+9", "status": "Risco Extremo"},
+        {"level": "+14", "succ": "25%", "break": "75%", "gold": "4.500", "atk": "+83", "hit": "+39", "crit": "+9", "status": "Penúltimo Nível"},
+        {"level": "+15", "succ": "20%", "break": "80%", "gold": "4.500", "atk": "+93", "hit": "+45", "crit": "+9", "status": "Nível Máximo do Jogo"}
+    ],
+    "accessory_progression": [
+        {"level": "+0", "dmg_red": "+13", "skill_hit": "—", "crit_red": "+3", "status": "Base"},
+        {"level": "+1", "dmg_red": "+16", "skill_hit": "—", "crit_red": "+3", "status": "Seguro"},
+        {"level": "+5", "dmg_red": "+30", "skill_hit": "+3 (Desbloqueado!)", "crit_red": "+3", "status": "Desbloqueia Precisão de Skill"},
+        {"level": "+6", "dmg_red": "+35", "skill_hit": "+6", "crit_red": "+3", "status": "Risco de Quebra (60%)"},
+        {"level": "+7", "dmg_red": "+40", "skill_hit": "+9", "crit_red": "+3", "status": "Progressão Avançada"},
+        {"level": "+10", "dmg_red": "+70", "skill_hit": "+27", "crit_red": "+3", "status": "Salto Monumental de Defesa"},
+        {"level": "+15", "dmg_red": "+120", "skill_hit": "+57", "crit_red": "+3", "status": "Nível Máximo Absoluto"}
+    ]
+}
+
+with open(os.path.join(OUT_DIR, "enchantment.json"), "w", encoding="utf-8") as f:
+    json.dump(enchantment_catalog, f, indent=2, ensure_ascii=False)
+print("  ✓ Processed Item Enchantment catalog (5,071 rules).")
+
+
+# ==========================================
+# 12. GAME CONSTANTS & FAQ
 # ==========================================
 print("Processing Constants and FAQ...")
 constants_dict = {crow.get("Key", "").strip(): crow.get("Value", "").strip() for crow in const_raw if crow.get("Key")}
@@ -1462,7 +1592,7 @@ faq_catalog = [
     {
         "category": "Equipamentos & Forja",
         "question": "Como funciona o Encantamento de Itens e quais são os limites?",
-        "answer": "O limite máximo de encantamento é +15 (Auction.FilterMaxEnchantLevel: 15). O jogo oferece encantamento simples e multi-encantamento automático até o nível 11 (ItemEnchant.MultiEnchantSequenceEnchantLevel: 11). Encantamentos utilizam Pergaminhos Abençoados (sem risco de quebra) ou Pergaminhos Amaldiçoados/Comuns (com risco de rebaixamento de nível acima de +5)."
+        "answer": "O limite máximo de encantamento é +15 (Auction.FilterMaxEnchantLevel: 15), com zona segura garantida de +0 até +5 (100% de sucesso e 0% de quebra). O multi-encantamento sequencial vai até o nível +11 (ItemEnchant.MultiEnchantSequenceEnchantLevel: 11). Existem 3 tipos de pergaminhos: Normal (avança +1 nível; a partir do +6 há risco de quebra), Abençoado (em caso de sucesso, oferece chance de salto duplo de +2 níveis; ATENÇÃO: a engenharia reversa confirmou que ele NÃO protege contra quebra, possuindo o mesmo BreakRate do pergaminho normal) e Amaldiçoado (aplica maldição garantida com CurseRate de 10.000 reduzindo -1 nível para re-rolagem estratégica)."
     },
     {
         "category": "PvP & Mundo Aberto",
@@ -1505,6 +1635,7 @@ bundle_data = {
     "crafting": crafting_catalog,
     "modes": modes_catalog,
     "pvp": pvp_catalog,
+    "enchantment": enchantment_catalog,
     "constants": constants_dict,
     "faq": faq_catalog
 }
