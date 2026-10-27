@@ -569,6 +569,63 @@
     `).join('');
   }
 
+  // Shared Numeric Pagination Component
+  function renderPagination(container, currentPage, totalPages, callbackName) {
+    if (!container) return;
+    if (totalPages <= 1) {
+      container.innerHTML = '';
+      return;
+    }
+
+    let html = `<div style="display: flex; justify-content: center; align-items: center; gap: 6px; flex-wrap: wrap;">`;
+
+    // Previous Button
+    if (currentPage > 1) {
+      html += `<button class="filter-btn" onclick="${callbackName}(${currentPage - 1})">← Anterior</button>`;
+    } else {
+      html += `<button class="filter-btn" disabled style="opacity: 0.35; cursor: not-allowed;">← Anterior</button>`;
+    }
+
+    // Page window
+    const delta = 2;
+    const range = [];
+    for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+      range.push(i);
+    }
+
+    // Page 1
+    html += `<button class="filter-btn ${currentPage === 1 ? 'active' : ''}" onclick="${callbackName}(1)">1</button>`;
+
+    if (range.length && range[0] > 2) {
+      html += `<span style="color: var(--text-dim); padding: 0 4px;">...</span>`;
+    }
+
+    range.forEach(p => {
+      html += `<button class="filter-btn ${currentPage === p ? 'active' : ''}" onclick="${callbackName}(${p})">${p}</button>`;
+    });
+
+    if (range.length && range[range.length - 1] < totalPages - 1) {
+      html += `<span style="color: var(--text-dim); padding: 0 4px;">...</span>`;
+    }
+
+    // Last Page
+    if (totalPages > 1) {
+      html += `<button class="filter-btn ${currentPage === totalPages ? 'active' : ''}" onclick="${callbackName}(${totalPages})">${totalPages}</button>`;
+    }
+
+    // Next Button
+    if (currentPage < totalPages) {
+      html += `<button class="filter-btn" onclick="${callbackName}(${currentPage + 1})">Próxima →</button>`;
+    } else {
+      html += `<button class="filter-btn" disabled style="opacity: 0.35; cursor: not-allowed;">Próxima →</button>`;
+    }
+
+    html += `</div>`;
+    html += `<div style="margin-top: 8px; font-size: 0.8rem; color: var(--text-dim); text-align: center;">Página ${currentPage} de ${totalPages}</div>`;
+
+    container.innerHTML = html;
+  }
+
   // Render Quests & Tasks
   function renderQuests() {
     const container = document.getElementById('questsContainer');
