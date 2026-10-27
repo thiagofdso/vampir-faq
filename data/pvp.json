@@ -233,5 +233,105 @@
     "schedule": "Sazonal (Fins de Temporada de Conquista)",
     "desc": "As guildas campeãs de cada servidor são transportadas para uma arena colossal de outro plano. Cada vitória distribui recompensas monumentais para os combatentes e bônus passivos para toda a comunidade de seu servidor de origem.",
     "rewards_sample": "Caixas de Linhagem Soberana, Títulos Cósmicos, Diamantes e Asas de Predador Mítico."
+  },
+  "nobility_titles": {
+    "title": "Títulos de Nobreza & Ranking Geral da Temporada",
+    "subtitle": "Benefícios passivos de combate PvP concedidos pela classificação global de temporada",
+    "icon": "assets/pvp/flat_noble.png",
+    "rankings": [
+      {
+        "title": "Duque",
+        "position": "1º Lugar",
+        "skill_id": "570015",
+        "effect_id": "10065",
+        "rp_reward": "400 RP",
+        "badge": "badge-crimson",
+        "icon": "assets/pvp/buffnoble_duke.png",
+        "bonus_skill": "Dignidade do Duque",
+        "effects_summary": "Bônus soberano de Ataque, Redução de Dano PvP, Precisão, Esquiva PvP e amplificação máxima na drenagem de sangue.",
+        "color": "#ef4444"
+      },
+      {
+        "title": "Marquês",
+        "position": "2º e 3º Lugar",
+        "skill_id": "570014",
+        "effect_id": "10064",
+        "rp_reward": "200 RP",
+        "badge": "badge-gold",
+        "icon": "assets/pvp/buffnoble_marquess.png",
+        "bonus_skill": "Dignidade do Marquês",
+        "effects_summary": "Atributos avançados de combate PvP e alta taxa de sucesso em drenagem vampírica de alvos.",
+        "color": "#f59e0b"
+      },
+      {
+        "title": "Conde",
+        "position": "4º ao 6º Lugar",
+        "skill_id": "570013",
+        "effect_id": "10063",
+        "rp_reward": "100 RP",
+        "badge": "badge-blue",
+        "icon": "assets/pvp/buffnoble_earl.png",
+        "bonus_skill": "Dignidade do Conde",
+        "effects_summary": "Aumento significativo em mitigação de dano de jogadores rivais e precisão de golpes.",
+        "color": "#38bdf8"
+      },
+      {
+        "title": "Visconde",
+        "position": "7º ao 40º Lugar",
+        "skill_id": "570012",
+        "effect_id": "10062",
+        "rp_reward": "50 RP",
+        "badge": "badge-purple",
+        "icon": "assets/pvp/buffnoble_viscount.png",
+        "bonus_skill": "Dignidade do Visconde",
+        "effects_summary": "Atributos intermediários de defesa territorial, ataque e preservação de pontos de sangue.",
+        "color": "#a855f7"
+      },
+      {
+        "title": "Barão",
+        "position": "41º ao 100º Lugar",
+        "skill_id": "570011",
+        "effect_id": "10061",
+        "rp_reward": "25 RP",
+        "badge": "badge-gray",
+        "icon": "assets/pvp/buffnoble_baron.png",
+        "bonus_skill": "Dignidade do Barão (205003)",
+        "effects_summary": "Ataque +6, Redução de Dano PvP +6, Precisão +3 (Skill diz +6, Efeito +3), Esquiva PvP +3.",
+        "color": "#94a3b8"
+      }
+    ],
+    "ranking_pillars": [
+      {
+        "name": "1. Invocação (Gacha)",
+        "icon": "assets/items/itembox_artifactenchantmaterial_random_01.png",
+        "badge": "badge-blue",
+        "desc": "Pontos ao obter itens raros, heroicos ou lendários por invocações. Raro: 10 pts, Épico: 105 pts, Lendário: 1.400 pts (ScoreTabId=101)."
+      },
+      {
+        "name": "2. Raides Mundiais",
+        "icon": "assets/pvp/flat_conquest.png",
+        "badge": "badge-crimson",
+        "desc": "Contribuir para derrotar Chefes Mundiais de campo; os pontos acumulados são calculados proporcionalmente ao dano e suporte na batalha."
+      },
+      {
+        "name": "3. Mercado Negro",
+        "icon": "assets/items/materials_artifactenchantmaterial_01.png",
+        "badge": "badge-gold",
+        "desc": "Obter Moedas do Mercado Negro em transações com o Comerciante Errante (Wanderer Trade)."
+      },
+      {
+        "name": "4. Aprimoramento",
+        "icon": "assets/items/flat_enchant.png",
+        "badge": "badge-purple",
+        "desc": "Alcançar o limiar de destruição no aprimoramento (+6 ou maior com risco de quebra) de armas, armaduras ou acessórios."
+      }
+    ],
+    "rules": {
+      "schedule": "Concedido com base na classificação da temporada anterior no reset semanal ({{Schedule::WeeklyReset}})",
+      "duration": "Permanece ativo até o final da temporada atual",
+      "menu_location": "Obtido e ativado no Menu de Personagem (NOBLE_GET_SYSTEM_MESSAGE)",
+      "tiebreaker": "Em empate de pontuação, prioridade para o personagem com nível mais alto; cálculo abrange até o Top 500.",
+      "divergence_note": "Divergência técnica: A descrição da habilidade do Barão informa PRE e ESQ PvP +6, enquanto a descrição do efeito e a tabela StaticOperation (GroupId 1110) registram +3. Os testes estáticos indicam que o motor aplica o valor da tabela de efeitos (+3)."
+    }
   }
 }

@@ -1022,6 +1022,99 @@
           <p style="color: #34d399; font-size: 0.85rem;">${t.rewards_sample}</p>
         </div>
       `;
+    } else if (state.pvpTab === 'nobility') {
+      const n = p.nobility_titles;
+      if (!n) return;
+      container.innerHTML = `
+        <div style="background: rgba(138, 3, 3, 0.12); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: var(--radius-md); padding: 20px; margin-bottom: 24px;">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <img src="${n.icon}" alt="Títulos de Nobreza" style="width: 52px; height: 52px; object-fit: contain;" onerror="this.src='assets/logo.png'">
+            <div>
+              <h3 style="font-family: var(--font-serif); font-size: 1.5rem; color: #fff; margin-bottom: 4px;">${n.title}</h3>
+              <p style="color: var(--gold-primary); font-size: 0.9rem;">${n.subtitle}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Technical Divergence Alert -->
+        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-left: 4px solid #f59e0b; border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 24px;">
+          <strong style="color: #fbbf24; font-size: 0.92rem; display: block; margin-bottom: 4px;">⚠️ Análise Técnica de Engenharia Reversa: Divergência de Atributos</strong>
+          <p style="font-size: 0.84rem; color: #cbd5e1; line-height: 1.5; margin: 0;">
+            ${n.rules.divergence_note}
+          </p>
+        </div>
+
+        <h4 style="font-size: 1.15rem; color: #fff; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+          <span>👑 Os 5 Títulos de Nobreza da Temporada</span>
+          <span style="font-size: 0.75rem; color: var(--gold-primary); font-weight: normal;">(RankingRewardId 39 a 43)</span>
+        </h4>
+
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px;">
+          ${n.rankings.map(r => `
+            <div style="background: rgba(15,20,30,0.65); border: 1px solid rgba(255,255,255,0.08); border-left: 4px solid ${r.color}; border-radius: var(--radius-md); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 16px; min-width: 220px;">
+                <div class="item-slot-frame" style="width: 52px; height: 52px; border-color: ${r.color};">
+                  <img src="${r.icon}" alt="${r.title}" class="item-slot-img" onerror="this.src='assets/logo.png'">
+                </div>
+                <div>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <strong style="font-size: 1.15rem; color: #fff;">${r.title}</strong>
+                    <span class="entity-badge ${r.badge}">${r.position}</span>
+                  </div>
+                  <div style="font-size: 0.74rem; color: #94a3b8; font-family: monospace; margin-top: 3px;">
+                    Skill: ${r.skill_id} • Efeito: ${r.effect_id}
+                  </div>
+                </div>
+              </div>
+
+              <div style="flex: 1; min-width: 260px;">
+                <div style="font-size: 0.78rem; color: #38bdf8; font-weight: 600; margin-bottom: 2px;">
+                  ✨ Passiva de Nobreza: ${r.bonus_skill}
+                </div>
+                <div style="font-size: 0.83rem; color: #cbd5e1; line-height: 1.4;">
+                  ${r.effects_summary}
+                </div>
+              </div>
+
+              <div style="text-align: right; min-width: 110px;">
+                <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim);">Recompensa RP</div>
+                <div style="font-size: 1.25rem; font-weight: 700; color: #fbbf24; font-family: monospace;">${r.rp_reward}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <h4 style="font-size: 1.15rem; color: #fff; margin-bottom: 14px;">📊 Os 4 Pilares de Pontuação do Ranking Geral</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 28px;">
+          ${n.ranking_pillars.map(pill => `
+            <div style="background: rgba(15,20,30,0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-md); padding: 18px;">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <img src="${pill.icon}" alt="${pill.name}" style="width: 32px; height: 32px; object-fit: contain;">
+                <strong style="color: #fff; font-size: 0.95rem;">${pill.name}</strong>
+              </div>
+              <p style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.5; margin: 0;">${pill.desc}</p>
+            </div>
+          `).join('')}
+        </div>
+
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.25); border-radius: var(--radius-md); padding: 20px;">
+          <h4 style="font-size: 1.05rem; color: var(--gold-primary); margin-bottom: 12px;">📜 Regras de Concessão, Renovação e Desempate</h4>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; font-size: 0.84rem; color: #cbd5e1; line-height: 1.6;">
+            <div>
+              <strong style="color: #fff; display: block; margin-bottom: 3px;">🗓️ Ciclo Sazonal e Reset</strong>
+              ${n.rules.schedule}. O título dura rigorosamente até o encerramento da temporada ativa.
+            </div>
+            <div>
+              <strong style="color: #fff; display: block; margin-bottom: 3px;">👤 Menu de Personagem</strong>
+              ${n.rules.menu_location}. Ao conquistar um novo título na temporada seguinte, os benefícios e bônus do título anterior são substituídos.
+            </div>
+            <div>
+              <strong style="color: #fff; display: block; margin-bottom: 3px;">⚖️ Critério de Desempate</strong>
+              ${n.rules.tiebreaker}
+            </div>
+          </div>
+        </div>
+      `;
     }
   }
 
