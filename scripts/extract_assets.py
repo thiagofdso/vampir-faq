@@ -31,19 +31,25 @@ def decode_uexp_to_png(uexp_path, out_png_path):
     with open(uexp_path, 'rb') as f:
         data = f.read()
 
+    if len(data) < 32 or data[-4:] != b'\xc1\x83\x2a\x9e':
+        return False
+
+    # Universal 28-byte Unreal Engine 5 export footer:
+    # [Width: 4B LE] [Height: 4B LE] [Depth: 4B LE] [Zeros: 12B] [Package Magic: 4B (0xc1832a9e)]
+    w, h, depth = struct.unpack('<III', data[-28:-16])
+    if w <= 0 or w > 8192 or h <= 0 or h > 8192:
+        return False
+
     fmt_pos = data.find(b'PF_')
     if fmt_pos == -1:
         return False
 
-    w = struct.unpack('<I', data[fmt_pos-16:fmt_pos-12])[0]
-    h = struct.unpack('<I', data[fmt_pos-12:fmt_pos-8])[0]
-    if w <= 0 or w > 8192 or h <= 0 or h > 8192:
-        return False
+    fmt_str = data[fmt_pos:fmt_pos+16].split(b'\x00')[0].decode('ascii', errors='ignore')
 
     # 1. BGRA Uncompressed
-    if b'PF_B8G8R8A8' in data[fmt_pos:fmt_pos+16]:
+    if 'PF_B8G8R8A8' in fmt_str:
         expected_bytes = w * h * 4
-        payload = data[-4-expected_bytes:-4]
+        payload = data[-28 - expected_bytes : -28]
         if len(payload) != expected_bytes:
             return False
 
@@ -67,8 +73,7 @@ def decode_uexp_to_png(uexp_path, out_png_path):
         return True
 
     # 2. ASTC Compressed
-    elif b'PF_ASTC' in data[fmt_pos:fmt_pos+16]:
-        fmt_str = data[fmt_pos:fmt_pos+16].split(b'\x00')[0].decode('ascii', errors='ignore')
+    elif 'PF_ASTC' in fmt_str:
         m = re.search(r'(\d+)x(\d+)', fmt_str)
         bx, by = (int(m.group(1)), int(m.group(2))) if m else (6, 6)
 
@@ -76,12 +81,11 @@ def decode_uexp_to_png(uexp_path, out_png_path):
         blocks_y = (h + by - 1) // by
         expected_bytes = blocks_x * blocks_y * 16
 
-        payload = data[-4-expected_bytes:-4]
+        payload = data[-28 - expected_bytes : -28]
         if len(payload) != expected_bytes:
             return False
 
-        header = bytearray()
-        header += b'\x13\xab\xa1\x5c'
+        header = bytearray(b'\x13\xab\xa1\x5c')
         header.append(bx)
         header.append(by)
         header.append(1)
