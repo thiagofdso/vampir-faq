@@ -712,7 +712,183 @@ with open(os.path.join(OUT_DIR, "items.json"), "w", encoding="utf-8") as f:
     json.dump(curated_items, f, indent=2, ensure_ascii=False)
 
 # ==========================================
-# 7. GAME CONSTANTS & FAQ
+# 7. QUESTS & MISSIONS (1.353 Quests, 5.944 Tasks)
+# ==========================================
+print("Processing Quests and Tasks from analysis/reports/jogo/missoes.csv...")
+JOGO_DIR = os.path.join(BASE_DIR, "analysis/reports/jogo")
+type_pt_map = {
+    'Scenario': 'Campanha Principal',
+    'Daily': 'Missão Diária',
+    'Guide': 'Guia / Tutorial',
+    'Sub': 'Missão Secundária',
+    'Wanted': 'Caçada / Procurado',
+    'GuildDefense': 'Defesa de Guilda',
+    'Dungeon': 'Masmorra & Desafio',
+    'Bloodline': 'Linhagem de Sangue',
+    'Item': 'Missão de Item'
+}
+
+quests_catalog = []
+missoes_path = os.path.join(JOGO_DIR, "missoes.csv")
+if os.path.exists(missoes_path):
+    with open(missoes_path, encoding='utf-8-sig') as f:
+        raw_quests = list(csv.DictReader(f))
+    for q in raw_quests:
+        qid = q['Id']
+        name = q.get('pt_nomes', '').strip()
+        if not name or "2025-" in name or "2026-" in name:
+            name = f"Missão #{qid}"
+        
+        qtype = q.get('tipo_nome_enum', 'Scenario').strip()
+        type_pt = type_pt_map.get(qtype, qtype)
+        req_lv = q.get('RequireCharacterLv', '').strip() or "1"
+        tasks_count = q.get('tarefas_count', '').strip() or "1"
+        rewards_raw = json.loads(q['recompensas_por_grupo_json']) if q.get('recompensas_por_grupo_json') else []
+        
+        quests_catalog.append({
+            "id": qid,
+            "name": name,
+            "type": qtype,
+            "type_pt": type_pt,
+            "req_level": int(req_lv) if req_lv.isdigit() else 1,
+            "tasks_count": int(tasks_count) if tasks_count.isdigit() else 1,
+            "rewards_count": len(rewards_raw),
+            "has_instance": q.get('StartRunInInstance') == '1',
+            "pre_quest": q.get('PreQuestId') if q.get('PreQuestId') != '0' else None
+        })
+    with open(os.path.join(OUT_DIR, "quests.json"), "w", encoding="utf-8") as f:
+        json.dump(quests_catalog, f, indent=2, ensure_ascii=False)
+    print(f"  ✓ Processed {len(quests_catalog)} quests.")
+
+# ==========================================
+# 8. CRAFTING & FORGE (602 Recipes, 38 Orphan Materials)
+# ==========================================
+print("Processing Crafting Recipes from analysis/reports/jogo/receitas.csv...")
+craft_tab_names = {}
+craft_tab_file = os.path.join(L10N_DIR, "ItemCraftTab_Name.csv")
+if os.path.exists(craft_tab_file):
+    with open(craft_tab_file, encoding='utf-8-sig') as f:
+        craft_tab_names = {r['Id']: r['Name'] for r in csv.DictReader(f)}
+
+crafting_catalog = []
+receitas_path = os.path.join(JOGO_DIR, "receitas.csv")
+if os.path.exists(receitas_path):
+    with open(receitas_path, encoding='utf-8-sig') as f:
+        raw_recipes = list(csv.DictReader(f))
+    for r in raw_recipes:
+        rid = r['Id']
+        tab_id = r.get('CraftTabInfoId', '')
+        tab_name = craft_tab_names.get(tab_id, f"Aba #{tab_id}")
+        
+        mats = json.loads(r['materiais_json']) if r.get('materiais_json') else []
+        succ_list = json.loads(r['SuccessRewardGroupId_registros_json']) if r.get('SuccessRewardGroupId_registros_json') else []
+        
+        target_name = "Item Forjado"
+        target_param = ""
+        target_rarity = "0"
+        if succ_list:
+            target_name = succ_list[0].get('item_nome_pt', '').strip() or f"Item #{succ_list[0].get('Param')}"
+            target_param = succ_list[0].get('Param', '')
+            target_rarity = succ_list[0].get('RewardRank', '0')
+
+        clean_mats = []
+        for m in mats:
+            mname = m.get('item_nome_pt', '').strip()
+            param = m.get('CostParam', '')
+            if not mname and param == 'Gold': mname = 'Ouro (Gold)'
+            elif not mname: mname = f"Material #{param}"
+            clean_mats.append({
+                "name": mname,
+                "amount": m.get('CostValue', '1'),
+                "type": m.get('custo_tipo_nome_enum', 'Item')
+            })
+
+        succ_rate = (int(r.get('SuccessRate') or 0)) // 10000
+        big_rate = (int(r.get('BigSuccessRate') or 0)) // 10000
+        
+        tab_num = int(tab_id) if tab_id.isdigit() else 0
+        if tab_num in range(101, 106) or tab_num in range(601, 606):
+            recipe_category = "weapons"
+            cat_label = "Armas de Classe"
+        elif tab_num in range(201, 205):
+            recipe_category = "armors"
+            cat_label = "Armaduras & Peças"
+        elif tab_num in range(301, 306):
+            recipe_category = "accessories"
+            cat_label = "Acessórios & Joias"
+        elif tab_num in [401, 402, 403]:
+            recipe_category = "materials"
+            cat_label = "Materiais & Forja"
+        elif tab_num in [501]:
+            recipe_category = "consumables"
+            cat_label = "Consumíveis & Poções"
+        else:
+            recipe_category = "events"
+            cat_label = "Eventos / Emblemas"
+
+        # Icon matching
+        icon = "assets/items/weapon_bloodsword_common_01.png"
+        clean_target = target_name.lower().replace(" ", "")
+        for p in item_pngs:
+            if clean_target in p:
+                icon = f"assets/items/{p}"
+                break
+
+        crafting_catalog.append({
+            "id": rid,
+            "target_name": target_name,
+            "target_item_id": target_param,
+            "rarity": target_rarity,
+            "tab_id": tab_id,
+            "tab_name": tab_name,
+            "category": recipe_category,
+            "category_label": cat_label,
+            "success_rate": f"{succ_rate}%",
+            "big_success_rate": f"{big_rate}%",
+            "materials": clean_mats,
+            "tradeable_on_big": big_rate > 0,
+            "icon_img": icon
+        })
+    with open(os.path.join(OUT_DIR, "crafting.json"), "w", encoding="utf-8") as f:
+        json.dump(crafting_catalog, f, indent=2, ensure_ascii=False)
+    print(f"  ✓ Processed {len(crafting_catalog)} crafting recipes.")
+
+# ==========================================
+# 9. ENRICH BOSSES WITH COMBAT STATS & MAPS
+# ==========================================
+print("Enriching Bosses with HP/ATK/DEF and World Spawns...")
+battles_map = {}
+npc_batalha_file = os.path.join(JOGO_DIR, "npcs_batalha.csv")
+if os.path.exists(npc_batalha_file):
+    with open(npc_batalha_file, encoding='utf-8-sig') as f:
+        for r in csv.DictReader(f):
+            b_list = json.loads(r['npcbattle_registros_json']) if r.get('npcbattle_registros_json') else []
+            if b_list: battles_map[r['Id']] = b_list[0]
+
+spawns_map = {}
+aparecimentos_file = os.path.join(JOGO_DIR, "aparecimentos_npc.csv")
+if os.path.exists(aparecimentos_file):
+    with open(aparecimentos_file, encoding='utf-8-sig') as f:
+        for r in csv.DictReader(f):
+            nid = r.get('NpcInfoId')
+            wn = r.get('mundo_nome_pt')
+            if nid and nid not in spawns_map and wn:
+                spawns_map[nid] = wn
+
+for b in bosses_catalog:
+    nid = b['id']
+    bat = battles_map.get(nid, {})
+    b['hp_raw'] = bat.get('HP', '0')
+    b['atk_raw'] = bat.get('AttackPower', '0')
+    b['def_raw'] = bat.get('DefensePower', '0')
+    b['is_aggressive'] = bat.get('Aggressive') == '1'
+    b['world_map'] = spawns_map.get(nid, "Masmorra / Campo Dimensional")
+
+with open(os.path.join(OUT_DIR, "bosses.json"), "w", encoding="utf-8") as f:
+    json.dump(bosses_catalog, f, indent=2, ensure_ascii=False)
+
+# ==========================================
+# 10. GAME CONSTANTS & FAQ
 # ==========================================
 print("Processing Constants and FAQ...")
 constants_dict = {crow.get("Key", "").strip(): crow.get("Value", "").strip() for crow in const_raw if crow.get("Key")}
@@ -787,6 +963,8 @@ bundle_data = {
     "bosses": bosses_catalog,
     "dungeons": dungeons_catalog,
     "items": curated_items,
+    "quests": quests_catalog,
+    "crafting": crafting_catalog,
     "constants": constants_dict,
     "faq": faq_catalog
 }

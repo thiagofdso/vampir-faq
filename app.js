@@ -20,9 +20,27 @@
     dungeonsSearchTerm: '',
     itemsFilter: 'all',
     itemsSearchTerm: '',
+    questsFilter: 'all',
+    questsSearchTerm: '',
+    questsPage: 1,
+    questsPerPage: 24,
+    craftingFilter: 'all',
+    craftingSearchTerm: '',
+    craftingPage: 1,
+    craftingPerPage: 24,
     activeBuildIndex: 0,
     activeVariantIndex: 0
   };
+
+  function formatBigNumber(val) {
+    if (!val || val === '0') return '—';
+    const n = Number(val);
+    if (isNaN(n)) return val;
+    if (n >= 1000000000) return (n / 1000000000).toFixed(2) + 'B';
+    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+    if (n >= 1000) return (n / 1000).toFixed(0) + 'k';
+    return n.toLocaleString();
+  }
 
   // DOM Elements
   const navItems = document.querySelectorAll('.nav-item');
@@ -417,12 +435,12 @@
             ${b.title}
           </div>
           <p class="entity-desc">
-            <strong>Aviso:</strong> ${b.audio_alert}<br>
+            <strong>Mapa:</strong> ${b.world_map || 'Masmorra / Campo Dimensional'}<br>
             <strong>Recompensas:</strong> ${b.reward_preview}
           </p>
           <div class="entity-meta-row">
-            <span>Escala: ${b.scale_factor}x</span>
-            <span>Velocidade: ${b.run_speed}</span>
+            <span>❤️ HP: <strong style="color: #ef4444;">${formatBigNumber(b.hp_raw)}</strong></span>
+            <span>⚔️ ATQ: <strong style="color: #eab308;">${formatBigNumber(b.atk_raw)}</strong></span>
             <span style="color: var(--crimson-light); font-weight: 600;">Ver Fases →</span>
           </div>
         </div>
@@ -514,6 +532,135 @@
       </div>
     `).join('');
   }
+
+  // Render Quests & Tasks
+  function renderQuests() {
+    const container = document.getElementById('questsContainer');
+    const pagination = document.getElementById('questsPagination');
+    if (!container || !state.data.quests) return;
+
+    let filtered = state.data.quests;
+
+    if (state.questsFilter !== 'all') {
+      filtered = filtered.filter(q => q.type === state.questsFilter);
+    }
+
+    if (state.questsSearchTerm.trim()) {
+      const s = state.questsSearchTerm.toLowerCase();
+      filtered = filtered.filter(q =>
+        q.name.toLowerCase().includes(s) ||
+        q.id.includes(s) ||
+        q.type_pt.toLowerCase().includes(s)
+      );
+    }
+
+    const total = filtered.length;
+    const pages = Math.ceil(total / state.questsPerPage) || 1;
+    if (state.questsPage > pages) state.questsPage = 1;
+
+    const start = (state.questsPage - 1) * state.questsPerPage;
+    const currentList = filtered.slice(start, start + state.questsPerPage);
+
+    container.innerHTML = currentList.map(q => `
+      <div class="entity-card quest-card" onclick="window.inspectQuest('${q.id}')">
+        <div class="entity-header">
+          <span class="entity-badge ${q.type === 'Scenario' ? 'badge-crimson' : q.type === 'Daily' ? 'badge-gold' : 'badge-blue'}">
+            ${q.type_pt}
+          </span>
+          <span class="entity-id">Nv. ${q.req_level} Requerido</span>
+        </div>
+        <div class="entity-title" style="margin-top: 6px; font-size: 1.05rem;">${q.name}</div>
+        <p class="entity-desc">
+          ${q.has_instance ? '<strong>🎬 Instância Cinematográfica:</strong> Batalha com cutscenes narrativas privadas.<br>' : ''}
+          ${q.pre_quest ? `<strong>Pré-requisito:</strong> Requer conclusão da Missão #${q.pre_quest}.<br>` : ''}
+          Esta jornada envolve <strong>${q.tasks_count} etapas de tarefas</strong> sequenciais e concede até <strong>${q.rewards_count} grupos de recompensas</strong> de EXP e espólios.
+        </p>
+        <div class="entity-meta-row">
+          <span>${q.tasks_count} Tarefas</span>
+          <span style="color: var(--gold-primary);">${q.rewards_count} Recompensas</span>
+          <span style="color: var(--crimson-light); font-weight: 600;">Ver Detalhes →</span>
+        </div>
+      </div>
+    `).join('');
+
+    renderPagination(pagination, state.questsPage, pages, 'window.changeQuestsPage');
+  }
+
+  window.changeQuestsPage = function(page) {
+    state.questsPage = page;
+    renderQuests();
+    document.getElementById('quests').scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Render Crafting & Forge
+  function renderCrafting() {
+    const container = document.getElementById('craftingContainer');
+    const pagination = document.getElementById('craftingPagination');
+    if (!container || !state.data.crafting) return;
+
+    let filtered = state.data.crafting;
+
+    if (state.craftingFilter !== 'all') {
+      filtered = filtered.filter(c => c.category === state.craftingFilter);
+    }
+
+    if (state.craftingSearchTerm.trim()) {
+      const s = state.craftingSearchTerm.toLowerCase();
+      filtered = filtered.filter(c =>
+        c.target_name.toLowerCase().includes(s) ||
+        c.tab_name.toLowerCase().includes(s) ||
+        c.id.includes(s) ||
+        c.materials.some(m => m.name.toLowerCase().includes(s))
+      );
+    }
+
+    const total = filtered.length;
+    const pages = Math.ceil(total / state.craftingPerPage) || 1;
+    if (state.craftingPage > pages) state.craftingPage = 1;
+
+    const start = (state.craftingPage - 1) * state.craftingPerPage;
+    const currentList = filtered.slice(start, start + state.craftingPerPage);
+
+    container.innerHTML = currentList.map(c => `
+      <div class="entity-card craft-card" onclick="window.inspectRecipe('${c.id}')">
+        <div class="entity-header">
+          <div class="item-slot-frame" style="width: 44px; height: 44px;">
+            <img src="${c.icon_img}" alt="${c.target_name}" class="item-slot-img" onerror="this.src='assets/logo.png'">
+          </div>
+          <div style="flex: 1; margin-left: 12px;">
+            <div class="entity-title" style="font-size: 1rem;">${c.target_name}</div>
+            <div style="display: flex; gap: 6px; margin-top: 3px;">
+              <span class="entity-badge badge-gold" style="font-size: 0.68rem;">${c.tab_name}</span>
+              <span class="entity-badge ${c.big_success_rate !== '0%' ? 'badge-blue' : 'badge-crimson'}" style="font-size: 0.68rem;">
+                Sucesso: ${c.success_rate} ${c.big_success_rate !== '0%' ? '• Gr. Sucesso: ' + c.big_success_rate : ''}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div style="margin: 12px 0 8px; font-size: 0.82rem; color: #94a3b8;">
+          <div style="font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Materiais Necessários:</div>
+          <ul style="padding-left: 18px; margin: 0; line-height: 1.5;">
+            ${c.materials.map(m => `<li><strong>${m.name}</strong> × ${m.amount}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="entity-meta-row" style="margin-top: 10px;">
+          <span>${c.materials.length} Insumos</span>
+          <span style="color: ${c.tradeable_on_big ? '#38bdf8' : '#94a3b8'};">
+            ${c.tradeable_on_big ? '💎 Negociável no Leilão' : '🔒 Vinculado'}
+          </span>
+          <span style="color: var(--crimson-light); font-weight: 600;">Forjar →</span>
+        </div>
+      </div>
+    `).join('');
+
+    renderPagination(pagination, state.craftingPage, pages, 'window.changeCraftingPage');
+  }
+
+  window.changeCraftingPage = function(page) {
+    state.craftingPage = page;
+    renderCrafting();
+    document.getElementById('crafting').scrollIntoView({ behavior: 'smooth' });
+  };
 
   // Render FAQ
   function renderFaq() {
@@ -680,6 +827,63 @@
     detailModal.classList.add('open');
   };
 
+  window.inspectQuest = function(id) {
+    const q = state.data.quests.find(x => x.id === id);
+    if (!q) return;
+
+    modalTitle.innerText = q.name;
+    modalSubtitle.innerText = `${q.type_pt} • Nível ${q.req_level} (Missão ID #${q.id})`;
+
+    modalBody.innerHTML = `
+      <div class="panel-box" style="margin-bottom: 16px;">
+        <div class="panel-title">Parâmetros da Jornada</div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 0.88rem; color: #cbd5e1;">
+          <div>Tipo da Missão: <strong style="color: var(--gold-primary);">${q.type_pt}</strong></div>
+          <div>Nível Requerido: <strong>Nv. ${q.req_level}</strong></div>
+          <div>Tarefas Sequenciais: <strong>${q.tasks_count} etapas</strong></div>
+          <div>Grupos de Recompensa: <strong>${q.rewards_count} grupos</strong></div>
+          <div>Cópia Instanciada: <strong>${q.has_instance ? 'Sim (Cinemática Privada)' : 'Não (Mundo Aberto)'}</strong></div>
+          <div>Missão Anterior: <strong>${q.pre_quest ? '#' + q.pre_quest : 'Nenhuma (Início de Linha)'}</strong></div>
+        </div>
+      </div>
+      <div style="font-size: 0.9rem; color: #94a3b8; line-height: 1.6;">
+        Esta missão integra o sistema mestre de 1.353 missões extraídas de <code>Quest.csv</code> e vinculadas a 5.944 registros de tarefas em <code>QuestTask.csv</code>. As tarefas incluem objetivos de diálogo, eliminação de monstros com contadores e acionamento de bandeiras narrativas.
+      </div>
+    `;
+
+    detailModal.classList.add('open');
+  };
+
+  window.inspectRecipe = function(id) {
+    const c = state.data.crafting.find(x => x.id === id);
+    if (!c) return;
+
+    modalTitle.innerText = `Forja: ${c.target_name}`;
+    modalSubtitle.innerText = `${c.tab_name} • Receita ID #${c.id}`;
+
+    modalBody.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+        <div class="item-slot-frame" style="width: 56px; height: 56px;">
+          <img src="${c.icon_img}" alt="${c.target_name}" class="item-slot-img" onerror="this.src='assets/logo.png'">
+        </div>
+        <div style="font-size: 0.95rem; color: #cbd5e1; line-height: 1.6;">
+          Receita da bancada <strong>${c.tab_name}</strong> com probabilidade de sucesso de <strong>${c.success_rate}</strong> e grande sucesso de <strong>${c.big_success_rate}</strong>.
+        </div>
+      </div>
+      <div class="panel-box">
+        <div class="panel-title">Materiais e Recursos Exigidos</div>
+        <ul style="padding-left: 20px; margin: 8px 0; color: #e2e8f0; font-size: 0.9rem; line-height: 1.6;">
+          ${c.materials.map(m => `<li><strong>${m.name}</strong>: ${m.amount} unidades (${m.type})</li>`).join('')}
+        </ul>
+        <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 8px;">
+          ${c.tradeable_on_big ? '💎 Em caso de Grande Sucesso, o item gerado possui FreeTradeRate=10000 e pode ser vendido livremente no Mercado de Leilões.' : '🔒 O item forjado é vinculado à conta do personagem.'}
+        </div>
+      </div>
+    `;
+
+    detailModal.classList.add('open');
+  };
+
   // Setup Event Listeners
   function setupListeners() {
     navItems.forEach(item => {
@@ -709,6 +913,14 @@
       } else if (state.currentTab === 'items') {
         state.itemsSearchTerm = q;
         renderItems();
+      } else if (state.currentTab === 'quests') {
+        state.questsSearchTerm = q;
+        state.questsPage = 1;
+        renderQuests();
+      } else if (state.currentTab === 'crafting') {
+        state.craftingSearchTerm = q;
+        state.craftingPage = 1;
+        renderCrafting();
       }
     });
 
@@ -748,6 +960,26 @@
         renderItems();
       }
     });
+
+    document.getElementById('questsFilterBar')?.addEventListener('click', e => {
+      if (e.target.tagName === 'BUTTON') {
+        document.querySelectorAll('#questsFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        state.questsFilter = e.target.dataset.qtype;
+        state.questsPage = 1;
+        renderQuests();
+      }
+    });
+
+    document.getElementById('craftingFilterBar')?.addEventListener('click', e => {
+      if (e.target.tagName === 'BUTTON') {
+        document.querySelectorAll('#craftingFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        state.craftingFilter = e.target.dataset.ccat;
+        state.craftingPage = 1;
+        renderCrafting();
+      }
+    });
   }
 
   function initApp() {
@@ -757,6 +989,8 @@
     renderBosses();
     renderDungeons();
     renderItems();
+    renderQuests();
+    renderCrafting();
     renderFaq();
     setupListeners();
   }

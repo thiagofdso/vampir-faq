@@ -57,8 +57,18 @@
         </a>
         <a class="nav-item" data-target="items">
           <span class="nav-icon">🎒</span>
-          <span>Itens & Forja</span>
-          <span class="nav-count" id="countItems">300</span>
+          <span>Itens & Equipamentos</span>
+          <span class="nav-count" id="countItems">456</span>
+        </a>
+        <a class="nav-item" data-target="quests">
+          <span class="nav-icon">📜</span>
+          <span>Missões & Jornada</span>
+          <span class="nav-count" id="countQuests">1.3k</span>
+        </a>
+        <a class="nav-item" data-target="crafting">
+          <span class="nav-icon">🔨</span>
+          <span>Forja & Criação</span>
+          <span class="nav-count" id="countCrafting">602</span>
         </a>
         <a class="nav-item" data-target="faq">
           <span class="nav-icon">❓</span>
@@ -128,12 +138,22 @@
             <div class="metric-card">
               <div class="metric-label">Chefes & Inimigos</div>
               <div class="metric-value">555</div>
-              <div class="metric-desc">81 Grandes Chefes de Masmorra e 474 Chefes de Campo</div>
+              <div class="metric-desc">81 Grandes Chefes e 474 Chefes de Campo com HP real e mapas</div>
             </div>
             <div class="metric-card">
               <div class="metric-label">Instâncias & Masmorras</div>
               <div class="metric-value">196</div>
-              <div class="metric-desc">Grupo, Torre Infinita, Cross-Server e Conquista de Guilda</div>
+              <div class="metric-desc">Grupo, Torre Naricanje, Cross-Server e Conquista de Guilda</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Missões & Jornada</div>
+              <div class="metric-value">1.353</div>
+              <div class="metric-desc">Campanha, diárias e tutoriais vinculados a 5.944 tarefas</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Forja & Criação</div>
+              <div class="metric-value">602</div>
+              <div class="metric-desc">Receitas de armas, armaduras, consumíveis e taxas de sucesso</div>
             </div>
           </div>
 
@@ -307,7 +327,56 @@
         </section>
 
         <!-- ==============================================
-             8. FAQ SECTION
+             8. QUESTS SECTION
+             ============================================== -->
+        <section id="quests" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">📜 Missões, Jornada & Tarefas</h2>
+            <p class="section-subtitle">1.353 missões e 5.944 tarefas de campanha, diárias, tutoriais e caçadas com grupos de recompensa</p>
+          </div>
+          <div class="filter-bar" id="questsFilterBar">
+            <button class="filter-btn active" data-qtype="all">Todas as Missões</button>
+            <button class="filter-btn" data-qtype="Scenario">Campanha Principal (863)</button>
+            <button class="filter-btn" data-qtype="Daily">Missões Diárias (236)</button>
+            <button class="filter-btn" data-qtype="Guide">Guias & Tutoriais (99)</button>
+            <button class="filter-btn" data-qtype="Sub">Secundárias (80)</button>
+            <button class="filter-btn" data-qtype="Wanted">Caçadas & Procurados (24)</button>
+            <button class="filter-btn" data-qtype="Bloodline">Linhagem de Sangue (10)</button>
+          </div>
+          <div class="cards-grid" id="questsContainer">
+            <!-- Dynamically populated -->
+          </div>
+          <div id="questsPagination" style="margin-top: 24px; text-align: center;"></div>
+        </section>
+
+        <!-- ==============================================
+             9. CRAFTING SECTION
+             ============================================== -->
+        <section id="crafting" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">🔨 Forja, Criação & Receitas</h2>
+            <p class="section-subtitle">602 receitas catalogadas com custos em ouro, materiais exigidos, taxas de sucesso e itens de grande sucesso</p>
+          </div>
+          <div style="background: rgba(138, 3, 3, 0.15); border: 1px solid rgba(138, 3, 3, 0.4); border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; font-size: 0.85rem; color: #f87171; line-height: 1.5;">
+            <strong>ℹ️ Relatório de Engenharia Reversa:</strong> A extração das 602 receitas revelou que 1.797 materiais de criação possuem correspondência exata em <code>ItemCraft.csv</code>. Há 38 materiais catalogados em <code>materiais_sem_grupo_receita.csv</code> cujos IDs de grupo aguardam vinculação com receitas adicionais de servidor.
+          </div>
+          <div class="filter-bar" id="craftingFilterBar">
+            <button class="filter-btn active" data-ccat="all">Todas as Receitas</button>
+            <button class="filter-btn" data-ccat="weapons">Armas de Classe</button>
+            <button class="filter-btn" data-ccat="armors">Armaduras & Peças</button>
+            <button class="filter-btn" data-ccat="accessories">Acessórios & Joias</button>
+            <button class="filter-btn" data-ccat="materials">Materiais & Forja</button>
+            <button class="filter-btn" data-ccat="consumables">Consumíveis & Poções</button>
+            <button class="filter-btn" data-ccat="events">Eventos & Emblemas</button>
+          </div>
+          <div class="cards-grid" id="craftingContainer">
+            <!-- Dynamically populated -->
+          </div>
+          <div id="craftingPagination" style="margin-top: 24px; text-align: center;"></div>
+        </section>
+
+        <!-- ==============================================
+             10. FAQ SECTION
              ============================================== -->
         <section id="faq" class="view-section">
           <div class="section-header">
