@@ -1512,6 +1512,25 @@
         renderCrafting();
       }
     });
+
+    document.getElementById('modesFilterBar')?.addEventListener('click', e => {
+      if (e.target.tagName === 'BUTTON') {
+        document.querySelectorAll('#modesFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        state.modesFilter = e.target.dataset.mcat;
+        renderModes();
+      }
+    });
+
+    document.getElementById('pvpSubNav')?.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (btn) {
+        document.querySelectorAll('#pvpSubNav .pvp-subnav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.pvpTab = btn.dataset.pvptab;
+        renderPvP();
+      }
+    });
   }
 
   function initApp() {
@@ -1523,6 +1542,8 @@
     renderItems();
     renderQuests();
     renderCrafting();
+    renderModes();
+    renderPvP();
     renderFaq();
     setupListeners();
   }
