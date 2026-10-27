@@ -9,6 +9,7 @@ import csv
 import json
 import os
 import re
+from collections import defaultdict
 
 BASE_DIR = "/home/thiagofdso/vampir"
 CSV_DIR = os.path.join(BASE_DIR, "analysis/patch_chunk1/ProjectRED/Content/RED/Data/CSV")
@@ -56,6 +57,7 @@ dungeon_raw = load_csv_dict(os.path.join(CSV_DIR, "Dungeon.csv"))
 dungeon_names = load_csv_dict(os.path.join(L10N_DIR, "Dungeon_Name.csv"))
 item_raw = load_csv_dict(os.path.join(CSV_DIR, "Item.csv"))
 item_names = load_csv_dict(os.path.join(L10N_DIR, "Item_Name.csv"))
+skill_card_raw = load_csv_dict(os.path.join(CSV_DIR, "SkillCard.csv"), "ItemId")
 const_raw = load_csv_list(os.path.join(CSV_DIR, "Const.csv"))
 
 # ==========================================
@@ -573,16 +575,12 @@ with open(os.path.join(OUT_DIR, "dungeons.json"), "w", encoding="utf-8") as f:
 # 6. ITEMS & GEAR (WITH REAL ICONS)
 # ==========================================
 print("Processing Items & Gear with official game icons...")
-item_type_map = {
-    "1": "Arma Principal",
-    "4": "Baú de Recompensas",
-    "20": "Poção & Consumível",
-    "31": "Livro de Habilidade",
-    "45": "Acessório & Joia",
-    "70": "Carta de Habilidade / Selo de Sangue"
-}
 
-items_catalog = []
+# Category mappings based on EItemType enum from libUnreal.so
+POTION_TYPES = {"5", "26", "48", "79", "80", "81", "36", "37", "38"}
+
+items_by_cat = defaultdict(list)
+
 for iid, irow in item_raw.items():
     iname_row = item_names.get(iid)
     if not iname_row:
@@ -594,14 +592,52 @@ for iid, irow in item_raw.items():
         continue
     
     itype = irow.get("Type", "")
-    type_label = item_type_map.get(itype, "Item Geral")
-    
     tier = irow.get("Tier", "1")
     rarity = irow.get("Rarity", "102")
     
-    clean_name = re.sub(r'\{[^}]+\}', '', name).strip()
-    clean_desc = re.sub(r'\{[^}]+\}', '', desc).strip()
-    
+    # Categorization and clean title
+    if itype == "1":
+        cat = "1"
+        type_label = "Arma & Equipamento"
+        clean_name = re.sub(r'\{[^}]+\}', '', name).strip()
+        clean_desc = re.sub(r'\{[^}]+\}', '', desc).strip()
+    elif itype == "31":
+        cat = "31"
+        type_label = "Livro de Habilidade"
+        clean_name = re.sub(r'\{[^}]+\}', '', name).strip()
+        clean_desc = re.sub(r'\{[^}]+\}', '', desc).strip()
+    elif itype in POTION_TYPES:
+        cat = "potion"
+        type_label = "Poção & Consumível"
+        clean_name = re.sub(r'\{[^}]+\}', '', name).strip()
+        clean_desc = re.sub(r'\{[^}]+\}', '', desc).strip()
+    elif itype == "70":
+        cat = "70"
+        type_label = "Carta de Habilidade"
+        card = skill_card_raw.get(iid)
+        if card:
+            lvl = card.get("SkillLevel", "1")
+            clean_name = name.replace("{ReplaceString1}", f"Nv. {lvl}").strip()
+            sid = card.get("SkillId")
+            sname = skill_names.get(sid, {}).get("Name", "")
+            sdesc = skill_names.get(sid, {}).get("Description", "")
+            clean_desc = f"Carta de Habilidade para {sname} (Nível {lvl}). {sdesc}".strip()
+        else:
+            clean_name = re.sub(r'\{[^}]+\}', 'Nv. 1', name).strip()
+            clean_desc = "Carta mística de aprimoramento de habilidade."
+    elif itype == "4":
+        cat = "4"
+        type_label = "Baú de Recompensas"
+        clean_name = re.sub(r'\{[^}]+\}', '', name).strip()
+        clean_desc = re.sub(r'\{[^}]+\}', '', desc).strip()
+    elif itype in ["32", "49", "53"]:
+        cat = "32"
+        type_label = "Sefira & Relíquia"
+        clean_name = re.sub(r'\{[^}]+\}', '', name).strip()
+        clean_desc = re.sub(r'\{[^}]+\}', '', desc).strip()
+    else:
+        continue
+
     if len(clean_name) < 2:
         continue
 
@@ -612,31 +648,36 @@ for iid, irow in item_raw.items():
     item_img = ""
     if clean_img_file in item_pngs:
         item_img = f"assets/items/{clean_img_file}"
-    elif "weapon" in clean_img_file or itype == "1":
-        # Search available weapon icon
-        for w in ["weapon_bloodsword_common_01.png", "weapon_bloodsword_common_01_event.png"]:
-            if w in item_pngs:
-                item_img = f"assets/items/{w}"
-                break
-    elif "potion" in clean_img_file or itype == "20":
-        for p in ["potion_event_01.png", "pvpbuffpotion_01.png"]:
+    elif cat == "potion":
+        for p in ["hppotion_01.png", "attackpowerpotion_01.png", "potion_event_01.png"]:
             if p in item_pngs:
                 item_img = f"assets/items/{p}"
                 break
-    elif "accessory" in clean_img_file or itype == "45":
-        for a in ["accessory_belt_common_01.png", "accessory_belt_epic_01.png"]:
-            if a in item_pngs:
-                item_img = f"assets/items/{a}"
+    elif cat == "70":
+        for c in ["flat_skillcard.png", "skill_active_waveofforce.png"]:
+            if c in item_pngs:
+                item_img = f"assets/items/{c}"
+                break
+    elif cat == "1":
+        for w in ["weapon_bloodsword_common_01.png"]:
+            if w in item_pngs:
+                item_img = f"assets/items/{w}"
+                break
+    elif cat == "31":
+        for b in ["flat_skillcard.png", "accessory_eventseal01_common.png"]:
+            if b in item_pngs:
+                item_img = f"assets/items/{b}"
                 break
 
     if not item_img:
         item_img = "assets/logo.png"
 
-    items_catalog.append({
+    items_by_cat[cat].append({
         "id": iid,
         "name": clean_name,
         "desc": clean_desc if clean_desc else "Item de uso e progressão vampírica.",
         "type_code": itype,
+        "category": cat,
         "type_name": type_label,
         "icon_img": item_img,
         "tier": tier if tier else "1",
@@ -646,16 +687,27 @@ for iid, irow in item_raw.items():
         "weight": irow.get("Weight", "0")
     })
 
-# Deduplicate distinct items and prioritize ones with custom item icons
-distinct_items = {}
-for it in items_catalog:
-    key = it["name"]
-    if key not in distinct_items:
-        distinct_items[key] = it
-    elif "assets/items/" in it["icon_img"] and "assets/items/" not in distinct_items[key]["icon_img"]:
-        distinct_items[key] = it
+# Curate a balanced collection across ALL categories so no tab is ever empty:
+curated_items = []
 
-curated_items = list(distinct_items.values())[:400]
+# 1. All Potions & Consumables (56 items)
+curated_items.extend(items_by_cat["potion"])
+
+# 2. Skill Cards (120 cards with skill levels)
+curated_items.extend(items_by_cat["70"][:120])
+
+# 3. Weapons & Gear (120 items)
+curated_items.extend(items_by_cat["1"][:120])
+
+# 4. Skill Books (80 items)
+curated_items.extend(items_by_cat["31"][:80])
+
+# 5. Chests (40 items)
+curated_items.extend(items_by_cat["4"][:40])
+
+# 6. Sephiras & Relics (40 items)
+curated_items.extend(items_by_cat["32"][:40])
+
 with open(os.path.join(OUT_DIR, "items.json"), "w", encoding="utf-8") as f:
     json.dump(curated_items, f, indent=2, ensure_ascii=False)
 

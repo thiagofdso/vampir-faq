@@ -480,7 +480,7 @@
     let filtered = state.data.items;
 
     if (state.itemsFilter !== 'all') {
-      filtered = filtered.filter(i => i.type_code === state.itemsFilter);
+      filtered = filtered.filter(i => i.category === state.itemsFilter || i.type_code === state.itemsFilter);
     }
 
     if (state.itemsSearchTerm.trim()) {

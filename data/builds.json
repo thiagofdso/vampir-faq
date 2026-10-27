@@ -11,7 +11,7 @@
       {
         "type": "geral",
         "badge": "🛡️ PvE Geral Equilibrado",
-        "title": "Build de Víbora: proposta para PvE geral",
+        "title": "Build de Víbora: PvE Geral",
         "objective": "dano mágico, veneno e sobrevivência. É uma proposta inicial inferida das descrições das habilidades; não foi validada em jogo nem otimizada com cálculo de dano.",
         "skills": [
           {
