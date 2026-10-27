@@ -43,10 +43,5 @@
     "category": "Arquitetura & Engenharia",
     "question": "Qual motor gráfico e arquitetura de segurança o jogo utiliza?",
     "answer": "O VAMPIR foi desenvolvido na Unreal Engine 5.5.4 em ARM64 (libUnreal.so), utilizando o Gameplay Ability System (GAS), MetaSound para áudio espacial, e FluidNinja para simulação volumétrica de sangue e magia negra. Toda a lógica de combate é Server-Authoritative: cálculos de vida, recarga e dano são validados no servidor, impedindo modificações ilegais de memória de cliente."
-  },
-  {
-    "category": "Arquitetura & Engenharia",
-    "question": "Como os arquivos de dados (PAKs) foram decodificados?",
-    "answer": "Os arquivos de dados (.pak) estavam criptografados com o algoritmo AES-256-CBC. Através de engenharia reversa estática na biblioteca libUnreal.so, a chave mestra de 256 bits foi extraída no offset 0x756520: 4de16fa1dffb68f2b957d49e6beaebcaf7d6b41a0107cd548f0068ecde4d28ed. Isso permitiu a extração completa de mais de 40 MB de tabelas de jogo originais."
   }
 ]
