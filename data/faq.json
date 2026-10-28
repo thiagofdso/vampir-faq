@@ -40,6 +40,11 @@
     "answer": "O jogo conta com o recurso SupportModeAutoMaintain, que permite ao personagem continuar farmando ou completando rotinas automaticamente mesmo offline. O sistema monitora poções de vida (AutoMaintain.HpPotionMinCount: 100) e recarrega suprimentos em cidades antes de retornar ao ponto de caça."
   },
   {
+    "category": "Economia & Lojas",
+    "question": "Como funcionam as Lojas, Moedas de Troca e Pacotes no jogo?",
+    "answer": "O catálogo comercial possui 1.301 ofertas mapeadas em 14 categorias e 78 abas. As duas categorias principais são Produto (740 ofertas, incluindo pacotes semanais/mensais e compras no app via Netmarble IAP) e Trocar (337 ofertas para moedas de jogo: Diamantes, Milhas, Ouro, Moedas do Mercado Negro, Pontos de Tumba e Arena). Há também lojas especializadas de Habilidades (55 ofertas de livros arcanos), Passes Sazonais (41), Moedas de Clã e Eternidade (24 cada) e Masmorras de Elite."
+  },
+  {
     "category": "Arquitetura & Engenharia",
     "question": "Qual motor gráfico e arquitetura de segurança o jogo utiliza?",
     "answer": "O VAMPIR foi desenvolvido na Unreal Engine 5.5.4 em ARM64 (libUnreal.so), utilizando o Gameplay Ability System (GAS), MetaSound para áudio espacial, e FluidNinja para simulação volumétrica de sangue e magia negra. Toda a lógica de combate é Server-Authoritative: cálculos de vida, recarga e dano são validados no servidor, impedindo modificações ilegais de memória de cliente."

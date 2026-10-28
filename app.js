@@ -31,6 +31,10 @@
     craftingSearchTerm: '',
     craftingPage: 1,
     craftingPerPage: 24,
+    shopsFilter: 'all',
+    shopsSearchTerm: '',
+    shopsPage: 1,
+    shopsPerPage: 24,
     modesFilter: 'all',
     pvpTab: 'arena',
     enchantTab: 'scrolls',
@@ -66,7 +70,7 @@
     }
 
     try {
-      const [classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, faq, constants] = await Promise.all([
+      const [classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, faq, constants] = await Promise.all([
         fetch('data/classes.json').then(r => r.json()),
         fetch('data/builds.json').then(r => r.json()),
         fetch('data/skills.json').then(r => r.json()),
@@ -78,11 +82,12 @@
         fetch('data/modes.json').then(r => r.json()),
         fetch('data/pvp.json').then(r => r.json()),
         fetch('data/enchantment.json').then(r => r.json()),
+        fetch('data/shops.json').then(r => r.json()),
         fetch('data/faq.json').then(r => r.json()),
         fetch('data/constants.json').then(r => r.json())
       ]);
 
-      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, faq, constants };
+      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, faq, constants };
       initApp();
     } catch (e) {
       console.error('Failed to load JSON data asynchronously:', e);
@@ -114,6 +119,7 @@
     if (tabId === 'modes') renderModes();
     if (tabId === 'pvp') renderPvP();
     if (tabId === 'enchantment') renderEnchantment();
+    if (tabId === 'shops') renderShops();
   }
 
   window.navTo = function(tabId) {
@@ -1358,6 +1364,182 @@
     }
   }
 
+  // Render Shops and Mercantile Catalog
+  function renderShops() {
+    const container = document.getElementById('shopsContainer');
+    const pagination = document.getElementById('shopsPagination');
+    if (!container || !state.data.shops) return;
+
+    let offers = state.data.shops.offers || [];
+
+    // Filter by Category
+    if (state.shopsFilter !== 'all') {
+      offers = offers.filter(o => o.cid === state.shopsFilter);
+    }
+
+    // Filter by Search Term
+    if (state.shopsSearchTerm) {
+      const q = state.shopsSearchTerm.toLowerCase();
+      offers = offers.filter(o =>
+        (o.name && o.name.toLowerCase().includes(q)) ||
+        (o.tab && o.tab.toLowerCase().includes(q)) ||
+        (o.cat && o.cat.toLowerCase().includes(q)) ||
+        (o.iap && o.iap.toLowerCase().includes(q)) ||
+        (o.cost_param && o.cost_param.toLowerCase().includes(q))
+      );
+    }
+
+    const total = offers.length;
+    const pages = Math.ceil(total / state.shopsPerPage) || 1;
+    if (state.shopsPage > pages) state.shopsPage = 1;
+
+    const start = (state.shopsPage - 1) * state.shopsPerPage;
+    const currentList = offers.slice(start, start + state.shopsPerPage);
+
+    if (currentList.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 48px; color: #94a3b8;">
+          <div style="font-size: 2.2rem; margin-bottom: 8px;">🔍</div>
+          <div style="font-size: 1.1rem; color: #fff; margin-bottom: 4px;">Nenhuma oferta encontrada</div>
+          <p style="font-size: 0.85rem;">Tente ajustar os filtros de categoria ou termo de busca.</p>
+        </div>
+      `;
+      if (pagination) pagination.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = currentList.map(o => {
+      let costHtml = '';
+      if (o.cost_type === 'InAppPurchase') {
+        costHtml = `<span class="entity-badge badge-crimson" style="font-size: 0.72rem;">💳 Compra no App</span>`;
+      } else if (o.cost_type === 'Asset') {
+        const paramLabel = o.cost_param === 'Diamond' ? '💎 Diamantes' : (o.cost_param === 'Gold' ? '🪙 Ouro' : o.cost_param);
+        costHtml = `<span class="entity-badge badge-gold" style="font-size: 0.72rem;">${formatBigNumber(o.cost_val)} ${paramLabel}</span>`;
+      } else {
+        costHtml = `<span class="entity-badge badge-blue" style="font-size: 0.72rem;">📦 Troca (${o.cost_val}x)</span>`;
+      }
+
+      let rewPreview = '';
+      if (o.rewards && o.rewards.length > 0) {
+        rewPreview = `
+          <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.76rem; color: #cbd5e1;">
+            <div style="font-size: 0.68rem; text-transform: uppercase; color: #94a3b8; margin-bottom: 4px;">Contém:</div>
+            ${o.rewards.map(r => `<div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">• ${r[1]}x ${r[0]}</div>`).join('')}
+          </div>
+        `;
+      }
+
+      return `
+        <div class="entity-card" onclick="window.inspectShopOffer('${o.id}')" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div class="entity-header">
+              <div class="item-slot-frame" style="width: 48px; height: 48px;">
+                <img src="${o.icon}" alt="${o.name}" class="item-slot-img" onerror="this.src='assets/items/flat_shop.png'">
+              </div>
+              <div style="flex: 1; margin-left: 12px; min-width: 0;">
+                <div class="entity-title" style="font-size: 0.98rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${o.name}">${o.name}</div>
+                <div style="display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap;">
+                  <span class="entity-badge badge-gray" style="font-size: 0.68rem;">${o.cat}</span>
+                  <span class="entity-badge badge-blue" style="font-size: 0.68rem;">${o.tab}</span>
+                </div>
+              </div>
+            </div>
+
+            ${o.desc ? `<p class="entity-desc" style="font-size: 0.8rem; margin-top: 8px; max-height: 40px; overflow: hidden;">${o.desc}</p>` : ''}
+          </div>
+
+          <div>
+            ${rewPreview}
+            <div class="entity-meta-row" style="margin-top: 10px;">
+              ${costHtml}
+              <span style="font-size: 0.72rem; color: #94a3b8;">${o.limit || (o.iap ? 'ID: ' + o.iap : 'ID #' + o.id)}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    renderPagination(pagination, state.shopsPage, pages, 'window.changeShopsPage');
+  }
+
+  window.changeShopsPage = function(page) {
+    state.shopsPage = page;
+    renderShops();
+    document.getElementById('shops').scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Inspect Shop Offer Modal
+  window.inspectShopOffer = function(id) {
+    if (!state.data.shops) return;
+    const o = state.data.shops.offers.find(x => x.id === id);
+    if (!o) return;
+
+    modalTitle.textContent = o.name;
+    modalSubtitle.textContent = `Oferta ID #${o.id} • ${o.cat} > ${o.tab}`;
+
+    let costDetails = '';
+    if (o.cost_type === 'InAppPurchase') {
+      costDetails = `
+        <div style="background: rgba(220, 38, 38, 0.1); border: 1px solid rgba(220, 38, 38, 0.3); border-radius: 6px; padding: 12px; margin-bottom: 16px;">
+          <div style="font-size: 0.72rem; color: var(--crimson-light); text-transform: uppercase; font-weight: 700;">Tipo de Cobrança</div>
+          <div style="font-size: 1.1rem; color: #fff; font-weight: 600; margin-top: 2px;">💳 Compra no Aplicativo (IAP)</div>
+          <div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 4px; font-family: monospace;">Identificador Netmarble: ${o.iap || 'Não especificado'}</div>
+          <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 4px;">O valor em moeda local (BRL/USD) é negociado pela loja oficial (Google Play / App Store).</div>
+        </div>
+      `;
+    } else {
+      costDetails = `
+        <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 6px; padding: 12px; margin-bottom: 16px;">
+          <div style="font-size: 0.72rem; color: var(--gold-primary); text-transform: uppercase; font-weight: 700;">Custo do Produto</div>
+          <div style="font-size: 1.25rem; color: #fbbf24; font-weight: 700; margin-top: 2px; font-family: monospace;">${formatBigNumber(o.cost_val)} ${o.cost_param}</div>
+          <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">Tipo de Transação: ${o.cost_type}</div>
+        </div>
+      `;
+    }
+
+    let rewardsHtml = '';
+    if (o.rewards && o.rewards.length > 0) {
+      rewardsHtml = `
+        <h5 style="color: #fff; font-size: 0.95rem; margin-bottom: 8px;">🎁 Conteúdo do Pacote / Recompensas Base:</h5>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+          ${o.rewards.map(r => `
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: #fff; font-size: 0.88rem;">${r[0]}</span>
+              <strong style="color: #38bdf8; font-family: monospace;">x${r[1]}</strong>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    modalBody.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 18px;">
+        <div class="item-slot-frame" style="width: 64px; height: 64px;">
+          <img src="${o.icon}" alt="${o.name}" class="item-slot-img" onerror="this.src='assets/items/flat_shop.png'">
+        </div>
+        <div>
+          <h4 style="font-size: 1.15rem; color: #fff; margin-bottom: 4px;">${o.name}</h4>
+          <div style="display: flex; gap: 8px;">
+            <span class="entity-badge badge-gold">${o.cat}</span>
+            <span class="entity-badge badge-blue">${o.tab}</span>
+            ${o.limit ? `<span class="entity-badge badge-crimson">${o.limit}</span>` : ''}
+          </div>
+        </div>
+      </div>
+
+      ${o.desc ? `<p style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 16px;">${o.desc}</p>` : ''}
+
+      ${costDetails}
+      ${rewardsHtml}
+
+      <div style="font-size: 0.74rem; color: #64748b; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px; margin-top: 12px;">
+        Registro extraído do pacote local de assets (Shop.csv • Netmarble Corporation).
+      </div>
+    `;
+
+    detailModal.classList.add('open');
+  };
+
   // Render FAQ
   function renderFaq() {
     const container = document.getElementById('faqContainer');
@@ -1791,6 +1973,10 @@
         state.craftingSearchTerm = q;
         state.craftingPage = 1;
         renderCrafting();
+      } else if (state.currentTab === 'shops') {
+        state.shopsSearchTerm = q;
+        state.shopsPage = 1;
+        renderShops();
       }
     });
 
@@ -1881,6 +2067,16 @@
         renderEnchantment();
       }
     });
+
+    document.getElementById('shopsFilterBar')?.addEventListener('click', e => {
+      if (e.target.tagName === 'BUTTON') {
+        document.querySelectorAll('#shopsFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        state.shopsFilter = e.target.dataset.scat;
+        state.shopsPage = 1;
+        renderShops();
+      }
+    });
   }
 
   function initApp() {
@@ -1895,6 +2091,7 @@
     renderModes();
     renderPvP();
     renderEnchantment();
+    renderShops();
     renderFaq();
     setupListeners();
   }

@@ -1661,7 +1661,125 @@ print("  ✓ Processed Item Enchantment catalog (5,071 rules).")
 
 
 # ==========================================
-# 12. GAME CONSTANTS & FAQ
+# 12. GAME SHOPS & MERCANTILE CATALOG (1,301 Offers, 14 Categories, 78 Tabs)
+# ==========================================
+print("Processing Game Shops catalog...")
+shops_raw = load_csv_list(os.path.join(CSV_DIR, "Shop.csv"))
+tabs_raw = load_csv_dict(os.path.join(CSV_DIR, "ShopTab.csv"))
+cats_raw = load_csv_dict(os.path.join(CSV_DIR, "ShopCategory.csv"))
+cat_names = load_csv_dict(os.path.join(L10N_DIR, "ShopCategory_Name.csv"))
+tab_names = load_csv_dict(os.path.join(L10N_DIR, "ShopTab_Name.csv"))
+shop_names = load_csv_dict(os.path.join(L10N_DIR, "Shop_Name.csv"))
+rewards_raw = load_csv_list(os.path.join(CSV_DIR, "Reward.csv"))
+
+rewards_by_group = defaultdict(list)
+for r in rewards_raw:
+    gid = r.get("GroupId", "").strip()
+    if gid:
+        rewards_by_group[gid].append(r)
+
+cost_type_map = {"1": "Asset", "2": "Item", "3": "ItemId", "4": "InAppPurchase"}
+
+cat_counts = defaultdict(int)
+offers_list = []
+
+for s in shops_raw:
+    sid = s.get("Id", "").strip()
+    tid = s.get("ShopTabInfoId", "").strip()
+    tab = tabs_raw.get(tid, {})
+    cid = tab.get("ShopCategoryInfoId", "").strip()
+
+    cname = cat_names.get(cid, {}).get("MainTabName", "").strip() or "Diversos"
+    tname = tab_names.get(tid, {}).get("SubTabName", "").strip() or "Geral"
+
+    cat_counts[cid] += 1
+
+    sname_data = shop_names.get(sid, {})
+    name = sname_data.get("Name", "").strip() or f"Oferta #{sid}"
+    desc = sname_data.get("Desc", "").strip()
+
+    ctype_code = s.get("CostType", "").strip()
+    ctype = cost_type_map.get(ctype_code, "Outro")
+    cparam = s.get("CostParam", "").strip()
+    cval = s.get("CostValue", "").strip()
+
+    rgid = s.get("BaseRewardGroupId", "").strip()
+    rew_list = []
+    if rgid and rgid in rewards_by_group:
+        for rew in rewards_by_group[rgid][:3]:
+            item_id = rew.get("Param", "").strip()
+            iname = item_names.get(item_id, {}).get("Name", "").strip() or f"Item #{item_id}"
+            cnt = rew.get("MinCount", "1").strip()
+            rew_list.append([iname, cnt])
+
+    plim_val = s.get("PurchaseLimitValue", "").strip()
+    limit_str = f"Limite: {plim_val}" if plim_val and plim_val != "0" else ""
+
+    img = s.get("Img", "").strip().lower().replace("img_", "")
+    icon_path = f"assets/items/{img}.png" if img else "assets/items/flat_shop.png"
+
+    item_dict = {
+        "id": sid,
+        "name": name,
+        "cid": cid,
+        "cat": cname,
+        "tid": tid,
+        "tab": tname,
+        "cost_type": ctype,
+        "cost_param": cparam,
+        "cost_val": cval,
+        "icon": icon_path,
+        "rewards": rew_list
+    }
+    if desc:
+        item_dict["desc"] = desc
+    if limit_str:
+        item_dict["limit"] = limit_str
+    if s.get("NetmarbleSItemId"):
+        item_dict["iap"] = s["NetmarbleSItemId"].strip()
+    if s.get("IsSaleClosed") == "1":
+        item_dict["closed"] = 1
+
+    offers_list.append(item_dict)
+
+categories_list = [
+    {"id": "all", "name": "Todas as Lojas", "count": len(offers_list)},
+    {"id": "1", "name": "Produto (Pacotes & IAP)", "count": cat_counts.get("1", 0)},
+    {"id": "2", "name": "Trocar (Moedas & Atividades)", "count": cat_counts.get("2", 0)},
+    {"id": "4", "name": "Loja de Habilidades", "count": cat_counts.get("4", 0)},
+    {"id": "99", "name": "Passe Sazonal", "count": cat_counts.get("99", 0)},
+    {"id": "6", "name": "Moeda da Eternidade", "count": cat_counts.get("6", 0)},
+    {"id": "7", "name": "Moeda do Clã", "count": cat_counts.get("7", 0)},
+    {"id": "18", "name": "Ponto de Geena", "count": cat_counts.get("18", 0)},
+    {"id": "19", "name": "Masmorra de Elite", "count": cat_counts.get("19", 0)},
+    {"id": "90", "name": "Evento Alto-Baixo", "count": cat_counts.get("90", 0)},
+    {"id": "91", "name": "Roleta do Crocodilo", "count": cat_counts.get("91", 0)},
+    {"id": "5", "name": "Loja de Equipamentos", "count": cat_counts.get("5", 0)},
+    {"id": "3", "name": "Loja Geral", "count": cat_counts.get("3", 0)}
+]
+
+shops_catalog = {
+    "summary": {
+        "total_offers": len(offers_list),
+        "categories_count": len(cats_raw),
+        "tabs_count": len(tabs_raw),
+        "cost_types": {
+            "in_app_purchase": sum(1 for o in offers_list if o["cost_type"] == "InAppPurchase"),
+            "asset": sum(1 for o in offers_list if o["cost_type"] == "Asset"),
+            "item": sum(1 for o in offers_list if o["cost_type"] == "Item")
+        }
+    },
+    "categories": categories_list,
+    "offers": offers_list
+}
+
+with open(os.path.join(OUT_DIR, "shops.json"), "w", encoding="utf-8") as f:
+    json.dump(shops_catalog, f, ensure_ascii=False)
+print(f"  ✓ Processed Game Shops catalog ({len(offers_list)} offers).")
+
+
+# ==========================================
+# 13. GAME CONSTANTS & FAQ
 # ==========================================
 print("Processing Constants and FAQ...")
 constants_dict = {crow.get("Key", "").strip(): crow.get("Value", "").strip() for crow in const_raw if crow.get("Key")}
@@ -1710,6 +1828,11 @@ faq_catalog = [
         "answer": "O jogo conta com o recurso SupportModeAutoMaintain, que permite ao personagem continuar farmando ou completando rotinas automaticamente mesmo offline. O sistema monitora poções de vida (AutoMaintain.HpPotionMinCount: 100) e recarrega suprimentos em cidades antes de retornar ao ponto de caça."
     },
     {
+        "category": "Economia & Lojas",
+        "question": "Como funcionam as Lojas, Moedas de Troca e Pacotes no jogo?",
+        "answer": "O catálogo comercial possui 1.301 ofertas mapeadas em 14 categorias e 78 abas. As duas categorias principais são Produto (740 ofertas, incluindo pacotes semanais/mensais e compras no app via Netmarble IAP) e Trocar (337 ofertas para moedas de jogo: Diamantes, Milhas, Ouro, Moedas do Mercado Negro, Pontos de Tumba e Arena). Há também lojas especializadas de Habilidades (55 ofertas de livros arcanos), Passes Sazonais (41), Moedas de Clã e Eternidade (24 cada) e Masmorras de Elite."
+    },
+    {
         "category": "Arquitetura & Engenharia",
         "question": "Qual motor gráfico e arquitetura de segurança o jogo utiliza?",
         "answer": "O VAMPIR foi desenvolvido na Unreal Engine 5.5.4 em ARM64 (libUnreal.so), utilizando o Gameplay Ability System (GAS), MetaSound para áudio espacial, e FluidNinja para simulação volumétrica de sangue e magia negra. Toda a lógica de combate é Server-Authoritative: cálculos de vida, recarga e dano são validados no servidor, impedindo modificações ilegais de memória de cliente."
@@ -1736,6 +1859,7 @@ bundle_data = {
     "modes": modes_catalog,
     "pvp": pvp_catalog,
     "enchantment": enchantment_catalog,
+    "shops": shops_catalog,
     "constants": constants_dict,
     "faq": faq_catalog
 }

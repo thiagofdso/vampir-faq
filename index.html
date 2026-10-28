@@ -85,6 +85,11 @@
           <span>Aprimoramento</span>
           <span class="nav-count" id="countEnchantment">5.0k</span>
         </a>
+        <a class="nav-item" data-target="shops">
+          <span class="nav-icon"><img src="assets/items/flat_shop.png" style="width: 18px; height: 18px; vertical-align: middle;" onerror="this.outerHTML='🏬'"></span>
+          <span>Lojas & Mercado</span>
+          <span class="nav-count" id="countShops">1.3k</span>
+        </a>
         <a class="nav-item" data-target="faq">
           <span class="nav-icon">❓</span>
           <span>FAQ & Sistemas</span>
@@ -503,7 +508,77 @@
         </section>
 
         <!-- ==============================================
-             13. FAQ SECTION
+             13. SHOPS & MERCANTILE SECTION
+             ============================================== -->
+        <section id="shops" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <img src="assets/items/flat_shop.png" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 8px;" onerror="this.outerHTML='🏬'">
+              Lojas do Jogo & Mercadores
+            </h2>
+            <p class="section-subtitle">1.301 ofertas mapeadas em 14 categorias e 78 abas: Pacotes, Moedas de Troca, Habilidades, Clã e Masmorras</p>
+          </div>
+
+          <!-- Summary Metric Cards -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px;">
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
+              <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Ofertas Mapeadas</div>
+              <div style="font-size: 1.6rem; font-weight: 700; color: var(--gold-primary); font-family: monospace;">1.301</div>
+              <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">Shop.csv do cliente</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
+              <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Categorias & Abas</div>
+              <div style="font-size: 1.6rem; font-weight: 700; color: #38bdf8; font-family: monospace;">14 Cat. • 78 Abas</div>
+              <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">ShopCategory / ShopTab</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
+              <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Pacotes IAP (App)</div>
+              <div style="font-size: 1.6rem; font-weight: 700; color: var(--crimson-light); font-family: monospace;">505</div>
+              <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">Netmarble SItemId</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
+              <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Moedas do Jogo</div>
+              <div style="font-size: 1.6rem; font-weight: 700; color: #34d399; font-family: monospace;">431</div>
+              <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">Gold, Diamond, Milhas</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
+              <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Trocas por Itens</div>
+              <div style="font-size: 1.6rem; font-weight: 700; color: #a78bfa; font-family: monospace;">365</div>
+              <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">Medalhas e Atividades</div>
+            </div>
+          </div>
+
+          <!-- Technical Disclaimer Banner -->
+          <div style="background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.25); border-left: 4px solid var(--gold-primary); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 24px;">
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <span style="font-size: 1.4rem; line-height: 1;">ℹ️</span>
+              <p style="font-size: 0.84rem; color: #cbd5e1; line-height: 1.5; margin: 0;">
+                <strong>Nota Técnica sobre o Catálogo:</strong> Os registros abaixo refletem a totalidade das ofertas cadastradas no cliente local (<code style="color: #fbbf24;">pakchunk1</code>). Preços regionais em moeda fiduciária (BRL, USD), promoções sazonais ativas e elegibilidade de conta são controlados dinamicamente pelos servidores da Netmarble.
+              </p>
+            </div>
+          </div>
+
+          <!-- Category Filter Bar -->
+          <div class="filter-bar" id="shopsFilterBar">
+            <button class="filter-btn active" data-scat="all">Todas as Lojas (1.301)</button>
+            <button class="filter-btn" data-scat="1">Produto (Pacotes)</button>
+            <button class="filter-btn" data-scat="2">Trocar (Moedas)</button>
+            <button class="filter-btn" data-scat="4">Habilidades</button>
+            <button class="filter-btn" data-scat="99">Passe Sazonal</button>
+            <button class="filter-btn" data-scat="6">Eternidade</button>
+            <button class="filter-btn" data-scat="7">Moeda do Clã</button>
+            <button class="filter-btn" data-scat="18">Geena</button>
+            <button class="filter-btn" data-scat="19">Masmorra Elite</button>
+          </div>
+
+          <div class="cards-grid" id="shopsContainer">
+            <!-- Dynamically populated -->
+          </div>
+          <div id="shopsPagination" style="margin-top: 24px; text-align: center;"></div>
+        </section>
+
+        <!-- ==============================================
+             14. FAQ SECTION
              ============================================== -->
         <section id="faq" class="view-section">
           <div class="section-header">
