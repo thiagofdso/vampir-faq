@@ -110,6 +110,11 @@
           <span>Artefatos</span>
           <span class="nav-count" id="countArtifacts">6</span>
         </a>
+        <a class="nav-item" data-target="bloodline">
+          <span class="nav-icon"><img src="assets/bloodline/flat_bloodline.png" style="width: 18px; height: 18px; vertical-align: middle;" onerror="this.outerHTML='🩸'"></span>
+          <span>Linhagem</span>
+          <span class="nav-count" id="countBloodline">10</span>
+        </a>
         <a class="nav-item" data-target="faq">
           <span class="nav-icon">❓</span>
           <span>FAQ & Sistemas</span>
@@ -863,7 +868,66 @@
         </section>
 
         <!-- ==============================================
-             18. FAQ SECTION
+             18. BLOODLINE (LINHAGEM) SECTION
+             ============================================== -->
+        <section id="bloodline" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <img src="assets/bloodline/flat_bloodline.png" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 8px;" onerror="this.outerHTML='🩸'">
+              Linhagem & Memórias dos Elottarvizianos
+            </h2>
+            <p class="section-subtitle">Conteúdo narrativo de história com 10 masmorras sequenciais, 50 transformações e herança de 25% dos atributos</p>
+          </div>
+
+          <!-- Mechanics Card -->
+          <div class="info-card" style="background: linear-gradient(135deg, rgba(40,15,20,0.85), rgba(25,10,15,0.95)); border: 1px solid rgba(239,68,68,0.35); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+            <div style="display: flex; gap: 14px; align-items: flex-start;">
+              <span style="font-size: 2rem;">🩸</span>
+              <div style="flex: 1;">
+                <h3 style="color: #f87171; margin-bottom: 8px; font-size: 1.15rem;">Como Funciona o Sistema de Linhagem no ProjectRED</h3>
+                <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; margin-bottom: 12px;">
+                  A Linhagem é um modo focado na narrativa ancestral de Valachia. Ao entrar nas memórias, o jogador <strong>assume o controle de um guerreiro Elottarviziano</strong> com visual, animações e habilidades ativas/mortais exclusivas da sua classe, enfrentando chefes épicos em instâncias de combate individual.
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 10px;">
+                  <div style="background: rgba(0,0,0,0.35); border-left: 3px solid #ef4444; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+                    <div style="font-weight: 700; color: #f87171; font-size: 0.88rem; margin-bottom: 4px;">⚡ Aplicação de 25% dos Atributos</div>
+                    <div style="font-size: 0.8rem; color: #94a3b8;">
+                      O campo <code>CharacterOperationAddRate=25</code> transfere <strong>25% dos atributos</strong> do seu personagem normal para o guerreiro da memória, tornando seu fortalecimento na campanha diretamente relevante.
+                    </div>
+                  </div>
+                  <div style="background: rgba(0,0,0,0.35); border-left: 3px solid #f59e0b; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+                    <div style="font-weight: 700; color: #fbbf24; font-size: 0.88rem; margin-bottom: 4px;">⏱️ Limite de 15 Minutos & Anti-AFK</div>
+                    <div style="font-size: 0.8rem; color: #94a3b8;">
+                      Instância com <code>dungeonLimitTime=900</code> (15 minutos). Ao entrar, há <strong>saída automática de grupos</strong>, bloqueio de emparelhamento e expulsão por inatividade.
+                    </div>
+                  </div>
+                  <div style="background: rgba(0,0,0,0.35); border-left: 3px solid #3b82f6; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+                    <div style="font-weight: 700; color: #60a5fa; font-size: 0.88rem; margin-bottom: 4px;">📜 Desbloqueio Sequencial & Recompensas</div>
+                    <div style="font-size: 0.8rem; color: #94a3b8;">
+                      Liberadas progressivamente pela campanha principal (de Nv. 1 a 20+). Cada memória concluída premia grandes pacotes de <strong>EXP</strong>, <strong>Ouro</strong>, <strong>Moedas da Eternidade</strong> e <strong>Livros de Habilidade</strong>.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Search and Filter Bar -->
+          <div class="filter-bar" id="bloodlineFilterBar" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 20px;">
+            <div style="flex: 1; min-width: 250px;">
+              <input type="text" id="bloodlineSearchInput" class="search-input" placeholder="🔍 Buscar por nome da memória, chefe ou missão pré-requisito..." style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(15,20,30,0.8); color: #fff; font-size: 0.9rem;">
+            </div>
+            <button class="filter-btn active" data-bchapter="all">Todas as Memórias (10)</button>
+            <button class="filter-btn" data-bchapter="early">Capítulos 1-5</button>
+            <button class="filter-btn" data-bchapter="late">Capítulos 6-10</button>
+          </div>
+
+          <!-- Bloodline Chapters Grid -->
+          <div class="entity-grid" id="bloodlineContainer"></div>
+        </section>
+
+        <!-- ==============================================
+             19. FAQ SECTION
              ============================================== -->
         <section id="faq" class="view-section">
           <div class="section-header">

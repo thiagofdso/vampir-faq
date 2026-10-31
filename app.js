@@ -57,6 +57,8 @@
     portraitsPerPage: 18,
     artifactsFilter: 'all',
     artifactsSearchTerm: '',
+    bloodlineFilter: 'all',
+    bloodlineSearchTerm: '',
     modesFilter: 'all',
     pvpTab: 'arena',
     enchantTab: 'scrolls',
@@ -92,7 +94,7 @@
     }
 
     try {
-      const [classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, faq, constants] = await Promise.all([
+      const [classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, faq, constants] = await Promise.all([
         fetch('data/classes.json').then(r => r.json()),
         fetch('data/builds.json').then(r => r.json()),
         fetch('data/skills.json').then(r => r.json()),
@@ -109,11 +111,12 @@
         fetch('data/research.json').then(r => r.json()),
         fetch('data/portraits.json').then(r => r.json()),
         fetch('data/artifacts.json').then(r => r.json()),
+        fetch('data/bloodline.json').then(r => r.json()),
         fetch('data/faq.json').then(r => r.json()),
         fetch('data/constants.json').then(r => r.json())
       ]);
 
-      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, faq, constants };
+      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, faq, constants };
       initApp();
     } catch (e) {
       console.error('Failed to load JSON data asynchronously:', e);
@@ -150,6 +153,7 @@
     if (tabId === 'research') renderResearch();
     if (tabId === 'portraits') renderPortraits();
     if (tabId === 'artifacts') renderArtifacts();
+    if (tabId === 'bloodline') renderBloodline();
   }
 
   window.navTo = function(tabId) {
@@ -2767,6 +2771,335 @@
     `;
   };
 
+  // ==========================================
+  // 18. BLOODLINE (LINHAGEM) RENDERING
+  // ==========================================
+  function renderBloodline() {
+    const container = document.getElementById('bloodlineContainer');
+    if (!container || !state.data.bloodline) return;
+
+    let chapters = state.data.bloodline.chapters || [];
+
+    // Filter by chapter range
+    if (state.bloodlineFilter === 'early') {
+      chapters = chapters.filter(c => c.chapter >= 1 && c.chapter <= 5);
+    } else if (state.bloodlineFilter === 'late') {
+      chapters = chapters.filter(c => c.chapter >= 6 && c.chapter <= 10);
+    }
+
+    // Search query
+    const q = (state.bloodlineSearchTerm || '').toLowerCase().trim();
+    if (q) {
+      chapters = chapters.filter(c => 
+        c.name.toLowerCase().includes(q) ||
+        c.quest_name.toLowerCase().includes(q) ||
+        c.prerequisite_quest_name.toLowerCase().includes(q) ||
+        c.boss.name.toLowerCase().includes(q) ||
+        String(c.dungeon_id).includes(q) ||
+        c.transformations.some(t => t.name.toLowerCase().includes(q) || t.title.toLowerCase().includes(q) || t.class_name.toLowerCase().includes(q))
+      );
+    }
+
+    if (chapters.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 48px; color: #94a3b8; background: rgba(0,0,0,0.2); border-radius: 12px;">
+          <p style="font-size: 1.1rem; margin-bottom: 8px;">Nenhuma memória de Linhagem encontrada para os filtros atuais.</p>
+          <p style="font-size: 0.85rem;">Tente ajustar sua busca ou selecionar "Todas as Memórias".</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = chapters.map(c => {
+      const boss = c.boss;
+      const rewardsPreview = c.rewards.slice(0, 4);
+
+      // Unique transforms mini badges
+      const transformsBadges = c.transformations.map(t => `
+        <span class="badge" style="background: rgba(255,255,255,0.06); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1); font-size: 0.72rem; display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px;">
+          <img src="${t.class_icon}" style="width: 12px; height: 12px; object-fit: contain;">
+          <span>${t.name}</span>
+        </span>
+      `).join('');
+
+      return `
+        <div class="entity-card" style="display: flex; flex-direction: column; justify-content: space-between; border-color: rgba(239,68,68,0.25); background: linear-gradient(180deg, rgba(25,15,20,0.7) 0%, rgba(15,10,15,0.85) 100%);">
+          <div>
+            <!-- Header Badges -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span class="badge" style="background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.4); font-weight: 700;">
+                Capítulo ${c.chapter}
+              </span>
+              <span class="badge" style="background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); font-size: 0.75rem;">
+                ⏱️ 15 min (900s)
+              </span>
+            </div>
+
+            <!-- Memory Title & Quest -->
+            <div style="display: flex; gap: 14px; margin-bottom: 14px;">
+              <div style="width: 72px; height: 72px; flex-shrink: 0; border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.5); border: 1px solid rgba(239,68,68,0.3); position: relative;">
+                <img src="${boss.img}" alt="${boss.name}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='assets/monsters/raab_01.png'">
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.75); font-size: 0.65rem; color: #fca5a5; text-align: center; padding: 1px 0; font-weight: 600;">
+                  ${boss.name}
+                </div>
+              </div>
+              <div style="flex: 1; min-width: 0;">
+                <h3 style="font-size: 1.1rem; color: #fff; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${c.name}">
+                  ${c.name}
+                </h3>
+                <div style="font-size: 0.82rem; color: #f87171; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+                  <img src="assets/bloodline/quest_bloodline.png" style="width: 14px; height: 14px; object-fit: contain;">
+                  <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${c.quest_name}</span>
+                </div>
+                <div style="font-size: 0.75rem; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="Missão pré-requisito da campanha: ${c.prerequisite_quest_name}">
+                  📜 Requer: <strong style="color: #cbd5e1;">${c.prerequisite_quest_name}</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Key Features / Scaling -->
+            <div style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 8px 10px; margin-bottom: 12px; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: #94a3b8;">Herança de Atributos:</span>
+              <strong style="color: #34d399;">+25% dos Atributos do PC</strong>
+            </div>
+
+            <!-- Transformations Preview -->
+            <div style="margin-bottom: 12px;">
+              <div style="font-size: 0.72rem; text-transform: uppercase; color: #64748b; font-weight: 700; margin-bottom: 6px;">
+                5 Guerreiros Elottarvizianos:
+              </div>
+              <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                ${transformsBadges}
+              </div>
+            </div>
+
+            <!-- Rewards Preview -->
+            <div style="margin-bottom: 14px;">
+              <div style="font-size: 0.72rem; text-transform: uppercase; color: #64748b; font-weight: 700; margin-bottom: 6px;">
+                Recompensas Destacadas:
+              </div>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                ${rewardsPreview.map(r => `
+                  <span class="badge" style="background: rgba(0,0,0,0.4); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.08); font-size: 0.72rem; display: inline-flex; align-items: center; gap: 4px;">
+                    <img src="${r.icon}" style="width: 13px; height: 13px; object-fit: contain;">
+                    <span>${r.name === 'EXP' || r.name === 'Ouro' ? r.count_display + ' ' + r.name : r.name}</span>
+                  </span>
+                `).join('')}
+                ${c.rewards.length > 4 ? `<span style="font-size: 0.72rem; color: #94a3b8; align-self: center;">+${c.rewards.length - 4}</span>` : ''}
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Button -->
+          <button class="btn btn-primary" onclick="window.inspectBloodline('${c.dungeon_id}')" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%); border: 1px solid rgba(239,68,68,0.5); color: #fff;">
+            <span>Inspecionar Memória & Habilidades</span>
+            <span>➔</span>
+          </button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Inspect Bloodline Chapter Details in Modal
+  window.inspectBloodline = function(dungeonId) {
+    if (!state.data.bloodline) return;
+    const chapter = state.data.bloodline.chapters.find(c => String(c.dungeon_id) === String(dungeonId));
+    if (!chapter) return;
+
+    modalTitle.textContent = `Capítulo ${chapter.chapter}: ${chapter.name}`;
+    modalSubtitle.textContent = `Instância de Memória #${chapter.dungeon_id} • Missão: ${chapter.quest_name}`;
+
+    const boss = chapter.boss;
+
+    modalBody.innerHTML = `
+      <!-- Showcase Header Banner -->
+      <div style="position: relative; border-radius: 12px; overflow: hidden; margin-bottom: 24px; border: 1px solid rgba(239,68,68,0.3); background: #000;">
+        <div style="position: absolute; inset: 0; background: url('assets/bloodline/bloodline_dungeon_bg.png') center/cover no-repeat; opacity: 0.35;"></div>
+        <div style="position: relative; z-index: 1; padding: 24px; display: flex; flex-direction: column; gap: 16px; background: linear-gradient(180deg, rgba(20,10,15,0.7) 0%, rgba(10,5,10,0.95) 100%);">
+          <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+            <div style="width: 96px; height: 96px; border-radius: 12px; overflow: hidden; border: 2px solid #ef4444; box-shadow: 0 0 20px rgba(239,68,68,0.4); flex-shrink: 0; background: #000;">
+              <img src="${boss.img}" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <div style="flex: 1; min-width: 240px;">
+              <div style="display: flex; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;">
+                <span class="badge" style="background: rgba(239,68,68,0.3); color: #fca5a5; border: 1px solid rgba(239,68,68,0.5); font-weight: 700;">
+                  Capítulo ${chapter.chapter} de 10
+                </span>
+                <span class="badge" style="background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.4);">
+                  ⏱️ Tempo Limite: 15 min (900s)
+                </span>
+                <span class="badge" style="background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.4);">
+                  ⚡ Herança: +25% dos Atributos
+                </span>
+              </div>
+              <h2 style="font-size: 1.5rem; color: #fff; margin-bottom: 4px; font-family: var(--font-serif);">${chapter.name}</h2>
+              <div style="color: #cbd5e1; font-size: 0.88rem;">
+                Chefe da Memória: <strong style="color: #f87171;">${boss.name}</strong> (${boss.title})
+              </div>
+            </div>
+          </div>
+
+          <!-- Rules bar -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; background: rgba(0,0,0,0.4); border-radius: 8px; padding: 12px; border: 1px solid rgba(255,255,255,0.08); font-size: 0.8rem;">
+            <div>
+              <span style="color: #94a3b8;">Missão Narrativa:</span>
+              <div style="font-weight: 600; color: #fca5a5;">${chapter.quest_name} (#${chapter.quest_id})</div>
+            </div>
+            <div>
+              <span style="color: #94a3b8;">Missão Prévia Exigida:</span>
+              <div style="font-weight: 600; color: #60a5fa;">${chapter.prerequisite_quest_name} (#${chapter.prerequisite_quest_id})</div>
+            </div>
+            <div>
+              <span style="color: #94a3b8;">Restrições de Grupo:</span>
+              <div style="font-weight: 600; color: #f87171;">Saída de Grupo • Anti-AFK</div>
+            </div>
+            <div>
+              <span style="color: #94a3b8;">Condição de Entrada:</span>
+              <div style="font-weight: 600; color: #34d399;">Nv. Rec: 20+ (Restrito: Nv. 1)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recompensas da Memória -->
+      <div style="margin-bottom: 24px;">
+        <h3 style="font-size: 1.1rem; color: #fbbf24; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <span>🎁</span>
+          <span>Recompensas da Conclusão</span>
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px;">
+          ${chapter.rewards.map(r => `
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px; display: flex; align-items: center; gap: 12px;">
+              <img src="${r.icon}" style="width: 32px; height: 32px; object-fit: contain; flex-shrink: 0;">
+              <div>
+                <div style="font-weight: 700; color: #fff; font-size: 0.88rem;">${r.count_display}x</div>
+                <div style="font-size: 0.78rem; color: #cbd5e1; word-break: break-word;">${r.name}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- As 5 Transformações Elottarvizianas -->
+      <div>
+        <h3 style="font-size: 1.1rem; color: #f87171; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <span>⚔️</span>
+          <span>Transformações Elottarvizianas & Habilidades (${chapter.transformations.length} Classes)</span>
+        </h3>
+        
+        <!-- Class Selector Tabs -->
+        <div style="display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;">
+          ${chapter.transformations.map((t, idx) => `
+            <button class="filter-btn ${idx === 0 ? 'active' : ''}" 
+                    id="bTabBtn-${chapter.dungeon_id}-${t.class_id}" 
+                    onclick="window.switchBloodlineTransform('${chapter.dungeon_id}', '${t.class_id}')"
+                    style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px;">
+              <img src="${t.class_icon}" style="width: 16px; height: 16px; object-fit: contain;">
+              <span>${t.name} (${t.class_name.split(' ')[0]})</span>
+            </button>
+          `).join('')}
+        </div>
+
+        <!-- Transform Details Container -->
+        <div id="bloodlineTransformDetails">
+          ${renderTransformDetailsHtml(chapter.transformations[0])}
+        </div>
+      </div>
+    `;
+
+    detailModal.classList.add('active');
+  };
+
+  function renderTransformDetailsHtml(t) {
+    return `
+      <div style="background: rgba(0,0,0,0.35); border: 1px solid rgba(239,68,68,0.25); border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <img src="${t.class_icon}" style="width: 24px; height: 24px; object-fit: contain;">
+              <h4 style="font-size: 1.2rem; color: #fff; margin: 0;">${t.full_name}</h4>
+              <span class="badge" style="background: rgba(239,68,68,0.2); color: #fca5a5; border: 1px solid rgba(239,68,68,0.4); font-size: 0.75rem;">
+                ${t.class_name}
+              </span>
+            </div>
+            <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">
+              Modelo: <code>${t.resource}</code> • Gênero: ${t.gender}
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <div style="background: rgba(0,0,0,0.4); border-radius: 6px; padding: 6px 10px; text-align: center; border: 1px solid rgba(255,255,255,0.08);">
+              <div style="font-size: 0.68rem; color: #94a3b8;">Vel. Movimento</div>
+              <div style="font-weight: 700; color: #60a5fa; font-size: 0.85rem;">${t.move_speed}</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.4); border-radius: 6px; padding: 6px 10px; text-align: center; border: 1px solid rgba(255,255,255,0.08);">
+              <div style="font-size: 0.68rem; color: #94a3b8;">Raio do Corpo</div>
+              <div style="font-weight: 700; color: #fbbf24; font-size: 0.85rem;">${t.body_radius}</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.4); border-radius: 6px; padding: 6px 10px; text-align: center; border: 1px solid rgba(16,185,129,0.3);">
+              <div style="font-size: 0.68rem; color: #94a3b8;">Herança de Status</div>
+              <div style="font-weight: 700; color: #34d399; font-size: 0.85rem;">+${t.character_operation_add_rate}% PC</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Skills Deck -->
+        <h5 style="font-size: 0.88rem; color: #cbd5e1; margin-bottom: 10px; text-transform: uppercase; font-weight: 700;">
+          Deck de Combate do Guerreiro (${t.skills.length} Habilidades)
+        </h5>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          ${t.skills.map(s => {
+            const isDeadly = s.is_deadly;
+            const borderCol = isDeadly ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.08)';
+            const bgCol = isDeadly ? 'rgba(239,68,68,0.1)' : 'rgba(0,0,0,0.25)';
+            return `
+              <div style="background: ${bgCol}; border: 1px solid ${borderCol}; border-radius: 8px; padding: 10px; display: flex; gap: 12px; align-items: flex-start;">
+                <img src="${s.icon}" style="width: 36px; height: 36px; object-fit: contain; border-radius: 6px; flex-shrink: 0; background: rgba(0,0,0,0.3);" onerror="this.src='assets/classes/logo.png'">
+                <div style="flex: 1; min-width: 0;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 6px;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                      <strong style="color: ${isDeadly ? '#fca5a5' : '#fff'}; font-size: 0.9rem;">${s.name}</strong>
+                      <span class="badge" style="font-size: 0.68rem; padding: 1px 5px; background: rgba(255,255,255,0.06); color: ${isDeadly ? '#ef4444' : '#94a3b8'}; border: 1px solid rgba(255,255,255,0.1);">
+                        ${s.category}
+                      </span>
+                    </div>
+                    <div style="display: flex; gap: 8px; font-size: 0.75rem; color: #94a3b8;">
+                      <span>⏳ CD: <strong style="color: #60a5fa;">${s.cooldown}</strong></span>
+                      <span>🎯 Alcance: <strong style="color: #fbbf24;">${s.range}</strong></span>
+                      <span>💧 ${s.mp}</span>
+                    </div>
+                  </div>
+                  <div style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.4;">
+                    ${s.description || s.effect_description || 'Habilidade de combate corporal do Elottarviziano.'}
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  window.switchBloodlineTransform = function(dungeonId, classId) {
+    if (!state.data.bloodline) return;
+    const chapter = state.data.bloodline.chapters.find(c => String(c.dungeon_id) === String(dungeonId));
+    if (!chapter) return;
+
+    const transform = chapter.transformations.find(t => String(t.class_id) === String(classId));
+    if (!transform) return;
+
+    // Update active tab buttons
+    chapter.transformations.forEach(t => {
+      const btn = document.getElementById(`bTabBtn-${dungeonId}-${t.class_id}`);
+      if (btn) btn.classList.toggle('active', String(t.class_id) === String(classId));
+    });
+
+    const container = document.getElementById('bloodlineTransformDetails');
+    if (container) {
+      container.innerHTML = renderTransformDetailsHtml(transform);
+    }
+  };
+
   // Render FAQ
   function renderFaq() {
     const container = document.getElementById('faqContainer');
@@ -3527,6 +3860,21 @@
         renderArtifacts();
       }
     });
+
+    document.getElementById('bloodlineFilterBar')?.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (btn && btn.dataset.bchapter) {
+        document.querySelectorAll('#bloodlineFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.bloodlineFilter = btn.dataset.bchapter;
+        renderBloodline();
+      }
+    });
+
+    document.getElementById('bloodlineSearchInput')?.addEventListener('input', e => {
+      state.bloodlineSearchTerm = e.target.value;
+      renderBloodline();
+    });
   }
 
   function initApp() {
@@ -3546,6 +3894,7 @@
     renderResearch();
     renderPortraits();
     renderArtifacts();
+    renderBloodline();
     renderFaq();
     setupListeners();
   }

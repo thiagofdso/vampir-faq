@@ -2751,6 +2751,202 @@ with open(os.path.join(OUT_DIR, "artifacts.json"), "w", encoding="utf-8") as f:
 print(f"  ✓ Processed Artifacts catalog ({len(artifacts_list)} artifacts, {artifacts_catalog['stats']['total_progression_records']} progression records).")
 
 # ==========================================
+# 18. BLOODLINE (LINHAGEM) CATALOG
+# ==========================================
+print("Processing Bloodline (Linhagem) catalog...")
+bloodline_reports_dir = os.path.join(BASE_DIR, "analysis/versions/2026-10-31/reports/linhagem")
+bloodline_dungeons_path = os.path.join(bloodline_reports_dir, "masmorras.csv")
+bloodline_quests_path = os.path.join(bloodline_reports_dir, "missoes.csv")
+bloodline_transforms_path = os.path.join(bloodline_reports_dir, "transformacoes.csv")
+
+skills_by_id = {s["id"]: s for s in skills_catalog}
+
+boss_map = {
+    "80010": {"name": "Ra'av", "img": "assets/monsters/raab_01.png", "title": "Herdeiro Antigo"},
+    "80020": {"name": "Luciferre", "img": "assets/monsters/luciferre_01.png", "title": "Senhor da Baía Negra"},
+    "80030": {"name": "Malum", "img": "assets/monsters/hermitfiend_02.png", "title": "Eremita Caído"},
+    "80040": {"name": "Innocentius", "img": "assets/monsters/innocentius_01.png", "title": "Bispo Corrompido"},
+    "80050": {"name": "Massacre", "img": "assets/monsters/massacre_01.png", "title": "Carrasco do Bosque"},
+    "80060": {"name": "Lillai", "img": "assets/monsters/relicbeast_01.png", "title": "Besta da Relíquia"},
+    "80070": {"name": "Draco", "img": "assets/monsters/draco_01.png", "title": "Dragão de Alabastro"},
+    "80080": {"name": "Uigilias", "img": "assets/monsters/uigilias_01.png", "title": "Vigia das Ruínas"},
+    "80090": {"name": "Carmon", "img": "assets/monsters/demonexecutioner_04.png", "title": "Executor Abissal"},
+    "80100": {"name": "Philippos", "img": "assets/monsters/philipposboss.png", "title": "Guardião da Terra Sagrada"}
+}
+
+class_names_map = {
+    "1": {"name": "Mago Sombrio (Dark Mage)", "icon": "assets/classes/darkmage_icon.png"},
+    "2": {"name": "Ceifador (Reaper)", "icon": "assets/classes/reaper_icon.png"},
+    "3": {"name": "Atirador (Gunner)", "icon": "assets/classes/gunner_icon.png"},
+    "4": {"name": "Espadachim (SwordMan)", "icon": "assets/classes/swordman_icon.png"},
+    "5": {"name": "Lutador (Fighter)", "icon": "assets/classes/fighter_icon.png"}
+}
+
+bloodline_chapters = []
+
+if os.path.exists(bloodline_dungeons_path) and os.path.exists(bloodline_quests_path) and os.path.exists(bloodline_transforms_path):
+    with open(bloodline_dungeons_path, "r", encoding="utf-8-sig") as f:
+        dungeons_raw = list(csv.DictReader(f))
+    with open(bloodline_quests_path, "r", encoding="utf-8-sig") as f:
+        quests_raw = {r["ContentsLockInfoId"]: r for r in csv.DictReader(f)}
+    with open(bloodline_transforms_path, "r", encoding="utf-8-sig") as f:
+        transforms_raw = {r["Id"]: r for r in csv.DictReader(f)}
+
+    for idx, d in enumerate(dungeons_raw, 1):
+        did = d["Id"]
+        param = json.loads(d["AdditionalInfoParam"]) if d.get("AdditionalInfoParam") else {}
+        ct_map = {}
+        time_limit = 900
+        for k in param.get("key", []):
+            if "ClassTransform" in k:
+                ct_map = k["ClassTransform"]
+            if "dungeonLimitTime" in k:
+                time_limit = int(k["dungeonLimitTime"])
+
+        q = quests_raw.get(did, {})
+        rewards_raw = json.loads(q.get("recompensas_json", "{}"))
+        rewards_compact = []
+        for gid, items in rewards_raw.items():
+            for it in items:
+                itype = it.get("Type")
+                iparam = it.get("Param", "")
+                count = int(it.get("MinCount", 1))
+                name = it.get("item_nome", "")
+                icon = "assets/items/materials_potion_01.png"
+                cat = "item"
+
+                if itype == "2":
+                    name = "EXP"
+                    cat = "exp"
+                    icon = "assets/items/materials_potion_01.png"
+                elif itype == "0" and iparam == "Gold":
+                    name = "Ouro"
+                    cat = "gold"
+                    icon = "assets/items/asset_gold.png"
+                elif iparam == "80000000":
+                    name = "Moeda da Eternidade"
+                    cat = "eternity_coin"
+                    icon = "assets/items/itembox_coin_02.png"
+                elif iparam == "100000000":
+                    name = "Trindade"
+                    cat = "trinity"
+                    icon = "assets/items/etc_contentscoin_01.png"
+                elif "Livro de Habilidade" in name:
+                    name = name.replace("{ReplaceString1}", "").strip()
+                    cat = "skill_book"
+                    icon = "assets/items/skillbook_darkmage_02.png"
+                elif "Fragmento de Memória" in name:
+                    cat = "memory_fragment"
+                    icon = "assets/bloodline/mat_bloodline.png"
+                elif iparam in all_processed_items:
+                    icon = all_processed_items[iparam].get("icon_img") or icon
+                    name = all_processed_items[iparam].get("name") or name
+
+                rewards_compact.append({
+                    "name": name,
+                    "count": count,
+                    "count_display": f"{count:,}",
+                    "category": cat,
+                    "icon": icon,
+                    "rate": float(it.get("Rate", 1))
+                })
+
+        t_list = []
+        for cid in ["1", "2", "3", "4", "5"]:
+            tid = ct_map.get(cid)
+            if not tid or tid not in transforms_raw:
+                continue
+            tr = transforms_raw[tid]
+            l10n = json.loads(tr.get("nome_localizado_json", "{}"))
+            skills_raw = json.loads(tr.get("habilidades_json", "[]"))
+            skills_compact = []
+
+            for s in skills_raw:
+                sid = s.get("Id")
+                catalog_skill = skills_by_id.get(sid, {})
+                sname = catalog_skill.get("name") or (skill_names.get(sid, {}).get("Name") if isinstance(skill_names.get(sid), dict) else (skill_names.get(sid) or f"Habilidade {sid}"))
+                desc = catalog_skill.get("description", "")
+                eff_desc = catalog_skill.get("effect_description", "")
+                icon_img = catalog_skill.get("icon_img") or "assets/classes/logo.png"
+
+                cd = catalog_skill.get("cooldown") or f"{float(s.get('MaxCoolTime', 0) or 0) / 1000.0:.1f}s"
+                dist = catalog_skill.get("range") or f"{float(s.get('MaxCastDistance', 0) or 0) / 100.0:.1f}m"
+                mp = catalog_skill.get("mp_cost") or (f"{s.get('MpMin')} MP" if s.get("MpMin") and s.get("MpMin") != "0" else "Sem Custo")
+                is_deadly = s.get("Category") == "5"
+
+                skills_compact.append({
+                    "id": sid,
+                    "name": sname,
+                    "description": desc,
+                    "effect_description": eff_desc,
+                    "icon": icon_img,
+                    "cooldown": cd,
+                    "range": dist,
+                    "mp": mp,
+                    "category": "Mortal / Fatal" if is_deadly else ("Esquiva" if s.get("Category") == "3" else ("Ataque Básico" if s.get("Category") == "0" else "Ativa")),
+                    "is_deadly": is_deadly
+                })
+
+            c_info = class_names_map.get(cid, {"name": f"Classe {cid}", "icon": "assets/classes/logo.png"})
+            t_list.append({
+                "class_id": int(cid),
+                "class_name": c_info["name"],
+                "class_icon": c_info["icon"],
+                "transform_id": tid,
+                "title": l10n.get("Title", "Elottarviziano"),
+                "name": l10n.get("Name", ""),
+                "full_name": f"{l10n.get('Title', 'Elottarviziano')} - {l10n.get('Name', '')}",
+                "resource": tr.get("Resource", ""),
+                "gender": "Feminino" if tr.get("GenderType") == "1" else "Masculino",
+                "move_speed": int(tr.get("MoveSpeed", 500)),
+                "body_radius": int(tr.get("BodyRadius", 50)),
+                "character_operation_add_rate": int(tr.get("CharacterOperationAddRate", 25)),
+                "skills": skills_compact
+            })
+
+        boss_data = boss_map.get(did, {"name": "Chefe da Masmorra", "img": "assets/monsters/raab_01.png", "title": "Chefe de Linhagem"})
+
+        bloodline_chapters.append({
+            "chapter": idx,
+            "dungeon_id": did,
+            "name": d["nome_pt"],
+            "quest_id": q.get("Id", ""),
+            "quest_name": q.get("nome_pt", ""),
+            "prerequisite_quest_id": q.get("RequireCompleteQuestInfoId", ""),
+            "prerequisite_quest_name": q.get("missao_previa_nome", ""),
+            "time_limit": time_limit,
+            "time_limit_minutes": round(time_limit / 60),
+            "restricted_level": int(d.get("RestrictedLevel", 1) or 1),
+            "recommended_level": int(d.get("RecommendedLevel", 20) or 20),
+            "boss": boss_data,
+            "rewards": rewards_compact,
+            "transformations": t_list,
+            "rules": [
+                "Controle de Elottarviziano com conjunto próprio de habilidades ativas e mortais.",
+                "Aplicação configurada de 25% dos atributos do seu personagem principal.",
+                "Limite de tempo de 15 minutos (900 segundos).",
+                "Entrada individual: saída automática do grupo e indisponível em emparelhamento.",
+                "Sistema de aviso contra inatividade e expulsão automática por AFK.",
+                "Progressão narrativa única: liberada após completar missões específicas da campanha principal."
+            ]
+        })
+
+bloodline_catalog = {
+    "stats": {
+        "total_dungeons": len(bloodline_chapters),
+        "total_transformations": sum(len(c["transformations"]) for c in bloodline_chapters),
+        "attribute_transfer_rate": "25%",
+        "time_limit_default": "15 minutos (900s)",
+        "unique_bosses": len(set(c["boss"]["name"] for c in bloodline_chapters))
+    },
+    "chapters": bloodline_chapters
+}
+
+with open(os.path.join(OUT_DIR, "bloodline.json"), "w", encoding="utf-8") as f:
+    json.dump(bloodline_catalog, f, ensure_ascii=False)
+print(f"  ✓ Processed Bloodline catalog ({len(bloodline_chapters)} chapters, {bloodline_catalog['stats']['total_transformations']} transformations).")
+
+# ==========================================
 # 8. BUNDLE GENERATION
 # ==========================================
 print("Writing bundle.js...")
@@ -2773,6 +2969,7 @@ bundle_data = {
     "research": research_catalog,
     "portraits": portraits_catalog,
     "artifacts": artifacts_catalog,
+    "bloodline": bloodline_catalog,
     "constants": constants_dict,
     "faq": faq_catalog
 }
