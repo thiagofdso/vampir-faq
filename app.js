@@ -36,6 +36,16 @@
     shopsSearchTerm: '',
     shopsPage: 1,
     shopsPerPage: 24,
+    codexTab: 'collections',
+    codexFilter: 'all',
+    codexRarity: 'all',
+    codexSearchTerm: '',
+    codexPage: 1,
+    codexPerPage: 24,
+    codexEntriesFilter: 'all',
+    codexEntriesSearchTerm: '',
+    codexEntriesPage: 1,
+    codexEntriesPerPage: 36,
     modesFilter: 'all',
     pvpTab: 'arena',
     enchantTab: 'scrolls',
@@ -71,7 +81,7 @@
     }
 
     try {
-      const [classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, faq, constants] = await Promise.all([
+      const [classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, faq, constants] = await Promise.all([
         fetch('data/classes.json').then(r => r.json()),
         fetch('data/builds.json').then(r => r.json()),
         fetch('data/skills.json').then(r => r.json()),
@@ -84,11 +94,12 @@
         fetch('data/pvp.json').then(r => r.json()),
         fetch('data/enchantment.json').then(r => r.json()),
         fetch('data/shops.json').then(r => r.json()),
+        fetch('data/codex.json').then(r => r.json()),
         fetch('data/faq.json').then(r => r.json()),
         fetch('data/constants.json').then(r => r.json())
       ]);
 
-      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, faq, constants };
+      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, faq, constants };
       initApp();
     } catch (e) {
       console.error('Failed to load JSON data asynchronously:', e);
@@ -121,6 +132,7 @@
     if (tabId === 'pvp') renderPvP();
     if (tabId === 'enchantment') renderEnchantment();
     if (tabId === 'shops') renderShops();
+    if (tabId === 'codex') renderCodex();
   }
 
   window.navTo = function(tabId) {
@@ -1622,6 +1634,295 @@
     detailModal.classList.add('open');
   };
 
+  // ==========================================
+  // CODEX & ANCESTRAL COLLECTIONS
+  // ==========================================
+  function renderCodex() {
+    if (!state.data.codex) return;
+
+    // Toggle subview visibility
+    const views = {
+      collections: document.getElementById('codexCollectionsView'),
+      entries: document.getElementById('codexEntriesView'),
+      character: document.getElementById('codexCharacterView'),
+      tomb: document.getElementById('codexTombView')
+    };
+
+    Object.keys(views).forEach(tabKey => {
+      if (views[tabKey]) {
+        views[tabKey].style.display = (state.codexTab === tabKey) ? 'block' : 'none';
+      }
+    });
+
+    if (state.codexTab === 'collections') {
+      renderCodexCollections();
+    } else if (state.codexTab === 'entries') {
+      renderCodexEntries();
+    } else if (state.codexTab === 'character') {
+      renderCodexCharacter();
+    } else if (state.codexTab === 'tomb') {
+      renderCodexTomb();
+    }
+  }
+
+  function renderCodexCollections() {
+    const container = document.getElementById('codexCollectionsContainer');
+    const pagination = document.getElementById('codexCollectionsPagination');
+    if (!container || !state.data.codex || !state.data.codex.collections) return;
+
+    let list = state.data.codex.collections;
+
+    // Filter by Tab (Category)
+    if (state.codexFilter !== 'all') {
+      list = list.filter(c => c.tab === Number(state.codexFilter));
+    }
+
+    // Filter by Rarity
+    if (state.codexRarity !== 'all') {
+      list = list.filter(c => c.rarity === Number(state.codexRarity));
+    }
+
+    // Search query
+    if (state.codexSearchTerm.trim()) {
+      const q = state.codexSearchTerm.toLowerCase();
+      list = list.filter(c =>
+        c.name.toLowerCase().includes(q) ||
+        c.id.includes(q) ||
+        (c.reqs && c.reqs.some(req => req.name.toLowerCase().includes(q) || req.id.includes(q))) ||
+        (c.effects && c.effects.some(eff => eff.name.toLowerCase().includes(q) || eff.raw_type.toLowerCase().includes(q)))
+      );
+    }
+
+    const total = list.length;
+    const pages = Math.ceil(total / state.codexPerPage) || 1;
+    if (state.codexPage > pages) state.codexPage = 1;
+
+    const start = (state.codexPage - 1) * state.codexPerPage;
+    const currentList = list.slice(start, start + state.codexPerPage);
+
+    container.innerHTML = currentList.map(c => {
+      const rarityBadgeColor = c.rarity === 5 ? 'badge-crimson' : (c.rarity === 4 ? 'badge-gold' : (c.rarity === 3 ? 'badge-blue' : 'badge-gray'));
+
+      return `
+        <div class="entity-card" style="display: flex; flex-direction: column; justify-content: space-between; border-left: 3px solid var(--border-gold);">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px;">
+              <div>
+                <div class="entity-title" style="font-size: 1.0rem; color: #fff; margin-bottom: 2px;">${c.name}</div>
+                <div style="font-size: 0.72rem; color: #94a3b8;">
+                  <span class="entity-badge badge-blue" style="font-size: 0.65rem;">${c.tab_name}</span>
+                  <span class="entity-badge ${rarityBadgeColor}" style="font-size: 0.65rem; margin-left: 4px;">${c.rarity_name}</span>
+                  <span style="margin-left: 6px;">ID #${c.id}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Required Items Frame -->
+            <div style="background: rgba(0,0,0,0.35); border-radius: 6px; padding: 10px; margin: 10px 0; border: 1px solid rgba(255,255,255,0.06);">
+              <div style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px;">
+                Requisitos (${c.reqs.length} itens):
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                ${c.reqs.map(q => `
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 0.78rem;">
+                    <div style="display: flex; align-items: center; gap: 6px; min-width: 0;">
+                      <img src="${q.icon}" style="width: 24px; height: 24px; border-radius: 4px; object-fit: contain; background: rgba(0,0,0,0.5); padding: 1px;" onerror="this.src='assets/logo.png'">
+                      <span style="color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;" onclick="window.inspectItem('${q.id}')" title="Clique para ver o item">${q.name}</span>
+                    </div>
+                    <div style="display: flex; gap: 4px; align-items: center; flex-shrink: 0;">
+                      ${q.ench > 0 ? `<span class="entity-badge badge-gold" style="font-size: 0.68rem; padding: 1px 5px;">+${q.ench}</span>` : `<span class="entity-badge badge-gray" style="font-size: 0.65rem; padding: 1px 4px;">+0</span>`}
+                      <span style="color: #94a3b8; font-size: 0.72rem;">x${q.qty}</span>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+
+          <!-- Applied Effects Frame -->
+          <div>
+            <div style="background: rgba(234, 179, 8, 0.08); border: 1px solid rgba(234, 179, 8, 0.2); border-radius: 6px; padding: 8px 10px;">
+              <div style="font-size: 0.72rem; font-weight: 700; color: var(--gold-primary); margin-bottom: 4px;">
+                ✨ Bônus Permanente de Atributos:
+              </div>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                ${c.effects.map(eff => `
+                  <span class="entity-badge badge-gold" style="font-size: 0.72rem; padding: 2px 6px;">
+                    ${eff.name}: <strong>${eff.val}</strong>
+                  </span>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    renderPagination(pagination, state.codexPage, pages, 'window.changeCodexPage');
+  }
+
+  window.changeCodexPage = function(page) {
+    state.codexPage = page;
+    renderCodexCollections();
+    document.getElementById('codex').scrollIntoView({ behavior: 'smooth' });
+  };
+
+  function renderCodexEntries() {
+    const container = document.getElementById('codexEntriesContainer');
+    const pagination = document.getElementById('codexEntriesPagination');
+    if (!container || !state.data.codex || !state.data.codex.entries) return;
+
+    let list = state.data.codex.entries;
+
+    // Filter by Entry Type
+    if (state.codexEntriesFilter === 'unmatched') {
+      list = list.filter(e => !e.matched);
+    } else if (state.codexEntriesFilter !== 'all') {
+      list = list.filter(e => e.type === state.codexEntriesFilter);
+    }
+
+    // Search
+    if (state.codexEntriesSearchTerm.trim()) {
+      const q = state.codexEntriesSearchTerm.toLowerCase();
+      list = list.filter(e =>
+        e.name.toLowerCase().includes(q) ||
+        (e.param && e.param.toLowerCase().includes(q)) ||
+        (e.group_id && e.group_id.toLowerCase().includes(q)) ||
+        e.table.toLowerCase().includes(q)
+      );
+    }
+
+    const total = list.length;
+    const pages = Math.ceil(total / state.codexEntriesPerPage) || 1;
+    if (state.codexEntriesPage > pages) state.codexEntriesPage = 1;
+
+    const start = (state.codexEntriesPage - 1) * state.codexEntriesPerPage;
+    const currentList = list.slice(start, start + state.codexEntriesPerPage);
+
+    container.innerHTML = currentList.map(e => {
+      const statusBadge = e.matched ?
+        '<span class="entity-badge badge-blue" style="font-size: 0.68rem;">✅ Identificado</span>' :
+        '<span class="entity-badge badge-crimson" style="font-size: 0.68rem;">⏳ ID Preservado</span>';
+
+      return `
+        <div class="entity-card" style="border-left: 3px solid ${e.matched ? 'var(--blue-primary)' : 'var(--crimson-primary)'};">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+            <div>
+              <div class="entity-title" style="font-size: 0.95rem; color: #fff;">${e.name}</div>
+              <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 4px;">
+                <span class="entity-badge badge-gray" style="font-size: 0.65rem;">${e.type_name}</span>
+                <span style="margin-left: 6px;">Posição Tile: <strong>#${e.tile_num}</strong></span>
+              </div>
+            </div>
+            ${statusBadge}
+          </div>
+
+          <div style="background: rgba(0,0,0,0.35); border-radius: 6px; padding: 8px 10px; margin-top: 10px; font-size: 0.75rem; color: #cbd5e1; font-family: monospace; line-height: 1.5;">
+            <div>Tabela Alvo: <strong>${e.table}</strong></div>
+            <div>Grupo de Códex: <strong>${e.group_id || '—'}</strong></div>
+            <div>Parâmetro / ID do Item: <strong>${e.param || 'Não especificado (Reservado)'}</strong></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    renderPagination(pagination, state.codexEntriesPage, pages, 'window.changeCodexEntriesPage');
+  }
+
+  window.changeCodexEntriesPage = function(page) {
+    state.codexEntriesPage = page;
+    renderCodexEntries();
+    document.getElementById('codex').scrollIntoView({ behavior: 'smooth' });
+  };
+
+  function renderCodexCharacter() {
+    const container = document.getElementById('codexCharacterContainer');
+    if (!container || !state.data.codex || !state.data.codex.character) return;
+
+    const chars = state.data.codex.character;
+
+    container.innerHTML = `
+      <div style="grid-column: 1 / -1; margin-bottom: 10px;">
+        <div class="panel-box" style="border-left: 3px solid var(--gold-primary);">
+          <div class="panel-title">📜 Mecânica do Códex de Personagem (Tutorial #41101)</div>
+          <p style="font-size: 0.86rem; color: #cbd5e1; line-height: 1.6; margin-top: 4px;">
+            As abas de território do Códex de Personagem são ativadas ao concluir a primeira missão principal da região correspondente.
+            As informações de personagens e seus relacionamentos são desvendadas ao completar missões secundárias locais, acumulando Pontos de Episódio que desbloqueiam até 5 etapas sucessivas de recompensas permanentes.
+          </p>
+        </div>
+      </div>
+      ${chars.map(c => `
+        <div class="entity-card" style="border-left: 3px solid var(--gold-primary);">
+          <div class="entity-title" style="font-size: 1.15rem; color: var(--gold-primary);">
+            🏰 Território: ${c.name}
+          </div>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin: 4px 0 12px;">
+            Desbloqueio de Território: <strong>Missão Principal #${c.quest_id}</strong>
+          </p>
+
+          <div style="background: rgba(0,0,0,0.35); border-radius: 6px; padding: 10px; border: 1px solid rgba(255,255,255,0.06);">
+            <div style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px;">
+              Etapas de Pontos de Episódio & Recompensas:
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              ${c.points.map((pt, idx) => `
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
+                  <span style="color: #cbd5e1;">Etapa ${idx + 1} (${pt} Pontos Necessários)</span>
+                  <span class="entity-badge badge-gold" style="font-size: 0.7rem;">Recompensa #${c.rewards[idx]}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    `;
+  }
+
+  function renderCodexTomb() {
+    const container = document.getElementById('codexTombContainer');
+    if (!container || !state.data.codex || !state.data.codex.tomb_cards) return;
+
+    const groups = state.data.codex.tomb_cards;
+
+    container.innerHTML = `
+      <div style="grid-column: 1 / -1; margin-bottom: 10px;">
+        <div class="panel-box" style="border-left: 3px solid #38bdf8;">
+          <div class="panel-title">⚰️ Coleção de Cartas da Tumba & Árvore da Linhagem (Bloodline)</div>
+          <p style="font-size: 0.86rem; color: #cbd5e1; line-height: 1.6; margin-top: 4px;">
+            A Coleção Fúnebre organiza 96 cartas de tumba ancestrais divididas em <strong>29 grupos temáticos</strong>, com 290 etapas de coleção acumulativas e 960 regras de evolução de nível.
+            Ao registrar cartas fúnebres na tumba, seus atributos são aplicados permanentemente a todos os personagens da conta.
+          </p>
+        </div>
+      </div>
+      ${groups.map(g => `
+        <div class="entity-card" style="border-left: 3px solid #38bdf8;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="entity-title" style="font-size: 0.98rem; color: #fff;">${g.name}</div>
+            <span class="entity-badge badge-blue" style="font-size: 0.68rem;">Ordem: ${g.order}</span>
+          </div>
+          <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 6px;">
+            ID do Grupo Fúnebre: <strong>#${g.id}</strong>
+          </div>
+        </div>
+      `).join('')}
+    `;
+  }
+
+  window.openCodexFromItem = function(collectionId) {
+    detailModal.classList.remove('open');
+    switchTab('codex');
+    state.codexTab = 'collections';
+    document.querySelectorAll('#codexSubNav .pvp-subnav-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.codextab === 'collections');
+    });
+    document.querySelectorAll('.codex-subview').forEach(v => v.style.display = 'none');
+    const view = document.getElementById('codexCollectionsView');
+    if (view) view.style.display = 'block';
+    state.codexSearchTerm = collectionId;
+    state.codexPage = 1;
+    renderCodex();
+  };
+
   // Render FAQ
   function renderFaq() {
     const container = document.getElementById('faqContainer');
@@ -1960,6 +2261,34 @@
       `;
     }
 
+    let collectionsHtml = '';
+    if (item.collections && item.collections.length > 0) {
+      collectionsHtml = `
+        <div class="panel-box" style="margin-top: 16px; border-left: 3px solid #eab308;">
+          <div class="panel-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>📖 Coleções do Códex que Utilizam este Item (${item.collections.length} conjuntos)</span>
+            <span style="font-size: 0.72rem; color: #94a3b8; font-weight: normal;">Fonte: CollectionGroup.csv</span>
+          </div>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin: 4px 0 10px; line-height: 1.4;">
+            Este item é requisito para completar conjuntos no Códex e obter bônus permanentes.
+          </p>
+          <div style="display: flex; flex-direction: column; gap: 8px; max-height: 240px; overflow-y: auto; padding-right: 4px;">
+            ${item.collections.map(c => `
+              <div style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                <div>
+                  <div style="font-size: 0.85rem; font-weight: 600; color: #fff;">${c.name}</div>
+                  <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px;">
+                    <span>${c.tab}</span> • Exige: <span style="color: #fbbf24; font-weight: 700;">+${c.ench}</span> (Qtd: ${c.qty})
+                  </div>
+                </div>
+                <button class="filter-btn" style="padding: 4px 10px; font-size: 0.75rem; flex-shrink: 0;" onclick="window.openCodexFromItem('${c.id}')">Ver no Códex 📖</button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
     modalBody.innerHTML = `
       <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
         <div class="item-slot-frame" style="width: 64px; height: 64px;">
@@ -1976,6 +2305,7 @@
         </div>
       </div>
       ${droppersHtml}
+      ${collectionsHtml}
     `;
 
     detailModal.classList.add('open');
@@ -2150,6 +2480,15 @@
         state.shopsSearchTerm = q;
         state.shopsPage = 1;
         renderShops();
+      } else if (state.currentTab === 'codex') {
+        if (state.codexTab === 'collections') {
+          state.codexSearchTerm = q;
+          state.codexPage = 1;
+        } else if (state.codexTab === 'entries') {
+          state.codexEntriesSearchTerm = q;
+          state.codexEntriesPage = 1;
+        }
+        renderCodex();
       }
     });
 
@@ -2262,6 +2601,42 @@
         renderShops();
       }
     });
+
+    document.getElementById('codexSubNav')?.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (btn) {
+        document.querySelectorAll('#codexSubNav .pvp-subnav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.codexTab = btn.dataset.codextab;
+        renderCodex();
+      }
+    });
+
+    document.getElementById('codexFilterBar')?.addEventListener('click', e => {
+      if (e.target.tagName === 'BUTTON') {
+        document.querySelectorAll('#codexFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        state.codexFilter = e.target.dataset.tabid;
+        state.codexPage = 1;
+        renderCodexCollections();
+      }
+    });
+
+    document.getElementById('codexRaritySelect')?.addEventListener('change', e => {
+      state.codexRarity = e.target.value;
+      state.codexPage = 1;
+      renderCodexCollections();
+    });
+
+    document.getElementById('codexEntriesFilterBar')?.addEventListener('click', e => {
+      if (e.target.tagName === 'BUTTON') {
+        document.querySelectorAll('#codexEntriesFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        state.codexEntriesFilter = e.target.dataset.etype;
+        state.codexEntriesPage = 1;
+        renderCodexEntries();
+      }
+    });
   }
 
   function initApp() {
@@ -2277,6 +2652,7 @@
     renderPvP();
     renderEnchantment();
     renderShops();
+    renderCodex();
     renderFaq();
     setupListeners();
   }

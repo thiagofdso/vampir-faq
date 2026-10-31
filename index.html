@@ -90,6 +90,11 @@
           <span>Lojas & Mercado</span>
           <span class="nav-count" id="countShops">1.4k</span>
         </a>
+        <a class="nav-item" data-target="codex">
+          <span class="nav-icon"><img src="assets/items/flat_relic.png" style="width: 18px; height: 18px; vertical-align: middle;" onerror="this.outerHTML='📖'"></span>
+          <span>Códex & Coleções</span>
+          <span class="nav-count" id="countCodex">4.1k</span>
+        </a>
         <a class="nav-item" data-target="faq">
           <span class="nav-icon">❓</span>
           <span>FAQ & Sistemas</span>
@@ -594,7 +599,89 @@
         </section>
 
         <!-- ==============================================
-             14. FAQ SECTION
+             14. CODEX & ANCESTRAL COLLECTIONS SECTION
+             ============================================== -->
+        <section id="codex" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <img src="assets/items/flat_relic.png" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 8px;" onerror="this.outerHTML='📖'">
+              Códex & Coleções Ancestrais
+            </h2>
+            <p class="section-subtitle">Catálogo unificado de 4.114 coleções de equipamentos, bônus permanentes de atributos, 2.073 entradas de códice e árvores fúnebres</p>
+          </div>
+
+          <!-- Sub-Navigation for Codex Types -->
+          <div class="pvp-subnav" id="codexSubNav" style="margin-bottom: 20px;">
+            <button class="pvp-subnav-btn active" data-codextab="collections">
+              <span>🛡️ Coleções de Itens (4.114)</span>
+            </button>
+            <button class="pvp-subnav-btn" data-codextab="entries">
+              <span>🔮 Códex de Entradas (2.073)</span>
+            </button>
+            <button class="pvp-subnav-btn" data-codextab="character">
+              <span>👑 Códex de Personagem (4 Territórios)</span>
+            </button>
+            <button class="pvp-subnav-btn" data-codextab="tomb">
+              <span>⚰️ Cartas da Tumba (29 Grupos)</span>
+            </button>
+          </div>
+
+          <!-- Sub-View 1: Item Collections -->
+          <div id="codexCollectionsView" class="codex-subview">
+            <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 14px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 0.85rem; color: #94a3b8; font-weight: 600;">🏷️ Raridade:</span>
+                <select id="codexRaritySelect" class="filter-select" style="background: rgba(15,20,30,0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 6px 14px; border-radius: 6px; font-size: 0.85rem; cursor: pointer;">
+                  <option value="all">Todas as Raridades</option>
+                  <option value="0">Comum</option>
+                  <option value="1">Incomum</option>
+                  <option value="2">Raro</option>
+                  <option value="3">Heroico</option>
+                  <option value="4">Lendário</option>
+                  <option value="5">Mítico</option>
+                </select>
+              </div>
+            </div>
+            <div class="filter-bar" id="codexFilterBar" style="margin-bottom: 20px;">
+              <button class="filter-btn active" data-tabid="all">Todas as Coleções (4.114)</button>
+              <button class="filter-btn" data-tabid="1">⚔️ Equipamentos & Armas (1.732)</button>
+              <button class="filter-btn" data-tabid="2">🗿 Relíquias & Estátuas (419)</button>
+              <button class="filter-btn" data-tabid="3">📜 Diários & Manuscritos (1.573)</button>
+              <button class="filter-btn" data-tabid="4">🎁 Eventos & Especiais (315)</button>
+              <button class="filter-btn" data-tabid="5">🏰 Reides de Gehenna (75)</button>
+            </div>
+            <div class="entity-grid" id="codexCollectionsContainer"></div>
+            <div id="codexCollectionsPagination" style="margin-top: 30px; text-align: center;"></div>
+          </div>
+
+          <!-- Sub-View 2: Tile Codex Entries -->
+          <div id="codexEntriesView" class="codex-subview" style="display: none;">
+            <div class="filter-bar" id="codexEntriesFilterBar" style="margin-bottom: 20px;">
+              <button class="filter-btn active" data-etype="all">Todas as Entradas (2.073)</button>
+              <button class="filter-btn" data-etype="0">🩸 Formas de Sangue (183)</button>
+              <button class="filter-btn" data-etype="2">🐎 Montarias (123)</button>
+              <button class="filter-btn" data-etype="4">🔮 Cartas da Tumba (96)</button>
+              <button class="filter-btn" data-etype="6">⚡ Cartas de Habilidade (1.575)</button>
+              <button class="filter-btn" data-etype="8">🐾 Progênies / Mascotes (96)</button>
+              <button class="filter-btn" data-etype="unmatched">⏳ Alvos Pendentes (41)</button>
+            </div>
+            <div class="entity-grid" id="codexEntriesContainer"></div>
+            <div id="codexEntriesPagination" style="margin-top: 30px; text-align: center;"></div>
+          </div>
+
+          <!-- Sub-View 3: Character Codex -->
+          <div id="codexCharacterView" class="codex-subview" style="display: none;">
+            <div class="entity-grid" id="codexCharacterContainer" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));"></div>
+          </div>
+
+          <!-- Sub-View 4: Tomb Card Collections -->
+          <div id="codexTombView" class="codex-subview" style="display: none;">
+            <div class="entity-grid" id="codexTombContainer" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));"></div>
+          </div>
+        </section>
+
+        <!-- ==============================================
+             15. FAQ SECTION
              ============================================== -->
         <section id="faq" class="view-section">
           <div class="section-header">

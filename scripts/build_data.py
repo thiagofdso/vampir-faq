@@ -824,6 +824,47 @@ print("Processing Items & Gear with official game icons...")
 # Category mappings based on EItemType enum from libUnreal.so
 POTION_TYPES = {"5", "26", "48", "79", "80", "81", "36", "37", "38"}
 
+# Build Item to Codex Collections mapping
+CODEX_REPORTS_DIR = os.path.join(BASE_DIR, "analysis/versions/2026-10-31/reports/codex")
+item_collections_map = defaultdict(list)
+codex_collections_raw = []
+
+TAB_LABELS = {
+    1: "Equipamentos & Armas",
+    2: "Relíquias & Estátuas",
+    3: "Diários & Manuscritos",
+    4: "Eventos & Especiais",
+    5: "Registros de Reide"
+}
+RARITY_LABELS = {
+    0: "Comum",
+    1: "Incomum",
+    2: "Raro",
+    3: "Heroico",
+    4: "Lendário",
+    5: "Mítico"
+}
+
+codex_csv_path = os.path.join(CODEX_REPORTS_DIR, "colecoes_itens_completas.csv")
+if os.path.exists(codex_csv_path):
+    with open(codex_csv_path, "r", encoding="utf-8-sig") as f:
+        codex_collections_raw = list(csv.DictReader(f))
+    for crow in codex_collections_raw:
+        cid = crow["Id"]
+        cname = crow["nome_pt"]
+        tab_id = int(crow["CollectionTabId"])
+        t_label = TAB_LABELS.get(tab_id, f"Aba {tab_id}")
+        reqs_data = json.loads(crow["requisitos_json"])
+        for q in reqs_data:
+            q_iid = q["CollectParam"]
+            item_collections_map[q_iid].append({
+                "id": cid,
+                "name": cname,
+                "ench": int(q.get("EnchantLevel", 0) or 0),
+                "qty": int(q.get("Count", 1) or 1),
+                "tab": t_label
+            })
+
 # Build Item Droppers mapping using npc_to_boss_map
 item_droppers_map = defaultdict(list)
 for iid, dlist in item_droppers_raw.items():
@@ -1018,7 +1059,8 @@ for iid, irow in item_raw.items():
         "max_enchant": "+15 (Encantamento Seguro até +5, Risco de Falha/Degradação acima)",
         "usable": irow.get("Usable", "0") == "1",
         "weight": irow.get("Weight", "0"),
-        "droppers": item_droppers_map.get(iid, [])
+        "droppers": item_droppers_map.get(iid, []),
+        "collections": item_collections_map.get(iid, [])[:15]
     }
     all_processed_items[iid] = item_dict
     items_by_cat[cat].append(item_dict)
@@ -2045,6 +2087,223 @@ faq_catalog = [
 with open(os.path.join(OUT_DIR, "faq.json"), "w", encoding="utf-8") as f:
     json.dump(faq_catalog, f, indent=2, ensure_ascii=False)
 
+
+# ==========================================
+# 14. CODEX & ANCESTRAL COLLECTIONS CATALOG
+# ==========================================
+print("Processing Codex & Ancestral Collections catalog...")
+
+STAT_NAME_MAP = {
+    "AttackPower": "Poder de Ataque",
+    "AttackPowerBoss": "Poder de Ataque contra Chefes",
+    "AttackPowerMonster": "Poder de Ataque contra Monstros",
+    "AttackPowerNormalAttack": "Poder de Ataque Normal",
+    "AttackPowerPvp": "Poder de Ataque PvP",
+    "AttackPowerReduction": "Redução de Poder de Ataque",
+    "AttackPowerReductionBoss": "Redução de Ataque de Chefes",
+    "AttackPowerReductionMagic": "Redução de Ataque Mágico",
+    "AttackPowerReductionMelee": "Redução de Ataque Corpo a Corpo",
+    "AttackPowerReductionMonster": "Redução de Ataque de Monstros",
+    "AttackPowerReductionNormalAttack": "Redução de Ataque Normal",
+    "AttackPowerReductionPvp": "Redução de Ataque PvP",
+    "AttackPowerReductionRange": "Redução de Ataque à Distância",
+    "AttackPowerReductionSkill": "Redução de Ataque de Habilidade",
+    "AttackPowerSkill": "Poder de Ataque de Habilidade",
+    "CriticalDamageMultiplier": "Dano Crítico (%)",
+    "CriticalDamageMultiplierMonster": "Dano Crítico contra Monstros (%)",
+    "CriticalDamageMultiplierPvp": "Dano Crítico PvP (%)",
+    "CriticalResistanceRate": "Resistência a Crítico (%)",
+    "CriticalResistanceRateMonster": "Resistência a Crítico de Monstros (%)",
+    "CriticalResistanceRatePvp": "Resistência a Crítico PvP (%)",
+    "DamageMultiplier": "Dano Adicional (%)",
+    "DamageMultiplierBoss": "Dano contra Chefes (%)",
+    "DamageMultiplierMonster": "Dano contra Monstros (%)",
+    "DamageMultiplierNormalAttack": "Dano de Ataque Normal (%)",
+    "DamageMultiplierPvp": "Dano PvP (%)",
+    "DamageMultiplierSkill": "Dano de Habilidade (%)",
+    "DamageReducer": "Redutor de Dano",
+    "DamageReducerBoss": "Redutor de Dano de Chefes",
+    "DamageReduction": "Redução de Dano",
+    "DamageReductionBoss": "Redução de Dano de Chefes",
+    "DamageReductionCritical": "Redução de Dano Crítico",
+    "DamageReductionMagic": "Redução de Dano Mágico",
+    "DamageReductionMelee": "Redução de Dano Corpo a Corpo",
+    "DamageReductionMonster": "Redução de Dano de Monstros",
+    "DamageReductionNormalAttack": "Redução de Dano de Ataque Normal",
+    "DamageReductionPvp": "Redução de Dano PvP",
+    "DamageReductionRange": "Redução de Dano à Distância",
+    "DamageReductionSkill": "Redução de Dano de Habilidade",
+    "DamageValue": "Dano Fixo Adicional",
+    "DamageValueBoss": "Dano contra Chefes",
+    "DamageValueCritical": "Dano Crítico",
+    "DamageValueMonster": "Dano contra Monstros",
+    "DamageValueNormalAttack": "Dano de Ataque Normal",
+    "DamageValuePvp": "Dano PvP",
+    "DamageValueSkill": "Dano de Habilidade",
+    "DodgeValue": "Esquiva",
+    "DodgeValueBoss": "Esquiva contra Chefes",
+    "DodgeValueMagic": "Esquiva Mágica",
+    "DodgeValueMelee": "Esquiva Corpo a Corpo",
+    "DodgeValueMonster": "Esquiva contra Monstros",
+    "DodgeValueNormalAttack": "Esquiva de Ataque Normal",
+    "DodgeValuePvp": "Esquiva PvP",
+    "DodgeValueRange": "Esquiva à Distância",
+    "DodgeValueSkill": "Esquiva de Habilidade",
+    "ExpAmountMultiplier": "Bônus de EXP (%)",
+    "GoldAmountMultiplier": "Bônus de Ouro (%)",
+    "HitValue": "Precisão",
+    "HitValueBoss": "Precisão contra Chefes",
+    "HitValueMonster": "Precisão contra Monstros",
+    "HitValueNormalAttack": "Precisão de Ataque Normal",
+    "HitValuePvp": "Precisão PvP",
+    "HitValueSkill": "Precisão de Habilidade",
+    "HpRecovery": "Recuperação de HP",
+    "IgnoreCriticalDamageMultiplier": "Ignorar Dano Crítico (%)",
+    "IgnoreCriticalDamageMultiplierMonster": "Ignorar Dano Crítico de Monstros (%)",
+    "IgnoreCriticalDamageMultiplierPvp": "Ignorar Dano Crítico PvP (%)",
+    "MaxHp": "HP Máximo",
+    "MaxInventoryWeight": "Limite de Peso",
+    "MaxMp": "MP Máximo",
+    "MpRecovery": "Recuperação de MP",
+    "NormalAttackSpeedMultiplier": "Velocidade de Ataque Normal (%)",
+    "SkillAttackSpeedMultiplier": "Velocidade de Ataque de Habilidade (%)"
+}
+
+codex_collections_list = []
+for r in codex_collections_raw:
+    tid = int(r["CollectionTabId"])
+    rar = int(r["Rarity"] or 0)
+    reqs = json.loads(r["requisitos_json"])
+    effs = json.loads(r["efeitos_json"])
+    
+    compact_reqs = []
+    for q in reqs:
+        q_id = q["CollectParam"]
+        p_item = all_processed_items.get(q_id)
+        icon_img = p_item["icon_img"] if p_item else "assets/logo.png"
+        compact_reqs.append({
+            "id": q_id,
+            "name": q["item_nome"],
+            "r": int(q.get("item_raridade", 0) or 0),
+            "ench": int(q.get("EnchantLevel", 0) or 0),
+            "qty": int(q.get("Count", 1) or 1),
+            "icon": icon_img
+        })
+
+    compact_effs = []
+    for e in effs:
+        raw_t = e.get("tipo_nome") or e.get("Type")
+        t_label = STAT_NAME_MAP.get(raw_t, raw_t)
+        min_v = e.get("Min", "0")
+        max_v = e.get("Max", "0")
+        val_str = f"+{min_v}" if min_v == max_v else f"+{min_v}~{max_v}"
+        compact_effs.append({
+            "name": t_label,
+            "raw_type": raw_t,
+            "val": val_str,
+            "min": min_v,
+            "max": max_v
+        })
+
+    codex_collections_list.append({
+        "id": r["Id"],
+        "tab": tid,
+        "tab_name": TAB_LABELS.get(tid, f"Aba {tid}"),
+        "name": r["nome_pt"],
+        "rarity": rar,
+        "rarity_name": RARITY_LABELS.get(rar, "Comum"),
+        "reqs": compact_reqs,
+        "effects": compact_effs
+    })
+
+# Process Tile Codex Entries (codex_entradas.csv)
+COLLECT_TYPE_MAP = {
+    "0": {"name": "Formas de Sangue (Costume)", "table": "Costume", "icon": "assets/classes/darkmage_icon.png"},
+    "2": {"name": "Montarias (Vehicle)", "table": "Vehicle", "icon": "assets/items/flat_relic.png"},
+    "4": {"name": "Cartas da Tumba (TombCard)", "table": "TombCard", "icon": "assets/items/itembox_relic_01.png"},
+    "6": {"name": "Cartas de Habilidade (SkillCard)", "table": "SkillCard", "icon": "assets/items/flat_skillcard.png"},
+    "8": {"name": "Progênies / Mascotes (Pet)", "table": "Pet", "icon": "assets/logo.png"}
+}
+
+codex_entries_list = []
+entradas_csv_path = os.path.join(CODEX_REPORTS_DIR, "codex_entradas.csv")
+unmatched_count = 0
+if os.path.exists(entradas_csv_path):
+    with open(entradas_csv_path, "r", encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            ct = r["CollectType"]
+            cands = json.loads(r["candidatos_json"])
+            matched = len(cands) > 0
+            if matched:
+                c = cands[0]
+                name = c.get("nome") or "Sem Nome"
+                tbl = c.get("tabela") or COLLECT_TYPE_MAP.get(ct, {}).get("table", "Desconhecido")
+                rar = int(c.get("dados", {}).get("Rarity", 0) or 0)
+            else:
+                unmatched_count += 1
+                name = f"Alvo Reservado #{r['FillTileNum']} (ID Pendente)"
+                tbl = "Pendente"
+                rar = 0
+
+            codex_entries_list.append({
+                "type": ct,
+                "type_name": COLLECT_TYPE_MAP.get(ct, {}).get("name", f"Tipo {ct}"),
+                "tile_num": int(r["FillTileNum"] or 0),
+                "group_id": r["GroupId"],
+                "param": r["CollectParam"],
+                "matched": matched,
+                "name": name,
+                "table": tbl,
+                "rarity": rar,
+                "rarity_name": RARITY_LABELS.get(rar, "Comum")
+            })
+
+# Process Character Codex (CharacterCollection.csv)
+char_collections = []
+char_csv_path = os.path.join(CODEX_REPORTS_DIR, "CharacterCollection.csv")
+if os.path.exists(char_csv_path):
+    with open(char_csv_path, "r", encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            char_collections.append({
+                "id": r["Id"],
+                "name": r["nome_pt"],
+                "quest_id": r["UnlockQuestInfoId"],
+                "points": [r["NeedEpisodePoint1"], r["NeedEpisodePoint2"], r["NeedEpisodePoint3"], r["NeedEpisodePoint4"], r["NeedEpisodePoint5"]],
+                "rewards": [r["EpisodeRewardGroupId1"], r["EpisodeRewardGroupId2"], r["EpisodeRewardGroupId3"], r["EpisodeRewardGroupId4"], r["EpisodeRewardGroupId5"]]
+            })
+
+# Process Tomb Card Collection Groups (TombCardCollectionGroup.csv)
+tomb_card_groups = []
+tc_csv_path = os.path.join(CODEX_REPORTS_DIR, "TombCardCollectionGroup.csv")
+if os.path.exists(tc_csv_path):
+    with open(tc_csv_path, "r", encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            tomb_card_groups.append({
+                "id": r["Id"],
+                "name": r["nome_pt"],
+                "order": r["DisplayOrder"]
+            })
+
+codex_catalog = {
+    "stats": {
+        "total_collections": len(codex_collections_list),
+        "total_requirements": 6801,
+        "total_entries": len(codex_entries_list),
+        "matched_entries": len(codex_entries_list) - unmatched_count,
+        "unmatched_entries": unmatched_count,
+        "character_territories": len(char_collections),
+        "tomb_card_groups": len(tomb_card_groups)
+    },
+    "collections": codex_collections_list,
+    "entries": codex_entries_list,
+    "character": char_collections,
+    "tomb_cards": tomb_card_groups
+}
+
+with open(os.path.join(OUT_DIR, "codex.json"), "w", encoding="utf-8") as f:
+    json.dump(codex_catalog, f, ensure_ascii=False)
+print(f"  ✓ Processed Codex & Collections ({len(codex_collections_list)} collections, {len(codex_entries_list)} tile entries, {unmatched_count} pending IDs preserved).")
+
 # ==========================================
 # 8. BUNDLE GENERATION
 # ==========================================
@@ -2064,6 +2323,7 @@ bundle_data = {
     "pvp": pvp_catalog,
     "enchantment": enchantment_catalog,
     "shops": shops_catalog,
+    "codex": codex_catalog,
     "constants": constants_dict,
     "faq": faq_catalog
 }
