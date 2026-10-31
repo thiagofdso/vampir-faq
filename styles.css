@@ -896,7 +896,8 @@ body {
   padding: 20px;
 }
 
-.modal-backdrop.open {
+.modal-backdrop.open,
+.modal-backdrop.active {
   display: flex;
 }
 

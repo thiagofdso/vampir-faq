@@ -2840,7 +2840,7 @@
       `).join('');
 
       return `
-        <div class="entity-card" style="display: flex; flex-direction: column; justify-content: space-between; border-color: rgba(239,68,68,0.25); background: linear-gradient(180deg, rgba(25,15,20,0.7) 0%, rgba(15,10,15,0.85) 100%);">
+        <div class="entity-card" onclick="window.inspectBloodline('${c.dungeon_id}')" style="display: flex; flex-direction: column; justify-content: space-between; border-color: rgba(239,68,68,0.25); background: linear-gradient(180deg, rgba(25,15,20,0.7) 0%, rgba(15,10,15,0.85) 100%); cursor: pointer;">
           <div>
             <!-- Header Badges -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -2908,7 +2908,7 @@
           </div>
 
           <!-- Action Button -->
-          <button class="btn btn-primary" onclick="window.inspectBloodline('${c.dungeon_id}')" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%); border: 1px solid rgba(239,68,68,0.5); color: #fff;">
+          <button class="btn btn-primary" onclick="event.stopPropagation(); window.inspectBloodline('${c.dungeon_id}')" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%); border: 1px solid rgba(239,68,68,0.5); color: #fff;">
             <span>Inspecionar Memória & Habilidades</span>
             <span>➔</span>
           </button>
@@ -3024,6 +3024,7 @@
       </div>
     `;
 
+    detailModal.classList.add('open');
     detailModal.classList.add('active');
   };
 
@@ -3176,7 +3177,7 @@
       `).join('') : '';
 
       return `
-        <div class="entity-card" style="display: flex; flex-direction: column; justify-content: space-between; border-color: ${isTemporary ? 'rgba(236,72,153,0.35)' : 'rgba(168,85,247,0.25)'}; background: linear-gradient(180deg, rgba(25,15,30,0.7) 0%, rgba(15,10,20,0.85) 100%);">
+        <div class="entity-card" onclick="window.inspectBloodrealm('${b.id}')" style="display: flex; flex-direction: column; justify-content: space-between; border-color: ${isTemporary ? 'rgba(236,72,153,0.35)' : 'rgba(168,85,247,0.25)'}; background: linear-gradient(180deg, rgba(25,15,30,0.7) 0%, rgba(15,10,20,0.85) 100%); cursor: pointer;">
           <div>
             <!-- Header Badges -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -3269,7 +3270,7 @@
           </div>
 
           <!-- Action Button -->
-          <button class="btn btn-primary" onclick="window.inspectBloodrealm('${b.id}')" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #7e22ce 0%, #581c87 100%); border: 1px solid rgba(168,85,247,0.5); color: #fff;">
+          <button class="btn btn-primary" onclick="event.stopPropagation(); window.inspectBloodrealm('${b.id}')" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #7e22ce 0%, #581c87 100%); border: 1px solid rgba(168,85,247,0.5); color: #fff;">
             <span>Inspecionar Grade & Probabilidades</span>
             <span>➔</span>
           </button>
@@ -3453,6 +3454,7 @@
       </div>
     `;
 
+    detailModal.classList.add('open');
     detailModal.classList.add('active');
   };
 
@@ -4761,9 +4763,19 @@
       });
     });
 
-    modalCloseBtn.addEventListener('click', () => detailModal.classList.remove('open'));
+    const closeModal = () => {
+      detailModal.classList.remove('open');
+      detailModal.classList.remove('active');
+    };
+
+    modalCloseBtn.addEventListener('click', closeModal);
     detailModal.addEventListener('click', e => {
-      if (e.target === detailModal) detailModal.classList.remove('open');
+      if (e.target === detailModal) closeModal();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && (detailModal.classList.contains('open') || detailModal.classList.contains('active'))) {
+        closeModal();
+      }
     });
 
     globalSearch.addEventListener('input', e => {
