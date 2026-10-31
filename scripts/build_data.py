@@ -2541,10 +2541,17 @@ if os.path.exists(portraits_csv_path):
             rate_raw = r["AcquireSuccessRate"] or "10000"
             rate_disp = f"{int(rate_raw)/100:.1f}%" if str(rate_raw).isdigit() else "100.0%"
 
+            pid = r["Id"]
+            p_icon = f"assets/portraits/portrait_{pid}.png"
+            p_art_cand = f"assets/portraits/portrait_{pid}_big.png"
+            p_art = p_art_cand if os.path.exists(os.path.join(BASE_DIR, "faq", p_art_cand)) else p_icon
+
             portraits_list.append({
-                "id": r["Id"],
+                "id": pid,
                 "group_id": r["GroupId"],
                 "name": r["nome_pt"],
+                "icon": p_icon,
+                "art": p_art,
                 "rarity_code": r["Rarity"],
                 "rarity": RARITY_PT_MAP.get(r["raridade_nome"], r["raridade_nome"]),
                 "type_code": r["PortraitBigType"],
@@ -2668,14 +2675,14 @@ if os.path.exists(artifacts_csv_path) and os.path.exists(enchant_csv_path):
             summary_effects.sort(key=lambda x: (not x["is_pct"], -x["raw_total"]))
 
             art_map = {
-                "1001": ("assets/items/materials_artifactenchantmaterial_01.png", "assets/items/artifact_01.png"),
-                "1101": ("assets/items/materials_artifactenchantmaterial_04.png", "assets/items/artifact_01.png"),
-                "1002": ("assets/items/materials_artifactenchantmaterial_01.png", "assets/items/artifact_01.png"),
-                "1003": ("assets/items/materials_artifactenchantmaterial_01.png", "assets/items/artifact_01.png"),
-                "1004": ("assets/items/materials_artifactenchantmaterial_01.png", "assets/items/artifact_02.png"),
-                "1005": ("assets/items/materials_artifactenchantmaterial_03.png", "assets/items/artifact_02.png"),
+                "1001": ("assets/artifacts/artifact_1001.png", "assets/artifacts/art_1001.png"),
+                "1101": ("assets/artifacts/artifact_1101.png", "assets/artifacts/art_1101.png"),
+                "1002": ("assets/artifacts/artifact_1002.png", "assets/artifacts/art_1002.png"),
+                "1003": ("assets/artifacts/artifact_1003.png", "assets/artifacts/art_1003.png"),
+                "1004": ("assets/artifacts/artifact_1004.png", "assets/artifacts/art_1004.png"),
+                "1005": ("assets/artifacts/artifact_1005.png", "assets/artifacts/art_1005.png"),
             }
-            icon_img, art_img = art_map.get(aid, ("assets/items/materials_artifactenchantmaterial_01.png", "assets/items/artifact_01.png"))
+            icon_img, art_img = art_map.get(aid, ("assets/artifacts/artifact_1001.png", "assets/artifacts/art_1001.png"))
 
             disp_name = r["categoria_nome"]
             if r["Type"] == "1":

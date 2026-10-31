@@ -2212,13 +2212,16 @@
       return `
         <div class="entity-card" style="display: flex; flex-direction: column; justify-content: space-between; border-left: 3px solid var(--border-gold); cursor: pointer;" onclick="window.inspectPortrait('${p.id}')">
           <div>
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
-              <div>
-                <div class="entity-title" style="font-size: 1.05rem; color: #fff; margin-bottom: 2px;">${p.name}</div>
-                <div style="font-size: 0.72rem; color: #94a3b8;">
+            <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 8px;">
+              <div style="width: 52px; height: 52px; border-radius: 8px; overflow: hidden; background: #000; border: 1px solid rgba(255,255,255,0.15); flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                <img src="${p.icon}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='assets/portraits/flat_portrait.png'">
+              </div>
+              <div style="flex: 1; min-width: 0;">
+                <div class="entity-title" style="font-size: 1.05rem; color: #fff; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.name}">${p.name}</div>
+                <div style="font-size: 0.72rem; color: #94a3b8; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
                   <span class="entity-badge ${rarityBadgeColor}" style="font-size: 0.65rem;">${p.rarity}</span>
-                  <span class="entity-badge badge-gray" style="font-size: 0.65rem; margin-left: 4px;">${p.type}</span>
-                  <span style="margin-left: 6px;">ID #${p.id}</span>
+                  <span class="entity-badge badge-gray" style="font-size: 0.65rem;">${p.type}</span>
+                  <span>ID #${p.id}</span>
                 </div>
               </div>
               <span class="entity-badge badge-blue" style="font-size: 0.68rem; flex-shrink: 0;">
@@ -2351,6 +2354,21 @@
     }
 
     modalBody.innerHTML = `
+      <div style="display: flex; gap: 16px; align-items: center; background: rgba(0,0,0,0.4); border-radius: 12px; padding: 14px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.08);">
+        <div style="width: 88px; height: 88px; border-radius: 10px; overflow: hidden; border: 2px solid var(--border-gold); flex-shrink: 0; background: #000; box-shadow: 0 4px 12px rgba(0,0,0,0.6);">
+          <img src="${p.art || p.icon}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='assets/portraits/flat_portrait.png'">
+        </div>
+        <div>
+          <div style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 4px;">${p.name}</div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px;">
+            <span class="entity-badge ${RARITY_BADGE_MAP[p.rarity] || 'badge-blue'}">${p.rarity}</span>
+            <span class="entity-badge badge-gray">${p.type}</span>
+            <span class="entity-badge badge-gold">Taxa: ${p.rate_display}</span>
+          </div>
+          <div style="font-size: 0.78rem; color: #94a3b8;">ID Oficial #${p.id} • ${p.frags_count > 0 ? p.frags_count + ' Fragmentos de Restauração' : 'Retrato Inicial Padrão'}</div>
+        </div>
+      </div>
+
       <!-- Portrait Overview & Equipment Rules -->
       <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid #10b981;">
         <div class="panel-title" style="display: flex; justify-content: space-between;">
@@ -2600,6 +2618,24 @@
     }
 
     modalBody.innerHTML = `
+      <div style="display: flex; gap: 18px; align-items: center; background: linear-gradient(135deg, rgba(30,20,40,0.8), rgba(15,20,30,0.9)); border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid rgba(168,85,247,0.3);">
+        <div style="width: 96px; height: 96px; border-radius: 12px; overflow: hidden; border: 2px solid var(--border-gold); flex-shrink: 0; background: #000; box-shadow: 0 4px 16px rgba(0,0,0,0.8); position: relative;">
+          <img src="${art.art}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='assets/artifacts/flat_artifact.png'">
+          <img src="${art.icon}" style="position: absolute; bottom: 4px; right: 4px; width: 28px; height: 28px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.9));" title="Ícone Oficial">
+        </div>
+        <div>
+          <div style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 4px;">${art.name}</div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
+            <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4);">${art.type_label}</span>
+            <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4);">Nv. Máx ${art.max_level}</span>
+            <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4);">Servidor: ${art.server_group}</span>
+          </div>
+          <div style="font-size: 0.8rem; color: #94a3b8; line-height: 1.4;">
+            🔓 <strong>Desbloqueio:</strong> ${art.unlock_text || 'Disponível no jogo'}
+          </div>
+        </div>
+      </div>
+
       ${divergenceHtml}
       ${transformHtml}
       ${generalMechanicsHtml}
