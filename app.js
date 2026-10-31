@@ -3070,7 +3070,7 @@
             const bgCol = isDeadly ? 'rgba(239,68,68,0.1)' : 'rgba(0,0,0,0.25)';
             return `
               <div style="background: ${bgCol}; border: 1px solid ${borderCol}; border-radius: 8px; padding: 10px; display: flex; gap: 12px; align-items: flex-start;">
-                <img src="${s.icon}" style="width: 36px; height: 36px; object-fit: contain; border-radius: 6px; flex-shrink: 0; background: rgba(0,0,0,0.3);" onerror="this.src='assets/classes/logo.png'">
+                <img src="${s.icon}" style="width: 36px; height: 36px; object-fit: contain; border-radius: 6px; flex-shrink: 0; background: rgba(0,0,0,0.3);" onerror="this.onerror=null; this.src='assets/logo.png';">
                 <div style="flex: 1; min-width: 0;">
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 6px;">
                     <div style="display: flex; align-items: center; gap: 6px;">
