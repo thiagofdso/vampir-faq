@@ -95,6 +95,11 @@
           <span>Códex & Coleções</span>
           <span class="nav-count" id="countCodex">4.1k</span>
         </a>
+        <a class="nav-item" data-target="research">
+          <span class="nav-icon"><img src="assets/items/flat_potion.png" style="width: 18px; height: 18px; vertical-align: middle;" onerror="this.outerHTML='🧪'"></span>
+          <span>Pesquisa Mágica</span>
+          <span class="nav-count" id="countResearch">90</span>
+        </a>
         <a class="nav-item" data-target="faq">
           <span class="nav-icon">❓</span>
           <span>FAQ & Sistemas</span>
@@ -681,7 +686,57 @@
         </section>
 
         <!-- ==============================================
-             15. FAQ SECTION
+             15. MAGIC RESEARCH (EXTRACT SYSTEM) SECTION
+             ============================================== -->
+        <section id="research" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <img src="assets/items/flat_potion.png" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 8px;" onerror="this.outerHTML='🧪'">
+              Pesquisa Mágica (Extract)
+            </h2>
+            <p class="section-subtitle">Sistema arcano de 6 linhas de magia, 90 frascos alquímicos, 890 etapas de infusão e bônus permanentes de atributos</p>
+          </div>
+
+          <!-- Overview & Mechanics Panel -->
+          <div class="panel-box" style="margin-bottom: 24px; border-left: 3px solid var(--gold-primary);">
+            <div class="panel-title" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>⚗️ Como Funciona o Sistema de Pesquisa Mágica (Tutoriais #41301 & #41302)</span>
+              <span style="font-size: 0.72rem; color: #94a3b8; font-weight: normal;">Fonte: Extract.csv / ExtractGroup.csv / ExtractStep.csv</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 10px; font-size: 0.85rem; color: #cbd5e1; line-height: 1.5;">
+              <div style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 10px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="color: #38bdf8; font-weight: 700; margin-bottom: 4px;">1. Infusão Mágica (Orbes)</div>
+                Cada frasco possui de 6 a 11 etapas de infusão. Cada etapa consome <strong>Orbes e Esferas Mágicas</strong> obtidas em masmorras abissais (ex: <em>Abismo da Criação</em>) para imbuir atributos de combate progressivos.
+              </div>
+              <div style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 10px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="color: var(--gold-primary); font-weight: 700; margin-bottom: 4px;">2. Pesquisa de Frasco (Trindade / Catalisador)</div>
+                Ao completar todas as infusões, a Pesquisa sela o frasco e concede bônus permanentes. Custo: <strong>Trindade (Trinity)</strong> (desmanche de itens Raros+) OU <strong>Catalisadores de Pesquisa Mágica</strong>.
+              </div>
+              <div style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 10px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="color: #a855f7; font-weight: 700; margin-bottom: 4px;">3. Chance Bônus por Falha</div>
+                Os textos do jogo (<code>EXTRACT_TOOLTIP_BONUSRATE</code>) confirmam que cada tentativa que falha adiciona uma taxa bônus à chance base até obter o sucesso e desbloquear o próximo frasco.
+              </div>
+            </div>
+          </div>
+
+          <!-- Magic Lines Filter Bar -->
+          <div class="filter-bar" id="researchFilterBar" style="margin-bottom: 20px;">
+            <button class="filter-btn active" data-mline="all">Todos os Frascos (90)</button>
+            <button class="filter-btn" data-mline="100">🌿 Criação (15)</button>
+            <button class="filter-btn" data-mline="200">🌑 Desbotada (15)</button>
+            <button class="filter-btn" data-mline="300">🏛️ Antiga (15)</button>
+            <button class="filter-btn" data-mline="400">🔥 Geena (15)</button>
+            <button class="filter-btn" data-mline="500">⚡ Elite (10)</button>
+            <button class="filter-btn" data-mline="600">🌌 Evolução (20)</button>
+          </div>
+
+          <!-- Flasks Grid -->
+          <div class="entity-grid" id="researchContainer"></div>
+          <div id="researchPagination" style="margin-top: 30px; text-align: center;"></div>
+        </section>
+
+        <!-- ==============================================
+             16. FAQ SECTION
              ============================================== -->
         <section id="faq" class="view-section">
           <div class="section-header">

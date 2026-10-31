@@ -46,6 +46,10 @@
     codexEntriesSearchTerm: '',
     codexEntriesPage: 1,
     codexEntriesPerPage: 36,
+    researchFilter: 'all',
+    researchSearchTerm: '',
+    researchPage: 1,
+    researchPerPage: 18,
     modesFilter: 'all',
     pvpTab: 'arena',
     enchantTab: 'scrolls',
@@ -81,7 +85,7 @@
     }
 
     try {
-      const [classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, faq, constants] = await Promise.all([
+      const [classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, faq, constants] = await Promise.all([
         fetch('data/classes.json').then(r => r.json()),
         fetch('data/builds.json').then(r => r.json()),
         fetch('data/skills.json').then(r => r.json()),
@@ -95,11 +99,12 @@
         fetch('data/enchantment.json').then(r => r.json()),
         fetch('data/shops.json').then(r => r.json()),
         fetch('data/codex.json').then(r => r.json()),
+        fetch('data/research.json').then(r => r.json()),
         fetch('data/faq.json').then(r => r.json()),
         fetch('data/constants.json').then(r => r.json())
       ]);
 
-      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, faq, constants };
+      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, faq, constants };
       initApp();
     } catch (e) {
       console.error('Failed to load JSON data asynchronously:', e);
@@ -133,6 +138,7 @@
     if (tabId === 'enchantment') renderEnchantment();
     if (tabId === 'shops') renderShops();
     if (tabId === 'codex') renderCodex();
+    if (tabId === 'research') renderResearch();
   }
 
   window.navTo = function(tabId) {
@@ -1923,6 +1929,197 @@
     renderCodex();
   };
 
+  // ==========================================
+  // MAGIC RESEARCH (EXTRACT SYSTEM)
+  // ==========================================
+  function renderResearch() {
+    const container = document.getElementById('researchContainer');
+    const pagination = document.getElementById('researchPagination');
+    if (!container || !state.data.research || !state.data.research.flasks) return;
+
+    let flasks = state.data.research.flasks;
+
+    // Filter by Magic Line
+    if (state.researchFilter !== 'all') {
+      flasks = flasks.filter(f => f.line_id === state.researchFilter);
+    }
+
+    // Search query
+    if (state.researchSearchTerm.trim()) {
+      const q = state.researchSearchTerm.toLowerCase();
+      flasks = flasks.filter(f =>
+        f.name.toLowerCase().includes(q) ||
+        f.line_name.toLowerCase().includes(q) ||
+        f.id.includes(q) ||
+        (f.effects && f.effects.some(e => e.name.toLowerCase().includes(q))) ||
+        (f.steps && f.steps.some(s => s.cost_name.toLowerCase().includes(q) || s.effects.some(se => se.name.toLowerCase().includes(q))))
+      );
+    }
+
+    const total = flasks.length;
+    const pages = Math.ceil(total / state.researchPerPage) || 1;
+    if (state.researchPage > pages) state.researchPage = 1;
+
+    const start = (state.researchPage - 1) * state.researchPerPage;
+    const currentList = flasks.slice(start, start + state.researchPerPage);
+
+    const LINE_COLORS = {
+      '100': 'badge-blue',
+      '200': 'badge-gray',
+      '300': 'badge-gold',
+      '400': 'badge-crimson',
+      '500': 'badge-gold',
+      '600': 'badge-blue'
+    };
+
+    container.innerHTML = currentList.map(f => {
+      const badgeColor = LINE_COLORS[f.line_id] || 'badge-blue';
+
+      return `
+        <div class="entity-card" style="display: flex; flex-direction: column; justify-content: space-between; border-left: 3px solid var(--border-gold); cursor: pointer;" onclick="window.inspectFlask('${f.id}')">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+              <div style="min-width: 0;">
+                <div class="entity-title" style="font-size: 1.02rem; color: #fff; margin-bottom: 2px;">${f.name}</div>
+                <div style="font-size: 0.72rem; color: #94a3b8;">
+                  <span class="entity-badge ${badgeColor}" style="font-size: 0.65rem;">${f.line_name}</span>
+                  <span class="entity-badge badge-gray" style="font-size: 0.65rem; margin-left: 4px;">Nv. ${f.level}</span>
+                  <span style="margin-left: 6px;">ID #${f.id}</span>
+                </div>
+              </div>
+              <span class="entity-badge badge-gold" style="font-size: 0.72rem; flex-shrink: 0;" title="Taxa base de sucesso na Pesquisa">
+                🎯 ${f.rate_display}
+              </span>
+            </div>
+
+            <!-- Infusion Steps Preview -->
+            <div style="background: rgba(0,0,0,0.35); border-radius: 6px; padding: 10px; margin: 12px 0 8px; border: 1px solid rgba(255,255,255,0.06);">
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #cbd5e1;">
+                <span>⚗️ <strong>${f.steps.length} Etapas de Infusão</strong></span>
+                <span style="color: #38bdf8;">${f.steps[0]?.cost_name || 'Orbes Mágicas'}</span>
+              </div>
+            </div>
+
+            <!-- Permanent Bonus Effects -->
+            <div style="margin-top: 8px;">
+              <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; margin-bottom: 6px;">
+                ✨ Bônus de Conclusão da Pesquisa:
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                ${f.effects.map(eff => `
+                  <div style="font-size: 0.78rem; color: #cbd5e1; display: flex; justify-content: space-between;">
+                    <span>${eff.name}:</span>
+                    <strong style="color: var(--gold-light);">${eff.val}</strong>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+
+          <!-- Research Costs Footer -->
+          <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
+            <div style="color: #94a3b8;">
+              Custo: <strong style="color: #fbbf24;">${formatBigNumber(f.trinity)}x Trindade</strong> ou <strong style="color: #38bdf8;">${f.catalyst}x Catalisador</strong>
+            </div>
+            <button class="filter-btn" style="padding: 3px 8px; font-size: 0.7rem;">Inspecionar ⚗️</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    renderPagination(pagination, state.researchPage, pages, 'window.changeResearchPage');
+  }
+
+  window.changeResearchPage = function(page) {
+    state.researchPage = page;
+    renderResearch();
+    document.getElementById('research').scrollIntoView({ behavior: 'smooth' });
+  };
+
+  window.inspectFlask = function(id) {
+    if (!state.data.research || !state.data.research.flasks) return;
+    const f = state.data.research.flasks.find(x => x.id === id);
+    if (!f) return;
+
+    modalTitle.innerText = f.name;
+    modalSubtitle.innerText = `${f.line_name} • Nível ${f.level} (Frasco ID #${f.id})`;
+
+    const stepsHtml = f.steps.map(s => `
+      <div style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 10px 14px; margin-bottom: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <div style="font-weight: 700; color: #fff; font-size: 0.88rem;">
+            Etapa ${s.step} ${s.step === 0 ? '(Início)' : ''}
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span class="entity-badge badge-gold" style="font-size: 0.7rem;">🎯 Taxa: ${(s.rate/100).toFixed(1)}%</span>
+            ${s.cost_val > 0 ? `<span class="entity-badge badge-blue" style="font-size: 0.7rem;">🧪 Custo: ${s.cost_val}x ${s.cost_name}</span>` : ''}
+          </div>
+        </div>
+        ${s.effects && s.effects.length > 0 ? `
+          <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;">
+            ${s.effects.map(e => `
+              <span class="entity-badge badge-gray" style="font-size: 0.72rem;">
+                ${e.name}: <strong style="color: var(--gold-light);">${e.val}</strong>
+              </span>
+            `).join('')}
+          </div>
+        ` : '<div style="font-size: 0.75rem; color: #94a3b8;">Etapa preparatória de ativação.</div>'}
+      </div>
+    `).join('');
+
+    modalBody.innerHTML = `
+      <!-- Research & Success Summary -->
+      <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid var(--gold-primary);">
+        <div class="panel-title" style="display: flex; justify-content: space-between;">
+          <span>🔬 Conclusão da Pesquisa do Frasco</span>
+          <span style="color: var(--gold-light); font-weight: 700;">Taxa Base: ${f.rate_display}</span>
+        </div>
+        <p style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; margin: 6px 0 10px;">
+          O sucesso na pesquisa sela permanentemente o frasco e desbloqueia o próximo nível da <strong>${f.line_name}</strong>.
+          Em caso de falha, o sistema concede uma chance bônus cumulativa (<code>EXTRACT_BONUS_RATE</code>).
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+          <div style="background: rgba(0,0,0,0.4); border-radius: 6px; padding: 10px; border: 1px solid rgba(255,255,255,0.06);">
+            <div style="font-size: 0.72rem; color: #fbbf24; font-weight: 700; text-transform: uppercase;">Custo Padrão</div>
+            <div style="font-size: 1.05rem; color: #fff; font-weight: 700; margin: 2px 0;">${formatBigNumber(f.trinity)}x Trindade (Trinity)</div>
+            <div style="font-size: 0.75rem; color: #94a3b8;">Obtido no desmanche de equipamentos Raros ou superiores.</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.4); border-radius: 6px; padding: 10px; border: 1px solid rgba(255,255,255,0.06);">
+            <div style="font-size: 0.72rem; color: #38bdf8; font-weight: 700; text-transform: uppercase;">Custo Substituto Alternativo</div>
+            <div style="font-size: 1.05rem; color: #fff; font-weight: 700; margin: 2px 0;">${f.catalyst}x Catalisador de Pesquisa</div>
+            <div style="font-size: 0.75rem; color: #94a3b8;">Item especial consumido no lugar da Trindade.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Permanent Research Effects -->
+      <div class="panel-box" style="margin-bottom: 20px; border-left: 3px solid #10b981;">
+        <div class="panel-title">✨ Bônus Permanentes Adquiridos ao Selar o Frasco</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+          ${f.effects.map(eff => `
+            <span class="entity-badge badge-gold" style="font-size: 0.8rem; padding: 4px 10px;">
+              ${eff.name}: <strong style="color: #fff; margin-left: 4px;">${eff.val}</strong>
+            </span>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Infusion Steps List -->
+      <div class="panel-box" style="border-left: 3px solid #38bdf8;">
+        <div class="panel-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <span>⚗️ Roteiro das ${f.steps.length} Etapas de Infusão Mágica</span>
+          <span style="font-size: 0.75rem; color: #94a3b8; font-weight: normal;">Fonte: ExtractStep.csv</span>
+        </div>
+        <div style="max-height: 340px; overflow-y: auto; padding-right: 4px;">
+          ${stepsHtml}
+        </div>
+      </div>
+    `;
+
+    detailModal.classList.add('open');
+  };
+
   // Render FAQ
   function renderFaq() {
     const container = document.getElementById('faqContainer');
@@ -2489,6 +2686,10 @@
           state.codexEntriesPage = 1;
         }
         renderCodex();
+      } else if (state.currentTab === 'research') {
+        state.researchSearchTerm = q;
+        state.researchPage = 1;
+        renderResearch();
       }
     });
 
@@ -2637,6 +2838,16 @@
         renderCodexEntries();
       }
     });
+
+    document.getElementById('researchFilterBar')?.addEventListener('click', e => {
+      if (e.target.tagName === 'BUTTON') {
+        document.querySelectorAll('#researchFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        state.researchFilter = e.target.dataset.mline;
+        state.researchPage = 1;
+        renderResearch();
+      }
+    });
   }
 
   function initApp() {
@@ -2653,6 +2864,7 @@
     renderEnchantment();
     renderShops();
     renderCodex();
+    renderResearch();
     renderFaq();
     setupListeners();
   }

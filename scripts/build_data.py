@@ -1102,6 +1102,13 @@ for iid in dropped_item_ids:
         curated_items.append(all_processed_items[iid])
         curated_ids.add(iid)
 
+# 11. Materiais de Pesquisa Mágica (Trindade, Catalisador e Orbes/Esferas)
+RESEARCH_MATERIAL_IDS = {'100000000', '100000359', '100000501', '100000502', '100000503', '100000504', '100000505', '100001501', '100001502', '100001503', '100001504', '100004023'}
+for mid in RESEARCH_MATERIAL_IDS:
+    if mid in all_processed_items and mid not in curated_ids:
+        curated_items.append(all_processed_items[mid])
+        curated_ids.add(mid)
+
 with open(os.path.join(OUT_DIR, "items.json"), "w", encoding="utf-8") as f:
     json.dump(curated_items, f, indent=2, ensure_ascii=False)
 
@@ -2304,6 +2311,150 @@ with open(os.path.join(OUT_DIR, "codex.json"), "w", encoding="utf-8") as f:
     json.dump(codex_catalog, f, ensure_ascii=False)
 print(f"  ✓ Processed Codex & Collections ({len(codex_collections_list)} collections, {len(codex_entries_list)} tile entries, {unmatched_count} pending IDs preserved).")
 
+
+# ==========================================
+# 15. MAGIC RESEARCH CATALOG (EXTRACT SYSTEM)
+# ==========================================
+print("Processing Magic Research catalog (Extract system)...")
+RESEARCH_REPORTS_DIR = os.path.join(BASE_DIR, "analysis/versions/2026-10-31/reports/pesquisa-magica")
+
+steps_by_group = defaultdict(list)
+extract_step_path = os.path.join(RESEARCH_REPORTS_DIR, "ExtractStep.csv")
+if os.path.exists(extract_step_path):
+    with open(extract_step_path, "r", encoding="utf-8-sig") as f:
+        for s in csv.DictReader(f):
+            c_list = json.loads(s["custo_json"])
+            c_name = c_list[0]["item_nome"] if c_list else ""
+            c_val = c_list[0]["CostValue"] if c_list else "0"
+            c_id = c_list[0].get("CostParam", "") if c_list else ""
+            c_icon = all_processed_items.get(c_id, {}).get("icon_img", "assets/items/flat_potion.png") if c_id else "assets/items/flat_potion.png"
+            e_list = json.loads(s["efeitos_json"])
+            steps_by_group[s["GroupId"]].append({
+                "step": int(s["Step"]),
+                "rate": int(s["GrowthSuccessRate"] or 0),
+                "cost_name": c_name,
+                "cost_val": int(c_val) if str(c_val).isdigit() else 0,
+                "cost_id": c_id,
+                "cost_icon": c_icon,
+                "effects": [
+                    {
+                        "name": STAT_NAME_MAP.get(e.get("tipo_nome") or e.get("Type"), e.get("tipo_nome") or e.get("Type")),
+                        "val": f"+{e.get('Min', '0')}" if e.get("Min") == e.get("Max") else f"+{e.get('Min', '0')}~{e.get('Max', '0')}",
+                        "raw_type": e.get("tipo_nome") or e.get("Type")
+                    }
+                    for e in e_list
+                ]
+            })
+
+magic_flasks_data = []
+extract_group_path = os.path.join(RESEARCH_REPORTS_DIR, "ExtractGroup.csv")
+if os.path.exists(extract_group_path):
+    with open(extract_group_path, "r", encoding="utf-8-sig") as f:
+        for g in csv.DictReader(f):
+            c_trin = json.loads(g["custo_json"])
+            c_cat = json.loads(g["custo_substituto_json"])
+            trin_val = c_trin[0]["CostValue"] if c_trin else "0"
+            cat_val = c_cat[0]["CostValue"] if c_cat else "0"
+            e_list = json.loads(g["efeitos_json"])
+            magic_flasks_data.append({
+                "id": g["Id"],
+                "line_id": g["ExtractId"],
+                "line_name": g["magia"],
+                "name": f"{g['frasco_nome']} {g['frasco_nivel']}",
+                "base_name": g["frasco_nome"],
+                "level": g["frasco_nivel"],
+                "rate": int(g["CompleteSuccessRate"] or 0),
+                "rate_display": f"{int(g['CompleteSuccessRate'] or 0)/100:.1f}%" if g["CompleteSuccessRate"] else "0%",
+                "trinity": int(trin_val) if str(trin_val).isdigit() else 0,
+                "catalyst": int(cat_val) if str(cat_val).isdigit() else 0,
+                "effects": [
+                    {
+                        "name": STAT_NAME_MAP.get(e.get("tipo_nome") or e.get("Type"), e.get("tipo_nome") or e.get("Type")),
+                        "val": f"+{e.get('Min', '0')}" if e.get("Min") == e.get("Max") else f"+{e.get('Min', '0')}~{e.get('Max', '0')}",
+                        "raw_type": e.get("tipo_nome") or e.get("Type")
+                    }
+                    for e in e_list
+                ],
+                "steps": sorted(steps_by_group.get(g["Id"], []), key=lambda x: x["step"])
+            })
+
+MAGIC_LINES_INFO = [
+    {
+        "id": "100",
+        "name": "Magia da Criação",
+        "icon": "assets/items/flat_potion.png",
+        "flasks_count": 15,
+        "lock_val": "32",
+        "primary_orb": "Orbe Mágica da Criação",
+        "orb_source": "Abismo da Criação (Masmorra)",
+        "focus": "Dano de Ataque Normal, Precisão e Redução de Dano Normal"
+    },
+    {
+        "id": "200",
+        "name": "Magia Desbotada",
+        "icon": "assets/items/flat_potion.png",
+        "flasks_count": 15,
+        "lock_val": "34",
+        "primary_orb": "Orbe Mágica Desbotada",
+        "orb_source": "Abismo Desbotado (Masmorra)",
+        "focus": "Poder de Ataque de Habilidade, Precisão e Redução de Habilidade"
+    },
+    {
+        "id": "300",
+        "name": "Magia Antiga",
+        "icon": "assets/items/flat_potion.png",
+        "flasks_count": 15,
+        "lock_val": "41",
+        "primary_orb": "Orbe Mágica Antiga",
+        "orb_source": "Ruínas Antigas (Masmorra)",
+        "focus": "Dano contra Monstros, Precisão contra Monstros e Esquiva"
+    },
+    {
+        "id": "400",
+        "name": "Magia da Geena",
+        "icon": "assets/items/flat_potion.png",
+        "flasks_count": 15,
+        "lock_val": "52",
+        "primary_orb": "Orbe Mágica de Geena",
+        "orb_source": "Profundezas de Geena (Masmorra de Reide)",
+        "focus": "Dano contra Chefes, Precisão contra Chefes e Redução de Chefes"
+    },
+    {
+        "id": "500",
+        "name": "Magia de Elite",
+        "icon": "assets/items/flat_potion.png",
+        "flasks_count": 10,
+        "lock_val": "70",
+        "primary_orb": "Orbe Mágica de Elite",
+        "orb_source": "Zonas de Monstros de Elite e Chefes de Campo",
+        "focus": "Poder de Ataque Geral, Redução de Dano Crítico e Bônus"
+    },
+    {
+        "id": "600",
+        "name": "Magia de Evolução",
+        "icon": "assets/items/flat_potion.png",
+        "flasks_count": 20,
+        "lock_val": "78",
+        "primary_orb": "Orbe Mágico de Evolução",
+        "orb_source": "Campos Dimensionais & Zonas de Guerra",
+        "focus": "Poder de Ataque PvP, Esquiva PvP e Multiplicadores Críticos"
+    }
+]
+
+research_catalog = {
+    "stats": {
+        "total_lines": 6,
+        "total_flasks": len(magic_flasks_data),
+        "total_steps": 890
+    },
+    "lines": MAGIC_LINES_INFO,
+    "flasks": magic_flasks_data
+}
+
+with open(os.path.join(OUT_DIR, "research.json"), "w", encoding="utf-8") as f:
+    json.dump(research_catalog, f, ensure_ascii=False)
+print(f"  ✓ Processed Magic Research ({len(magic_flasks_data)} flasks across 6 lines, 890 infusion steps).")
+
 # ==========================================
 # 8. BUNDLE GENERATION
 # ==========================================
@@ -2324,6 +2475,7 @@ bundle_data = {
     "enchantment": enchantment_catalog,
     "shops": shops_catalog,
     "codex": codex_catalog,
+    "research": research_catalog,
     "constants": constants_dict,
     "faq": faq_catalog
 }
