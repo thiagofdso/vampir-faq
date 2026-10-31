@@ -125,6 +125,11 @@
           <span>Refinamento</span>
           <span class="nav-count" id="countRefinement">71</span>
         </a>
+        <a class="nav-item" data-target="lifetree">
+          <span class="nav-icon"><img src="assets/lifetree/flat_lifetree.png" style="width: 18px; height: 18px; vertical-align: middle;" onerror="this.outerHTML='🌳'"></span>
+          <span>Árvore da Vida</span>
+          <span class="nav-count" id="countLifeTree">72</span>
+        </a>
         <a class="nav-item" data-target="faq">
           <span class="nav-icon">❓</span>
           <span>FAQ & Sistemas</span>
@@ -1211,7 +1216,103 @@
         </section>
 
         <!-- ==============================================
-             21. FAQ SECTION
+             21. LIFE TREE (ÁRVORE DA VIDA) & SEPHIRAS SECTION
+             ============================================== -->
+        <section id="lifetree" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <img src="assets/lifetree/flat_lifetree.png" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 8px;" onerror="this.outerHTML='🌳'">
+              Árvore da Vida & Sefiras
+            </h2>
+            <p class="section-subtitle">
+              Gravação de Sefiras nos 10 espaços da Árvore da Vida, ativação de Elos de Formato e Conjuntos de Padrão, e sistema de Fusão de Sefiras.
+            </p>
+          </div>
+
+          <!-- Tree Showcase & Interactive Slots Banner -->
+          <div class="card" style="margin-bottom: 24px; position: relative; overflow: hidden; border: 1px solid rgba(52, 211, 153, 0.35); background: linear-gradient(135deg, rgba(10, 30, 20, 0.85), rgba(15, 20, 35, 0.95)); padding: 24px;">
+            <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+              <img src="assets/lifetree/bg_lifetree_web.webp" style="width: 110px; height: 110px; object-fit: cover; border-radius: 12px; border: 2px solid rgba(52, 211, 153, 0.4); box-shadow: 0 0 15px rgba(52, 211, 153, 0.3);" alt="Árvore da Vida">
+              <div style="flex: 1; min-width: 280px;">
+                <h3 style="color: #34d399; margin-top: 0; margin-bottom: 8px; font-size: 1.25rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <span>Os Dez Espaços da Árvore da Vida & Regras de Atributo</span>
+                  <span style="font-size: 0.75rem; background: rgba(52,211,153,0.2); color: #6ee7b7; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(52,211,153,0.4);">10 Espaços • 72 Sefiras • 90 Bônus • 15 Fusões</span>
+                </h3>
+                <div style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.55;">
+                  <ul style="margin: 0; padding-left: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 8px;">
+                    <li><strong>3 Formatos de Gravação:</strong> 3 Achillute (Nv. 48), 3 Bria (Nv. 60) e 4 Yechira (Nv. 70). Cada Sefira só encaixa em espaço correspondente.</li>
+                    <li><strong>Atributo Próprio:</strong> Cada Sefira concede um stat individual e tem custo de gravação em Ouro (1k a 70k).</li>
+                    <li><strong>Elo de Formato:</strong> Ativado ao preencher todos os espaços do formato (3 Achillute, 3 Bria ou 4 Yechira).</li>
+                    <li><strong>Conjunto de Padrão:</strong> Ativado ao equipar o mesmo símbolo (Alfa, Sigma, Teta ou Capa) em todo o formato.</li>
+                    <li><strong>Regra do Menor Grau:</strong> O nível do bônus de Elo e de Conjunto é nivelado pelo <strong>menor grau</strong> entre as Sefiras gravadas.</li>
+                    <li><strong>Fusão de 4 Peças:</strong> Combina 4 Sefiras de mesmo formato e grau com chance de upgrade (12% a 25%), sem garantir o padrão desejado.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Visual 10 Slots Board -->
+            <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px;">
+              <h4 style="color: #94a3b8; font-size: 0.86rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <span>Disposição Oficial dos 10 Espaços na Árvore</span>
+                <span style="font-size: 0.75rem; color: #34d399; font-weight: normal;">Clique em um formato para filtrar as Sefiras</span>
+              </h4>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;" id="lifetreeSlotsGrid">
+                <!-- Slots populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Subtabs Navigation (Sefiras / Elos & Conjuntos / Fusões) -->
+          <div style="display: flex; gap: 10px; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; flex-wrap: wrap;">
+            <button class="filter-btn active" id="lifetreeTabSefiras" onclick="window.switchLifetreeSubtab('sefiras')">🔮 Catálogo de Sefiras (72)</button>
+            <button class="filter-btn" id="lifetreeTabBonuses" onclick="window.switchLifetreeSubtab('bonuses')">✨ Elos & Conjuntos (90)</button>
+            <button class="filter-btn" id="lifetreeTabFusions" onclick="window.switchLifetreeSubtab('fusions')">⚗️ Fusão & Probabilidades (15)</button>
+          </div>
+
+          <!-- Sefiras Subtab Filters & Grid -->
+          <div id="lifetreeSefirasView">
+            <div class="filter-bar" id="lifetreeFilterBar" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 20px;">
+              <div style="flex: 1; min-width: 250px;">
+                <input type="text" id="lifetreeSearchInput" class="search-input" placeholder="🔍 Buscar por nome da Sefira (ex: Achillute, Alfa, Yechira), atributo ou raridade..." style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(15,20,30,0.8); color: #fff; font-size: 0.9rem;">
+              </div>
+              <button class="filter-btn active" data-ltformat="all">Todos os Formatos</button>
+              <button class="filter-btn" data-ltformat="0">Achillute (24)</button>
+              <button class="filter-btn" data-ltformat="1">Bria (24)</button>
+              <button class="filter-btn" data-ltformat="2">Yechira (24)</button>
+              <select id="lifetreeSymbolSelect" style="padding: 9px 12px; border-radius: 8px; background: rgba(15,20,30,0.8); color: #fff; border: 1px solid rgba(255,255,255,0.15); font-size: 0.88rem;">
+                <option value="all">Todos os Padrões</option>
+                <option value="1">Alfa (Ataque / Precisão)</option>
+                <option value="2">Sigma (Habilidade / Recarga)</option>
+                <option value="3">Teta (Monstro / EXP)</option>
+                <option value="4">Capa (PvP / CC)</option>
+              </select>
+              <select id="lifetreeRaritySelect" style="padding: 9px 12px; border-radius: 8px; background: rgba(15,20,30,0.8); color: #fff; border: 1px solid rgba(255,255,255,0.15); font-size: 0.88rem;">
+                <option value="all">Todas as Raridades</option>
+                <option value="0">Comum</option>
+                <option value="1">Incomum</option>
+                <option value="2">Raro</option>
+                <option value="3">Heroico</option>
+                <option value="4">Lendário</option>
+                <option value="5">Mítico</option>
+              </select>
+            </div>
+            <div class="entity-grid" id="lifetreeSefirasContainer"></div>
+          </div>
+
+          <!-- Bonuses (Elos & Conjuntos) Subtab View -->
+          <div id="lifetreeBonusesView" style="display: none;">
+            <div class="entity-grid" id="lifetreeBonusesContainer"></div>
+          </div>
+
+          <!-- Fusions Subtab View -->
+          <div id="lifetreeFusionsView" style="display: none;">
+            <div class="entity-grid" id="lifetreeFusionsContainer"></div>
+          </div>
+        </section>
+
+        <!-- ==============================================
+             22. FAQ SECTION
              ============================================== -->
         <section id="faq" class="view-section">
           <div class="section-header">

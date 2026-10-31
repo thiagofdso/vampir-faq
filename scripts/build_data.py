@@ -2190,7 +2190,13 @@ STAT_NAME_MAP = {
     "NormalAttackSpeedMultiplier": "Velocidade de Ataque Normal (%)",
     "SkillAttackSpeedMultiplier": "Velocidade de Ataque de Habilidade (%)",
     "WeaponAttackPower": "Poder de Ataque da Arma",
-    "WeaponAttackPowerMax": "Poder de Ataque Máx. da Arma"
+    "WeaponAttackPowerMax": "Poder de Ataque Máx. da Arma",
+    "DamageReducerMonster": "Resiliência a Dano de Monstros",
+    "DamageReducerNormalAttack": "Resiliência a Dano de Ataque Básico",
+    "DamageReducerPvp": "Resiliência a Dano PvP",
+    "MoveSpeedMultiplier": "Velocidade de Movimento (%)",
+    "ResistRateCrowdControl": "Resistência a Efeitos de Controle (%)",
+    "SkillCoolTimeReducer": "Redução de Recarga de Habilidade"
 }
 
 codex_collections_list = []
@@ -3405,6 +3411,239 @@ with open(os.path.join(OUT_DIR, "refinement.json"), "w", encoding="utf-8") as f:
 print(f"  ✓ Processed Item Refinement catalog ({len(refinement_rules)} rules, {refinement_catalog['stats']['total_effects']} subattributes across {len(refinement_groups)} groups).")
 
 # ==========================================
+# 21. LIFE TREE (ÁRVORE DA VIDA) & SEPHIRAS CATALOG
+# ==========================================
+print("Processing Life Tree & Sephiras catalog...")
+SEPHIRA_REPORTS_DIR = os.path.join(BASE_DIR, "analysis/versions/2026-10-31/reports/sefira-arvore-da-vida")
+sefiras_csv_path = os.path.join(SEPHIRA_REPORTS_DIR, "sefiras.csv")
+espacos_csv_path = os.path.join(SEPHIRA_REPORTS_DIR, "espacos_arvore.csv")
+elos_csv_path = os.path.join(SEPHIRA_REPORTS_DIR, "elos_e_conjuntos.csv")
+fusoes_csv_path = os.path.join(SEPHIRA_REPORTS_DIR, "fusoes.csv")
+
+FORMAT_NAMES = {
+    0: "Achillute",
+    1: "Bria",
+    2: "Yechira"
+}
+
+FORMAT_ICONS = {
+    0: "assets/lifetree/type_a_achillute.png",
+    1: "assets/lifetree/type_b_bria.png",
+    2: "assets/lifetree/type_c_yechira.png"
+}
+
+FORMAT_UNLOCKS = {
+    0: {"level": 48, "lock_id": "111112", "desc": "Desbloqueia no Nv. 48"},
+    1: {"level": 60, "lock_id": "111126", "desc": "Desbloqueia no Nv. 60"},
+    2: {"level": 70, "lock_id": "111127", "desc": "Desbloqueia no Nv. 70"}
+}
+
+SYMBOL_NAMES = {
+    1: "Alfa",
+    2: "Sigma",
+    3: "Teta",
+    4: "Capa"
+}
+
+SYMBOL_ICONS = {
+    1: "assets/lifetree/symbol_alpha.png",
+    2: "assets/lifetree/symbol_sigma.png",
+    3: "assets/lifetree/symbol_theta.png",
+    4: "assets/lifetree/symbol_kappa.png"
+}
+
+RARITY_ORDER = ["Comum", "Incomum", "Raro", "Heroico", "Lendário", "Mítico"]
+RARITY_COLORS = {
+    0: "#94a3b8",
+    1: "#22c55e",
+    2: "#3b82f6",
+    3: "#a855f7",
+    4: "#eab308",
+    5: "#ef4444"
+}
+
+SEPHIRA_ICON_MAP = {
+    (0, 1): "assets/items/sephira_01.png",
+    (0, 2): "assets/items/sephira_02.png",
+    (0, 3): "assets/items/sephira_03.png",
+    (0, 4): "assets/items/sephira_04.png",
+    (1, 1): "assets/items/sephira_11.png",
+    (1, 2): "assets/items/sephira_12.png",
+    (1, 3): "assets/items/sephira_13.png",
+    (1, 4): "assets/items/sephira_14.png",
+    (2, 1): "assets/items/sephira_21.png",
+    (2, 2): "assets/items/sephira_22.png",
+    (2, 3): "assets/items/sephira_23.png",
+    (2, 4): "assets/items/sephira_24.png",
+}
+
+# 1. Tree Slots (10)
+tree_slots = []
+if os.path.exists(espacos_csv_path):
+    with open(espacos_csv_path, "r", encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            stype = int(r["SephiraType"])
+            slot_id = int(r["Id"])
+            uinfo = FORMAT_UNLOCKS.get(stype, {"level": 1, "lock_id": "", "desc": ""})
+            tree_slots.append({
+                "slot_id": slot_id,
+                "format_code": stype,
+                "format_name": FORMAT_NAMES.get(stype, f"Formato {stype}"),
+                "format_icon": FORMAT_ICONS.get(stype, "assets/lifetree/type_a_achillute.png"),
+                "unlock_level": uinfo["level"],
+                "unlock_desc": uinfo["desc"],
+                "lock_id": uinfo["lock_id"]
+            })
+
+# 2. Sephiras (72)
+sephiras_list = []
+if os.path.exists(sefiras_csv_path):
+    with open(sefiras_csv_path, "r", encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            stype = int(r["SephiraType"])
+            sym = int(r["SymbolType"])
+            rar = int(r["raridade"])
+            cost = int(r["CostValue"] or 0)
+            effs_raw = json.loads(r["efeitos_json"])
+            effs_compact = []
+            for e in effs_raw:
+                t = e.get("tipo_nome") or e.get("Type")
+                val = float(e.get("Min", 0) or 0)
+                t_name = STAT_NAME_MAP.get(t, t)
+                v_disp = f"+{val/100:.1f}%" if "Multiplier" in t or "Rate" in t else f"+{int(val):,}"
+                effs_compact.append({"key": t, "name": t_name, "val": v_disp, "raw_val": val})
+
+            s_icon = SEPHIRA_ICON_MAP.get((stype, sym), "assets/items/flat_sephira.png")
+            sephiras_list.append({
+                "id": r["Id"],
+                "name": r["nome"],
+                "format_code": stype,
+                "format_name": FORMAT_NAMES.get(stype, f"Formato {stype}"),
+                "format_icon": FORMAT_ICONS.get(stype, "assets/lifetree/type_a_achillute.png"),
+                "symbol_code": sym,
+                "symbol_name": SYMBOL_NAMES.get(sym, f"Símbolo {sym}"),
+                "symbol_icon": SYMBOL_ICONS.get(sym, "assets/lifetree/symbol_alpha.png"),
+                "rarity_code": rar,
+                "rarity_name": RARITY_ORDER[rar] if rar < len(RARITY_ORDER) else f"Grau {rar}",
+                "rarity_color": RARITY_COLORS.get(rar, "#fff"),
+                "cost_gold": cost,
+                "cost_formatted": f"{cost:,} Ouro".replace(",", "."),
+                "icon": s_icon,
+                "effects": effs_compact,
+                "effect_summary": ", ".join(f"{e['name']} {e['val']}" for e in effs_compact)
+            })
+
+# 3. Elos & Conjuntos (90)
+bonuses_list = []
+if os.path.exists(elos_csv_path):
+    with open(elos_csv_path, "r", encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            stype = int(r["SephiraType"])
+            rar = int(r["Rarity"])
+            is_elo = not bool(r.get("SymbolCount"))
+            sym = int(r["SymbolType"]) if r.get("SymbolType") and not is_elo else None
+            req_cnt = int(r["RegistrationCount"] or 3)
+            
+            effs_raw = json.loads(r["efeitos_json"])
+            effs_compact = []
+            for e in effs_raw:
+                t = e.get("tipo_nome") or e.get("Type")
+                val = float(e.get("Min", 0) or 0)
+                t_name = STAT_NAME_MAP.get(t, t)
+                v_disp = f"+{val/100:.1f}%" if "Multiplier" in t or "Rate" in t else f"+{int(val):,}"
+                effs_compact.append({"key": t, "name": t_name, "val": v_disp, "raw_val": val})
+
+            disp_name = r["nome"]
+            if not disp_name:
+                disp_name = f"Elo {FORMAT_NAMES.get(stype, '')} ({RARITY_ORDER[rar]})"
+
+            bonuses_list.append({
+                "id": r["Id"],
+                "is_elo": is_elo,
+                "type_label": "Elo de Formato" if is_elo else "Conjunto de Padrão",
+                "format_code": stype,
+                "format_name": FORMAT_NAMES.get(stype, f"Formato {stype}"),
+                "format_icon": FORMAT_ICONS.get(stype, "assets/lifetree/type_a_achillute.png"),
+                "symbol_code": sym,
+                "symbol_name": SYMBOL_NAMES.get(sym) if sym else None,
+                "symbol_icon": SYMBOL_ICONS.get(sym) if sym else None,
+                "rarity_code": rar,
+                "rarity_name": RARITY_ORDER[rar] if rar < len(RARITY_ORDER) else f"Grau {rar}",
+                "rarity_color": RARITY_COLORS.get(rar, "#fff"),
+                "req_count": req_cnt,
+                "name": disp_name,
+                "effects": effs_compact,
+                "effect_summary": ", ".join(f"{e['name']} {e['val']}" for e in effs_compact)
+            })
+
+# 4. Fusions (15)
+fusions_list = []
+if os.path.exists(fusoes_csv_path):
+    with open(fusoes_csv_path, "r", encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            fid = r["Id"]
+            rar = int(r["Rarity"])
+            rate_raw = int(r["SuccessRate"])
+            rate_pct = round(rate_raw / 100.0, 1)
+            fail_pct = round(100.0 - rate_pct, 1)
+            
+            mats = json.loads(r["materiais_json"])
+            sucs = json.loads(r["sucesso_json"])
+            fals = json.loads(r["falha_json"])
+            
+            sample_name = mats[0]["item_nome"] if mats else ""
+            if "Achillute" in sample_name or "Aquiluta" in sample_name:
+                stype = 0
+            elif "Bria" in sample_name:
+                stype = 1
+            else:
+                stype = 2
+
+            mats_compact = [{"id": m["ItemInfoId"], "name": m["item_nome"]} for m in mats]
+            sucs_compact = [{"id": s["Param"], "name": s["item_nome"]} for s in sucs]
+            fals_compact = [{"id": f["Param"], "name": f["item_nome"]} for f in fals]
+
+            fusions_list.append({
+                "id": fid,
+                "format_code": stype,
+                "format_name": FORMAT_NAMES.get(stype, f"Formato {stype}"),
+                "format_icon": FORMAT_ICONS.get(stype, "assets/lifetree/type_a_achillute.png"),
+                "input_rarity_code": rar,
+                "input_rarity_name": RARITY_ORDER[rar] if rar < len(RARITY_ORDER) else f"Grau {rar}",
+                "target_rarity_name": RARITY_ORDER[rar + 1] if rar + 1 < len(RARITY_ORDER) else "Superior",
+                "material_count": int(r["MaterialCount"] or 4),
+                "success_rate_raw": rate_raw,
+                "success_rate_pct": rate_pct,
+                "fail_rate_pct": fail_pct,
+                "materials": mats_compact,
+                "success_rewards": sucs_compact,
+                "fail_rewards": fals_compact
+            })
+
+lifetree_catalog = {
+    "stats": {
+        "total_slots": len(tree_slots),
+        "total_sephiras": len(sephiras_list),
+        "total_bonus_rules": len(bonuses_list),
+        "total_elos": sum(1 for b in bonuses_list if b["is_elo"]),
+        "total_conjuntos": sum(1 for b in bonuses_list if not b["is_elo"]),
+        "total_fusions": len(fusions_list),
+        "formats": ["Achillute (3 Espaços)", "Bria (3 Espaços)", "Yechira (4 Espaços)"],
+        "symbols": ["Alfa", "Sigma", "Teta", "Capa"],
+        "rarities": RARITY_ORDER
+    },
+    "tree_slots": tree_slots,
+    "sephiras": sephiras_list,
+    "bonuses": bonuses_list,
+    "fusions": fusions_list,
+    "tree_bg": "assets/lifetree/bg_lifetree_web.webp"
+}
+
+with open(os.path.join(OUT_DIR, "lifetree.json"), "w", encoding="utf-8") as f:
+    json.dump(lifetree_catalog, f, ensure_ascii=False)
+print(f"  ✓ Processed Life Tree & Sephiras catalog ({len(sephiras_list)} sephiras, {len(bonuses_list)} elos/conjuntos, {len(fusions_list)} fusions).")
+
+# ==========================================
 # 8. BUNDLE GENERATION
 # ==========================================
 print("Writing bundle.js...")
@@ -3430,6 +3669,7 @@ bundle_data = {
     "bloodline": bloodline_catalog,
     "bloodrealm": bloodrealm_catalog,
     "refinement": refinement_catalog,
+    "lifetree": lifetree_catalog,
     "constants": constants_dict,
     "faq": faq_catalog
 }

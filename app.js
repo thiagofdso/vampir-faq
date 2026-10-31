@@ -65,6 +65,11 @@
     refinementFilter: 'all',
     refinementRarityFilter: 'all',
     refinementSearchTerm: '',
+    lifetreeSubtab: 'sefiras',
+    lifetreeFormat: 'all',
+    lifetreeSymbol: 'all',
+    lifetreeRarity: 'all',
+    lifetreeSearchTerm: '',
     modesFilter: 'all',
     pvpTab: 'arena',
     enchantTab: 'scrolls',
@@ -100,7 +105,7 @@
     }
 
     try {
-      const [classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, bloodrealm, refinement, faq, constants] = await Promise.all([
+      const [classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, bloodrealm, refinement, lifetree, faq, constants] = await Promise.all([
         fetch('data/classes.json').then(r => r.json()),
         fetch('data/builds.json').then(r => r.json()),
         fetch('data/skills.json').then(r => r.json()),
@@ -120,11 +125,12 @@
         fetch('data/bloodline.json').then(r => r.json()),
         fetch('data/bloodrealm.json').then(r => r.json()),
         fetch('data/refinement.json').then(r => r.json()),
+        fetch('data/lifetree.json').then(r => r.json()),
         fetch('data/faq.json').then(r => r.json()),
         fetch('data/constants.json').then(r => r.json())
       ]);
 
-      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, bloodrealm, refinement, faq, constants };
+      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, bloodrealm, refinement, lifetree, faq, constants };
       initApp();
     } catch (e) {
       console.error('Failed to load JSON data asynchronously:', e);
@@ -164,6 +170,7 @@
     if (tabId === 'bloodline') renderBloodline();
     if (tabId === 'bloodrealm') renderBloodrealm();
     if (tabId === 'refinement') renderRefinement();
+    if (tabId === 'lifetree') renderLifeTree();
   }
 
   window.navTo = function(tabId) {
@@ -3774,6 +3781,463 @@
     detailModal.classList.add('active');
   };
 
+  // ==========================================
+  // 21. LIFE TREE (ÁRVORE DA VIDA) & SEPHIRAS
+  // ==========================================
+  window.switchLifetreeSubtab = function(subtab) {
+    state.lifetreeSubtab = subtab;
+    const tabSefiras = document.getElementById('lifetreeTabSefiras');
+    const tabBonuses = document.getElementById('lifetreeTabBonuses');
+    const tabFusions = document.getElementById('lifetreeTabFusions');
+    const viewSefiras = document.getElementById('lifetreeSefirasView');
+    const viewBonuses = document.getElementById('lifetreeBonusesView');
+    const viewFusions = document.getElementById('lifetreeFusionsView');
+
+    if (tabSefiras) tabSefiras.classList.toggle('active', subtab === 'sefiras');
+    if (tabBonuses) tabBonuses.classList.toggle('active', subtab === 'bonuses');
+    if (tabFusions) tabFusions.classList.toggle('active', subtab === 'fusions');
+
+    if (viewSefiras) viewSefiras.style.display = subtab === 'sefiras' ? 'block' : 'none';
+    if (viewBonuses) viewBonuses.style.display = subtab === 'bonuses' ? 'block' : 'none';
+    if (viewFusions) viewFusions.style.display = subtab === 'fusions' ? 'block' : 'none';
+
+    if (subtab === 'sefiras') renderLifeTreeSefiras();
+    else if (subtab === 'bonuses') renderLifeTreeBonuses();
+    else if (subtab === 'fusions') renderLifeTreeFusions();
+  };
+
+  function renderLifeTree() {
+    renderLifeTreeSlots();
+    if (state.lifetreeSubtab === 'sefiras') renderLifeTreeSefiras();
+    else if (state.lifetreeSubtab === 'bonuses') renderLifeTreeBonuses();
+    else if (state.lifetreeSubtab === 'fusions') renderLifeTreeFusions();
+  }
+
+  function renderLifeTreeSlots() {
+    const container = document.getElementById('lifetreeSlotsGrid');
+    if (!container || !state.data.lifetree) return;
+
+    const slots = state.data.lifetree.tree_slots || [];
+    container.innerHTML = slots.map(s => {
+      const formatColor = s.format_code === 0 ? '#38bdf8' : (s.format_code === 1 ? '#a855f7' : '#f59e0b');
+      return `
+        <div style="background: rgba(0,0,0,0.45); border: 1px solid ${formatColor}55; border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s ease;" 
+             onclick="state.lifetreeFormat = '${s.format_code}'; window.switchLifetreeSubtab('sefiras'); document.querySelectorAll('#lifetreeFilterBar .filter-btn').forEach(b => b.classList.toggle('active', b.dataset.ltformat === '${s.format_code}'));"
+             onmouseover="this.style.borderColor='${formatColor}'; this.style.transform='translateY(-2px)'"
+             onmouseout="this.style.borderColor='${formatColor}55'; this.style.transform='none'">
+          <div style="width: 42px; height: 42px; border-radius: 8px; background: rgba(0,0,0,0.6); border: 1px solid ${formatColor}; display: flex; align-items: center; justify-content: center; padding: 4px; flex-shrink: 0;">
+            <img src="${s.format_icon}" style="width: 100%; height: 100%; object-fit: contain;">
+          </div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+              <span style="font-weight: 700; color: #fff; font-size: 0.9rem;">Espaço #${s.slot_id}</span>
+              <span class="badge" style="background: rgba(52,211,153,0.15); color: #34d399; border: 1px solid rgba(52,211,153,0.3); font-size: 0.7rem;">Nv. ${s.unlock_level}</span>
+            </div>
+            <div style="font-size: 0.78rem; color: ${formatColor}; font-weight: 600;">
+              ${s.format_name}
+            </div>
+            <div style="font-size: 0.7rem; color: #94a3b8;">
+              ${s.unlock_desc}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderLifeTreeSefiras() {
+    const container = document.getElementById('lifetreeSefirasContainer');
+    if (!container || !state.data.lifetree) return;
+
+    let sephiras = state.data.lifetree.sephiras || [];
+
+    // Filter by Format
+    if (state.lifetreeFormat !== 'all') {
+      const fcode = parseInt(state.lifetreeFormat);
+      sephiras = sephiras.filter(s => s.format_code === fcode);
+    }
+
+    // Filter by Symbol
+    if (state.lifetreeSymbol && state.lifetreeSymbol !== 'all') {
+      const scode = parseInt(state.lifetreeSymbol);
+      sephiras = sephiras.filter(s => s.symbol_code === scode);
+    }
+
+    // Filter by Rarity
+    if (state.lifetreeRarity && state.lifetreeRarity !== 'all') {
+      const rcode = parseInt(state.lifetreeRarity);
+      sephiras = sephiras.filter(s => s.rarity_code === rcode);
+    }
+
+    // Filter by Search Query
+    const q = (state.lifetreeSearchTerm || '').toLowerCase().trim();
+    if (q) {
+      sephiras = sephiras.filter(s => 
+        s.name.toLowerCase().includes(q) ||
+        s.format_name.toLowerCase().includes(q) ||
+        s.symbol_name.toLowerCase().includes(q) ||
+        s.rarity_name.toLowerCase().includes(q) ||
+        s.id.includes(q) ||
+        s.effects.some(e => e.name.toLowerCase().includes(q) || e.key.toLowerCase().includes(q))
+      );
+    }
+
+    if (sephiras.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 48px; color: #94a3b8; background: rgba(0,0,0,0.2); border-radius: 12px;">
+          <p style="font-size: 1.1rem; margin-bottom: 8px;">Nenhuma Sefira encontrada para os filtros selecionados.</p>
+          <p style="font-size: 0.85rem;">Tente ajustar sua busca ou selecionar "Todos os Formatos".</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = sephiras.map(s => {
+      const formatColor = s.format_code === 0 ? '#38bdf8' : (s.format_code === 1 ? '#a855f7' : '#f59e0b');
+      const eff = s.effects[0] || { name: 'Atributo', val: '+0' };
+
+      return `
+        <div class="entity-card" style="display: flex; flex-direction: column; justify-content: space-between; border-color: ${s.rarity_color}44; background: linear-gradient(180deg, rgba(15,25,25,0.7) 0%, rgba(10,15,20,0.85) 100%);">
+          <div>
+            <!-- Top Badges -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span class="badge" style="background: rgba(255,255,255,0.08); color: ${formatColor}; border: 1px solid ${formatColor}55; display: inline-flex; align-items: center; gap: 4px; font-weight: 600;">
+                <img src="${s.format_icon}" style="width: 13px; height: 13px;">
+                ${s.format_name}
+              </span>
+              <div style="display: flex; gap: 6px;">
+                <span class="badge" style="background: rgba(0,0,0,0.5); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.15); display: inline-flex; align-items: center; gap: 4px;">
+                  <img src="${s.symbol_icon}" style="width: 12px; height: 12px;">
+                  ${s.symbol_name}
+                </span>
+                <span class="badge" style="background: ${s.rarity_color}22; color: ${s.rarity_color}; border: 1px solid ${s.rarity_color}55; font-weight: 700;">
+                  ${s.rarity_name}
+                </span>
+              </div>
+            </div>
+
+            <!-- Sephira Artwork & Title -->
+            <div style="display: flex; gap: 14px; margin-bottom: 14px;">
+              <div style="width: 58px; height: 58px; flex-shrink: 0; border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.5); border: 1px solid ${s.rarity_color}55; display: flex; align-items: center; justify-content: center; padding: 4px;">
+                <img src="${s.icon}" alt="${s.name}" style="width: 100%; height: 100%; object-fit: contain;">
+              </div>
+              <div style="flex: 1; min-width: 0;">
+                <h3 style="font-size: 1.08rem; color: #fff; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${s.name}">
+                  ${s.name}
+                </h3>
+                <div style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 4px;">
+                  Item #${s.id}
+                </div>
+                <div style="font-size: 0.72rem; color: #64748b;">
+                  Padrão ${s.symbol_name} • Grau ${s.rarity_name}
+                </div>
+              </div>
+            </div>
+
+            <!-- Stat & Cost Box -->
+            <div style="background: rgba(0,0,0,0.35); border-radius: 8px; padding: 10px; margin-bottom: 12px; font-size: 0.8rem; display: flex; flex-direction: column; gap: 6px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #94a3b8;">Atributo Próprio:</span>
+                <strong style="color: #34d399;">${eff.name} ${eff.val}</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 4px; margin-top: 2px;">
+                <span style="color: #94a3b8;">Custo de Gravação:</span>
+                <span style="color: #fbbf24; font-weight: 600;">${s.cost_formatted}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Inspect Button -->
+          <button class="btn btn-primary" onclick="window.inspectSephira('${s.id}')" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #059669 0%, #047857 100%); border: 1px solid rgba(52,211,153,0.5); color: #fff;">
+            <span>Inspecionar Sefira & Sinergias</span>
+            <span>➔</span>
+          </button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderLifeTreeBonuses() {
+    const container = document.getElementById('lifetreeBonusesContainer');
+    if (!container || !state.data.lifetree) return;
+
+    const bonuses = state.data.lifetree.bonuses || [];
+
+    container.innerHTML = bonuses.map(b => {
+      const formatColor = b.format_code === 0 ? '#38bdf8' : (b.format_code === 1 ? '#a855f7' : '#f59e0b');
+      const eff = b.effects[0] || { name: 'Efeito', val: '+0' };
+      const isElo = b.is_elo;
+
+      return `
+        <div class="entity-card" style="display: flex; flex-direction: column; justify-content: space-between; border-color: ${isElo ? 'rgba(52,211,153,0.4)' : 'rgba(251,191,36,0.3)'}; background: linear-gradient(180deg, rgba(20,20,30,0.7) 0%, rgba(15,15,20,0.85) 100%);">
+          <div>
+            <!-- Header Badges -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span class="badge" style="background: ${isElo ? 'rgba(52,211,153,0.2)' : 'rgba(245,158,11,0.2)'}; color: ${isElo ? '#6ee7b7' : '#fbbf24'}; border: 1px solid ${isElo ? 'rgba(52,211,153,0.4)' : 'rgba(245,158,11,0.4)'}; font-weight: 700;">
+                ${isElo ? '🔗 Elo de Formato' : '✨ Conjunto de Padrão'}
+              </span>
+              <div style="display: flex; gap: 6px;">
+                <span class="badge" style="background: ${b.rarity_color}22; color: ${b.rarity_color}; border: 1px solid ${b.rarity_color}55; font-weight: 700;">
+                  ${b.rarity_name}
+                </span>
+                <span class="badge" style="background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15); font-family: monospace;">
+                  ${b.req_count} Peças
+                </span>
+              </div>
+            </div>
+
+            <!-- Title & Info -->
+            <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 14px;">
+              <div style="width: 48px; height: 48px; border-radius: 8px; background: rgba(0,0,0,0.5); border: 1px solid ${formatColor}; display: flex; align-items: center; justify-content: center; padding: 4px; flex-shrink: 0;">
+                <img src="${isElo ? b.format_icon : b.symbol_icon}" style="width: 100%; height: 100%; object-fit: contain;">
+              </div>
+              <div style="flex: 1; min-width: 0;">
+                <h3 style="font-size: 1.05rem; color: #fff; margin-bottom: 3px;">
+                  ${b.name}
+                </h3>
+                <div style="font-size: 0.78rem; color: ${formatColor}; font-weight: 600;">
+                  Formato ${b.format_name} ${b.symbol_name ? '• Padrão ' + b.symbol_name : ''}
+                </div>
+              </div>
+            </div>
+
+            <!-- Condition and Effect -->
+            <div style="background: rgba(0,0,0,0.35); border-radius: 8px; padding: 12px; margin-bottom: 12px; font-size: 0.8rem; display: flex; flex-direction: column; gap: 8px;">
+              <div>
+                <span style="color: #94a3b8; font-size: 0.74rem; text-transform: uppercase;">Bônus Concedido:</span>
+                <div style="font-size: 1.15rem; color: #34d399; font-weight: 700; margin-top: 2px;">
+                  ${eff.name} <span style="color: #fbbf24;">${eff.val}</span>
+                </div>
+              </div>
+              <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 6px; font-size: 0.75rem; color: #cbd5e1; line-height: 1.4;">
+                ${isElo ? 
+                  `Preencher todos os <strong>${b.req_count} espaços</strong> de ${b.format_name}. Nivelado pelo <em>menor grau</em> entre eles.` : 
+                  `Equipar <strong>${b.req_count} Sefiras</strong> de ${b.format_name} com símbolo <strong>${b.symbol_name}</strong>. Nivelado pelo <em>menor grau</em>.`}
+              </div>
+            </div>
+          </div>
+
+          <div style="font-size: 0.72rem; color: #64748b; text-align: right; font-family: monospace;">
+            Regra #${b.id} • LifeTreeSetEffect.csv
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderLifeTreeFusions() {
+    const container = document.getElementById('lifetreeFusionsContainer');
+    if (!container || !state.data.lifetree) return;
+
+    const fusions = state.data.lifetree.fusions || [];
+
+    container.innerHTML = fusions.map(f => {
+      const formatColor = f.format_code === 0 ? '#38bdf8' : (f.format_code === 1 ? '#a855f7' : '#f59e0b');
+
+      return `
+        <div class="entity-card" style="display: flex; flex-direction: column; justify-content: space-between; border-color: rgba(168,85,247,0.35); background: linear-gradient(180deg, rgba(25,15,35,0.7) 0%, rgba(15,10,20,0.85) 100%);">
+          <div>
+            <!-- Header Badges -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span class="badge" style="background: rgba(255,255,255,0.08); color: ${formatColor}; border: 1px solid ${formatColor}55; display: inline-flex; align-items: center; gap: 4px; font-weight: 600;">
+                <img src="${f.format_icon}" style="width: 13px; height: 13px;">
+                ${f.format_name}
+              </span>
+              <span class="badge" style="background: rgba(168,85,247,0.2); color: #c084fc; border: 1px solid rgba(168,85,247,0.4); font-weight: 700;">
+                ${f.material_count}x ${f.input_rarity_name} ➔ ${f.target_rarity_name}
+              </span>
+            </div>
+
+            <!-- Fusion Title -->
+            <h3 style="font-size: 1.12rem; color: #fff; margin-bottom: 6px;">
+              Fusão de Sefiras: ${f.format_name}
+            </h3>
+            <p style="font-size: 0.78rem; color: #94a3b8; margin: 0 0 14px;">
+              Consome 4 Sefiras de ${f.format_name} (${f.input_rarity_name}) para tentar upgrade para ${f.target_rarity_name}.
+            </p>
+
+            <!-- Probability Rate Bar -->
+            <div style="background: rgba(0,0,0,0.35); border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.8rem;">
+                <span style="color: #34d399; font-weight: 700;">🎯 Sucesso: ${f.success_rate_pct}%</span>
+                <span style="color: #f87171; font-weight: 700;">❌ Falha: ${f.fail_rate_pct}%</span>
+              </div>
+              <div style="height: 8px; border-radius: 4px; background: #ef4444; overflow: hidden; display: flex;">
+                <div style="background: #10b981; width: ${f.success_rate_pct}%; height: 100%;"></div>
+              </div>
+            </div>
+
+            <!-- Candidate Rewards -->
+            <div style="font-size: 0.78rem; margin-bottom: 12px;">
+              <div style="color: #94a3b8; margin-bottom: 4px; font-weight: 600;">Resultados no Sucesso (${f.target_rarity_name}):</div>
+              <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                ${f.success_rewards.map(r => `
+                  <span class="badge" style="background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); font-size: 0.72rem;">
+                    ${r.name}
+                  </span>
+                `).join('')}
+              </div>
+            </div>
+
+            <div style="font-size: 0.78rem; margin-bottom: 12px;">
+              <div style="color: #94a3b8; margin-bottom: 4px; font-weight: 600;">Resultados na Falha (${f.input_rarity_name}):</div>
+              <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                ${f.fail_rewards.map(r => `
+                  <span class="badge" style="background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); font-size: 0.72rem;">
+                    ${r.name}
+                  </span>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+
+          <!-- Alert Note -->
+          <div style="background: rgba(245,158,11,0.1); border-left: 2px solid #f59e0b; padding: 6px 10px; border-radius: 0 4px 4px 0; font-size: 0.72rem; color: #fbbf24;">
+            Sorteio equiprovável (25% cada símbolo). Não garante manter o padrão do conjunto.
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.inspectSephira = function(sephiraId) {
+    if (!state.data.lifetree) return;
+    const s = state.data.lifetree.sephiras.find(x => String(x.id) === String(sephiraId));
+    if (!s) return;
+
+    modalTitle.textContent = `${s.name}`;
+    modalSubtitle.textContent = `Formato: ${s.format_name} • Padrão: ${s.symbol_name} • Raridade: ${s.rarity_name} • Item #${s.id}`;
+
+    const matchingSlots = (state.data.lifetree.tree_slots || []).filter(sl => sl.format_code === s.format_code);
+    const matchingElo = (state.data.lifetree.bonuses || []).find(b => b.is_elo && b.format_code === s.format_code && b.rarity_code === s.rarity_code);
+    const matchingSet = (state.data.lifetree.bonuses || []).find(b => !b.is_elo && b.format_code === s.format_code && b.symbol_code === s.symbol_code && b.rarity_code === s.rarity_code);
+    const matchingFusion = (state.data.lifetree.fusions || []).find(f => f.format_code === s.format_code && f.input_rarity_code === s.rarity_code);
+
+    modalBody.innerHTML = `
+      <div style="background: linear-gradient(135deg, rgba(20,35,30,0.9), rgba(15,20,30,0.95)); border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid ${s.rarity_color}55;">
+        <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 16px; flex-wrap: wrap;">
+          <div style="width: 64px; height: 64px; border-radius: 10px; background: rgba(0,0,0,0.5); border: 2px solid ${s.rarity_color}; display: flex; align-items: center; justify-content: center; padding: 6px;">
+            <img src="${s.icon}" style="width: 100%; height: 100%; object-fit: contain;">
+          </div>
+          <div style="flex: 1; min-width: 240px;">
+            <div style="display: flex; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;">
+              <span class="badge" style="background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.2); display: inline-flex; align-items: center; gap: 4px;">
+                <img src="${s.format_icon}" style="width: 13px; height: 13px;">
+                Formato ${s.format_name}
+              </span>
+              <span class="badge" style="background: rgba(0,0,0,0.5); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.15); display: inline-flex; align-items: center; gap: 4px;">
+                <img src="${s.symbol_icon}" style="width: 12px; height: 12px;">
+                Padrão ${s.symbol_name}
+              </span>
+              <span class="badge" style="background: ${s.rarity_color}25; color: ${s.rarity_color}; border: 1px solid ${s.rarity_color}55; font-weight: 700;">
+                ${s.rarity_name}
+              </span>
+            </div>
+            <h3 style="color: #fff; font-size: 1.25rem; margin-bottom: 4px;">
+              ${s.name}
+            </h3>
+            <p style="color: #cbd5e1; font-size: 0.85rem; margin: 0;">
+              Item Oficial #${s.id} • Atributo Próprio: <strong style="color: #34d399;">${s.effect_summary}</strong>
+            </p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+          <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(245,158,11,0.25); border-radius: 8px; padding: 12px;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; color: #94a3b8; margin-bottom: 4px;">
+              💰 Custo de Gravação na Árvore
+            </div>
+            <div style="font-size: 1.15rem; color: #fbbf24; font-weight: 700;">
+              ${s.cost_formatted}
+            </div>
+            <div style="font-size: 0.75rem; color: #94a3b8;">Cobrado ao equipar na Árvore</div>
+          </div>
+
+          <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(52,211,153,0.25); border-radius: 8px; padding: 12px;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; color: #94a3b8; margin-bottom: 4px;">
+              🌳 Espaços Compatíveis
+            </div>
+            <div style="font-size: 1.05rem; color: #34d399; font-weight: 700;">
+              ${matchingSlots.map(sl => '#' + sl.slot_id).join(', ')} (${s.format_name})
+            </div>
+            <div style="font-size: 0.75rem; color: #94a3b8;">${matchingSlots[0]?.unlock_desc || ''}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sinergias de Elo e Conjunto -->
+      <div style="margin-bottom: 24px;">
+        <h4 style="color: #fff; font-size: 0.95rem; margin-bottom: 12px;">
+          Sinergias com a Árvore da Vida (${s.format_name})
+        </h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;">
+          ${matchingElo ? `
+            <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(52,211,153,0.3); border-radius: 8px; padding: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span class="badge" style="background: rgba(52,211,153,0.2); color: #34d399; border: 1px solid rgba(52,211,153,0.4);">
+                  🔗 Elo (${matchingElo.req_count} Peças)
+                </span>
+                <span style="font-size: 0.75rem; color: ${s.rarity_color}; font-weight: 700;">Grau ${s.rarity_name}</span>
+              </div>
+              <div style="font-weight: 700; color: #fff; font-size: 0.95rem; margin-bottom: 4px;">
+                ${matchingElo.name}
+              </div>
+              <div style="font-size: 1.05rem; color: #34d399; font-weight: 700; margin-bottom: 6px;">
+                ${matchingElo.effect_summary}
+              </div>
+              <div style="font-size: 0.72rem; color: #94a3b8;">
+                Ativado ao preencher todos os ${matchingElo.req_count} espaços de ${s.format_name}. Nivelado pelo menor grau.
+              </div>
+            </div>
+          ` : ''}
+
+          ${matchingSet ? `
+            <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(245,158,11,0.3); border-radius: 8px; padding: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span class="badge" style="background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.4);">
+                  ✨ Conjunto (${matchingSet.req_count}x ${s.symbol_name})
+                </span>
+                <span style="font-size: 0.75rem; color: ${s.rarity_color}; font-weight: 700;">Grau ${s.rarity_name}</span>
+              </div>
+              <div style="font-weight: 700; color: #fff; font-size: 0.95rem; margin-bottom: 4px;">
+                ${matchingSet.name}
+              </div>
+              <div style="font-size: 1.05rem; color: #fbbf24; font-weight: 700; margin-bottom: 6px;">
+                ${matchingSet.effect_summary}
+              </div>
+              <div style="font-size: 0.72rem; color: #94a3b8;">
+                Ativado ao equipar ${matchingSet.req_count} Sefiras com padrão ${s.symbol_name}. Nivelado pelo menor grau.
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+
+      <!-- Fusão Relacionada -->
+      ${matchingFusion ? `
+        <div style="background: rgba(0,0,0,0.35); border-radius: 8px; padding: 14px; border: 1px solid rgba(168,85,247,0.3);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <h4 style="color: #fff; font-size: 0.92rem; margin: 0;">
+              ⚗️ Fusão para o Grau Superior (${matchingFusion.target_rarity_name})
+            </h4>
+            <span class="badge" style="background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.4); font-weight: 700;">
+              Taxa: ${matchingFusion.success_rate_pct}%
+            </span>
+          </div>
+          <div style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.5;">
+            Combine <strong>4 Sefiras de ${s.format_name} (${s.rarity_name})</strong> para ter <strong>${matchingFusion.success_rate_pct}% de chance</strong> de obter uma Sefira de grau <strong>${matchingFusion.target_rarity_name}</strong>. Em caso de falha (${matchingFusion.fail_rate_pct}%), recebe 1 Sefira de grau ${s.rarity_name}.
+          </div>
+          <div style="margin-top: 8px; font-size: 0.72rem; color: #f59e0b;">
+            ⚠️ Atenção: O símbolo resultante é sorteado aleatoriamente (Alfa, Sigma, Teta ou Capa) e pode quebrar um conjunto pré-existente.
+          </div>
+        </div>
+      ` : ''}
+    `;
+
+    detailModal.classList.add('open');
+    detailModal.classList.add('active');
+  };
+
   // Render FAQ
   function renderFaq() {
     const container = document.getElementById('faqContainer');
@@ -4589,6 +5053,31 @@
       state.refinementSearchTerm = e.target.value;
       renderRefinement();
     });
+
+    document.getElementById('lifetreeFilterBar')?.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (btn && btn.dataset.ltformat) {
+        document.querySelectorAll('#lifetreeFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.lifetreeFormat = btn.dataset.ltformat;
+        renderLifeTreeSefiras();
+      }
+    });
+
+    document.getElementById('lifetreeSymbolSelect')?.addEventListener('change', e => {
+      state.lifetreeSymbol = e.target.value;
+      renderLifeTreeSefiras();
+    });
+
+    document.getElementById('lifetreeRaritySelect')?.addEventListener('change', e => {
+      state.lifetreeRarity = e.target.value;
+      renderLifeTreeSefiras();
+    });
+
+    document.getElementById('lifetreeSearchInput')?.addEventListener('input', e => {
+      state.lifetreeSearchTerm = e.target.value;
+      renderLifeTreeSefiras();
+    });
   }
 
   function initApp() {
@@ -4611,6 +5100,7 @@
     renderBloodline();
     renderBloodrealm();
     renderRefinement();
+    renderLifeTree();
     renderFaq();
     setupListeners();
   }
