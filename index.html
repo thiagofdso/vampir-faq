@@ -58,7 +58,7 @@
         <a class="nav-item" data-target="items">
           <span class="nav-icon">🎒</span>
           <span>Itens & Equipamentos</span>
-          <span class="nav-count" id="countItems">588</span>
+          <span class="nav-count" id="countItems">934</span>
         </a>
         <a class="nav-item" data-target="quests">
           <span class="nav-icon">📜</span>
@@ -68,7 +68,7 @@
         <a class="nav-item" data-target="crafting">
           <span class="nav-icon"><img src="assets/items/flat_itemcraft.png" style="width: 18px; height: 18px; vertical-align: middle;" onerror="this.outerHTML='🔨'"></span>
           <span>Forja & Criação</span>
-          <span class="nav-count" id="countCrafting">602</span>
+          <span class="nav-count" id="countCrafting">603</span>
         </a>
         <a class="nav-item" data-target="modes">
           <span class="nav-icon">🎯</span>
@@ -83,12 +83,12 @@
         <a class="nav-item" data-target="enchantment">
           <span class="nav-icon"><img src="assets/items/flat_enchant.png" style="width: 18px; height: 18px; vertical-align: middle;" onerror="this.outerHTML='✨'"></span>
           <span>Aprimoramento</span>
-          <span class="nav-count" id="countEnchantment">5.0k</span>
+          <span class="nav-count" id="countEnchantment">5.1k</span>
         </a>
         <a class="nav-item" data-target="shops">
           <span class="nav-icon"><img src="assets/items/flat_shop.png" style="width: 18px; height: 18px; vertical-align: middle;" onerror="this.outerHTML='🏬'"></span>
           <span>Lojas & Mercado</span>
-          <span class="nav-count" id="countShops">1.3k</span>
+          <span class="nav-count" id="countShops">1.4k</span>
         </a>
         <a class="nav-item" data-target="faq">
           <span class="nav-icon">❓</span>
@@ -172,7 +172,7 @@
             </div>
             <div class="metric-card">
               <div class="metric-label">Forja & Criação</div>
-              <div class="metric-value">602</div>
+              <div class="metric-value">603</div>
               <div class="metric-desc">Receitas de armas, armaduras, consumíveis e taxas de sucesso</div>
             </div>
           </div>
@@ -379,10 +379,10 @@
         <section id="crafting" class="view-section">
           <div class="section-header">
             <h2 class="section-title"><img src="assets/items/flat_itemcraft.png" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 8px;" onerror="this.style.display='none'">Forja, Criação & Receitas</h2>
-            <p class="section-subtitle">602 receitas catalogadas com custos em ouro, materiais exigidos, taxas de sucesso e itens de grande sucesso</p>
+            <p class="section-subtitle">603 receitas catalogadas com custos em ouro, materiais exigidos, taxas de sucesso e itens de grande sucesso</p>
           </div>
           <div style="background: rgba(138, 3, 3, 0.15); border: 1px solid rgba(138, 3, 3, 0.4); border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; font-size: 0.85rem; color: #f87171; line-height: 1.5;">
-            <strong>ℹ️ Relatório de Engenharia Reversa:</strong> A extração das 602 receitas revelou que 1.797 materiais de criação possuem correspondência exata em <code>ItemCraft.csv</code>. Há 38 materiais catalogados em <code>materiais_sem_grupo_receita.csv</code> cujos IDs de grupo aguardam vinculação com receitas adicionais de servidor.
+            <strong>ℹ️ Relatório de Engenharia Reversa:</strong> A extração das 603 receitas revelou que 1.800 materiais de criação possuem correspondência exata em <code>ItemCraft.csv</code> (incluindo a nova receita 4020010 da Pedra de Aprimoramento de Artefato). Há 38 materiais catalogados em <code>materiais_sem_grupo_receita.csv</code> cujos IDs de grupo aguardam vinculação com receitas adicionais de servidor.
           </div>
           <div class="filter-bar" id="craftingFilterBar">
             <button class="filter-btn active" data-ccat="all">Todas as Receitas</button>
@@ -500,6 +500,10 @@
             <button class="pvp-subnav-btn" data-enchtab="progression_acc">
               <span>💍 Progressão de Acessórios</span>
             </button>
+            <button class="pvp-subnav-btn" data-enchtab="artifacts">
+              <img src="assets/items/materials_artifactenchantmaterial_04.png" style="width: 16px; height: 16px;" onerror="this.outerHTML='🏺'">
+              <span>🏺 Artefato de Transformação (Novo)</span>
+            </button>
           </div>
 
           <div id="enchantmentContentContainer">
@@ -516,14 +520,14 @@
               <img src="assets/items/flat_shop.png" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 8px;" onerror="this.outerHTML='🏬'">
               Lojas do Jogo & Mercadores
             </h2>
-            <p class="section-subtitle">1.301 ofertas mapeadas em 14 categorias e 78 abas: Pacotes, Moedas de Troca, Habilidades, Clã e Masmorras</p>
+            <p class="section-subtitle">1.364 ofertas mapeadas em 14 categorias e 78 abas: Pacotes, Moedas de Troca, Habilidades, Clã e Masmorras</p>
           </div>
 
           <!-- Summary Metric Cards -->
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px;">
             <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
               <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Ofertas Mapeadas</div>
-              <div style="font-size: 1.6rem; font-weight: 700; color: var(--gold-primary); font-family: monospace;">1.301</div>
+              <div style="font-size: 1.6rem; font-weight: 700; color: var(--gold-primary); font-family: monospace;">1.364</div>
               <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">Shop.csv do cliente</div>
             </div>
             <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
@@ -533,12 +537,12 @@
             </div>
             <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
               <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Pacotes IAP (App)</div>
-              <div style="font-size: 1.6rem; font-weight: 700; color: var(--crimson-light); font-family: monospace;">505</div>
+              <div style="font-size: 1.6rem; font-weight: 700; color: var(--crimson-light); font-family: monospace;">559</div>
               <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">Netmarble SItemId</div>
             </div>
             <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
               <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Moedas do Jogo</div>
-              <div style="font-size: 1.6rem; font-weight: 700; color: #34d399; font-family: monospace;">431</div>
+              <div style="font-size: 1.6rem; font-weight: 700; color: #34d399; font-family: monospace;">440</div>
               <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">Gold, Diamond, Milhas</div>
             </div>
             <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
@@ -560,7 +564,7 @@
 
           <!-- Category Filter Bar -->
           <div class="filter-bar" id="shopsFilterBar">
-            <button class="filter-btn active" data-scat="all">Todas as Lojas (1.301)</button>
+            <button class="filter-btn active" data-scat="all">Todas as Lojas (1.364)</button>
             <button class="filter-btn" data-scat="1">Produto (Pacotes)</button>
             <button class="filter-btn" data-scat="2">Trocar (Moedas)</button>
             <button class="filter-btn" data-scat="4">Habilidades</button>
@@ -569,6 +573,8 @@
             <button class="filter-btn" data-scat="7">Moeda do Clã</button>
             <button class="filter-btn" data-scat="18">Geena</button>
             <button class="filter-btn" data-scat="19">Masmorra Elite</button>
+            <button class="filter-btn" data-scat="10">Evocação Especial</button>
+            <button class="filter-btn" data-scat="11">Invocação Especial II</button>
           </div>
 
           <div class="cards-grid" id="shopsContainer">

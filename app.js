@@ -1361,6 +1361,77 @@
           </table>
         </div>
       `;
+    } else if (state.enchantTab === 'artifacts') {
+      const art = enc.artifact_transformation || {
+        name: "Transformação I (Óleo de Unção de Olga)",
+        unlock_level: 100,
+        unlock_lock_id: "91010",
+        craft_recipe_reqs: "180x Pedra de Aprimoramento de Artefato, 25x Trindade, 30.000 Gold",
+        progression: []
+      };
+
+      container.innerHTML = `
+        <div style="background: rgba(15,20,30,0.7); border: 1px solid rgba(245,158,11,0.3); border-radius: 12px; padding: 22px; margin-bottom: 24px; position: relative; overflow: hidden;">
+          <div style="position: absolute; right: -20px; top: -20px; font-size: 8rem; opacity: 0.05; pointer-events: none;">🏺</div>
+          <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+            <img src="${art.material_icon || 'assets/items/materials_artifactenchantmaterial_04.png'}" style="width: 72px; height: 72px; border-radius: 10px; border: 2px solid var(--gold-primary); background: rgba(0,0,0,0.5); padding: 4px;" onerror="this.src='assets/logo.png'">
+            <div style="flex: 1; min-width: 260px;">
+              <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px; flex-wrap: wrap;">
+                <span class="entity-badge badge-gold" style="font-size: 0.75rem;">🌟 Novo Artefato (Patch 31/10/2026)</span>
+                <span class="entity-badge badge-crimson" style="font-size: 0.75rem;">🔓 Desbloqueio: Nível ${art.unlock_level} (ContentsLock ${art.unlock_lock_id})</span>
+                <span class="entity-badge badge-blue" style="font-size: 0.75rem;">🛡️ 0% Falha / Sem Quebra</span>
+              </div>
+              <h3 style="font-size: 1.4rem; color: #fff; margin: 0 0 8px 0;">${art.name}</h3>
+              <p style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.5; margin: 0 0 12px 0;">
+                ${art.description}
+              </p>
+              <div style="background: rgba(0,0,0,0.4); border-left: 3px solid #38bdf8; padding: 10px 14px; border-radius: 6px; font-size: 0.82rem; color: #94a3b8;">
+                <strong style="color: #38bdf8;">🔨 Receita na Forja (ID ${art.craft_recipe_id}):</strong> Confeccione a <em>${art.material_name}</em> usando <strong style="color: #fff;">${art.craft_recipe_reqs}</strong> na aba de Criação de Materiais (402).
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="font-size: 1.2rem; color: #fff; margin-bottom: 6px;">📊 Ciclo de Mitigação dos 20 Níveis de Aprimoramento</h3>
+        <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 18px;">
+          O aprimoramento avança em ciclos ordenados de 4 níveis por disciplina defensiva. Não há risco de quebra (<code style="color: #34d399;">EnchantFailRate = 0</code>):
+        </p>
+
+        <div style="overflow-x: auto;">
+          <table class="skills-table" style="background: rgba(15,20,30,0.6); border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08);">
+            <thead>
+              <tr style="background: rgba(0,0,0,0.5);">
+                <th style="padding: 12px 14px;">Nível</th>
+                <th style="padding: 12px 14px;">Disciplina</th>
+                <th style="padding: 12px 14px;">Atributo Reduzido</th>
+                <th style="padding: 12px 14px;">Bônus</th>
+                <th style="padding: 12px 14px;">Custo (Pedras)</th>
+                <th style="padding: 12px 14px;">Custo (Gold)</th>
+                <th style="padding: 12px 14px;">Sucesso Nv 1/2/3</th>
+                <th style="padding: 12px 14px;">Falha</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${(art.progression || []).map(p => {
+                const isDisciplineStart = p.level === '+1' || p.level === '+5' || p.level === '+9' || p.level === '+13' || p.level === '+17';
+                const rowBg = isDisciplineStart ? 'background: rgba(245, 158, 11, 0.06);' : '';
+                return `
+                  <tr style="${rowBg}">
+                    <td style="padding: 12px 14px; font-weight: 700; color: #fbbf24; font-family: monospace; font-size: 0.95rem;">${p.level}</td>
+                    <td style="padding: 12px 14px;"><span class="entity-badge ${p.discipline_badge}" style="font-size: 0.72rem;">${p.discipline}</span></td>
+                    <td style="padding: 12px 14px; color: #fff; font-weight: 600;">${p.stat_name} <span style="font-size: 0.75rem; color: #64748b; font-family: monospace; display: block;">${p.stat_key}</span></td>
+                    <td style="padding: 12px 14px; color: #34d399; font-weight: 700; font-size: 1rem; font-family: monospace;">${p.bonus}</td>
+                    <td style="padding: 12px 14px; color: #38bdf8; font-family: monospace; font-weight: 600;">${p.cost_stones}x Pedras</td>
+                    <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">${p.cost_gold}</td>
+                    <td style="padding: 12px 14px; color: #cbd5e1; font-size: 0.8rem; font-family: monospace;">${p.rates}</td>
+                    <td style="padding: 12px 14px; color: #34d399; font-size: 0.8rem; font-weight: 600;">${p.fail}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
     }
   }
 

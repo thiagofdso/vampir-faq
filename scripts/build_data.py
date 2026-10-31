@@ -12,7 +12,7 @@ import re
 from collections import defaultdict
 
 BASE_DIR = "/home/thiagofdso/vampir"
-CSV_DIR = os.path.join(BASE_DIR, "analysis/patch_chunk1/ProjectRED/Content/RED/Data/CSV")
+CSV_DIR = os.path.join(BASE_DIR, "analysis/versions/2026-10-31/patch_extracted/ProjectRED/Content/RED/Data/CSV")
 L10N_DIR = os.path.join(CSV_DIR, "L10N/pt")
 OUT_DIR = os.path.join(BASE_DIR, "faq/data")
 ASSETS_DIR = os.path.join(BASE_DIR, "faq/assets")
@@ -804,6 +804,16 @@ for iid, irow in item_raw.items():
         type_label = "Baú de Tesouro"
         clean_name = re.sub(r'\{[^}]+\}', '', name).strip()
         clean_desc = re.sub(r'\{[^}]+\}', '', desc).strip()
+    elif itype in ["33", "34", "35"] or any(k in raw_img.lower() for k in ["artifactenchantmaterial", "enchantmaterial"]) or any(k in name.lower() for k in ["pedra de aprimoramento", "material de aprimoramento"]):
+        cat = "materials"
+        type_label = "Material de Aprimoramento"
+        clean_name = re.sub(r'\{[^}]+\}', '', name).strip()
+        clean_desc = re.sub(r'\{[^}]+\}', '', desc).strip()
+    elif itype in ["2", "54"] or any(k in raw_img.lower() for k in ["costume", "seal"]) or any(k in name.lower() for k in ["traje", "chapéu", "medalha", "selo"]):
+        cat = "costumes"
+        type_label = "Traje, Cosmético & Selo"
+        clean_name = re.sub(r'\{[^}]+\}', '', name).strip()
+        clean_desc = re.sub(r'\{[^}]+\}', '', desc).strip()
     else:
         continue
 
@@ -817,6 +827,16 @@ for iid, irow in item_raw.items():
     item_img = ""
     if clean_img_file in item_pngs:
         item_img = f"assets/items/{clean_img_file}"
+    elif cat == "materials":
+        for m in ["materials_artifactenchantmaterial_04.png", "materials_artifactenchantmaterial_01.png", "weaponenchantmaterial_01.png"]:
+            if m in item_pngs:
+                item_img = f"assets/items/{m}"
+                break
+    elif cat == "costumes":
+        for c in ["costumeitemicon_alle011armor.png", "costumeitemicon_alle011hair.png", "costumeicon_alle011armor.png"]:
+            if c in item_pngs:
+                item_img = f"assets/items/{c}"
+                break
     elif cat == "4":
         for b in ["itembox_fieldboss_01.png", "itembox_equipment_01.png", "itembox_enchantscroll_01.png", "itembox_burialgoods_01.png"]:
             if b in item_pngs:
@@ -894,6 +914,12 @@ curated_items.extend(items_by_cat["32"][:72])
 
 # 7. Relíquias & Equipamento Fúnebre (60 items)
 curated_items.extend(items_by_cat["relic"][:60])
+
+# 8. Materiais de Aprimoramento e Forja
+curated_items.extend(items_by_cat["materials"])
+
+# 9. Trajes, Cosméticos & Medalhas Comemorativas
+curated_items.extend(items_by_cat["costumes"])
 
 with open(os.path.join(OUT_DIR, "items.json"), "w", encoding="utf-8") as f:
     json.dump(curated_items, f, indent=2, ensure_ascii=False)
@@ -1652,7 +1678,43 @@ enchantment_catalog = {
         {"level": "+7", "dmg_red": "+40", "skill_hit": "+9", "crit_red": "+3", "status": "Progressão Avançada"},
         {"level": "+10", "dmg_red": "+70", "skill_hit": "+27", "crit_red": "+3", "status": "Salto Monumental de Defesa"},
         {"level": "+15", "dmg_red": "+120", "skill_hit": "+57", "crit_red": "+3", "status": "Nível Máximo Absoluto"}
-    ]
+    ],
+    "artifact_transformation": {
+        "id": "1101",
+        "name": "Transformação I (Óleo de Unção de Olga)",
+        "category": "Artefato Místico de Mitigação",
+        "unlock_level": 100,
+        "unlock_lock_id": "91010",
+        "max_level": 20,
+        "material_item_id": "110000776",
+        "material_name": "Pedra de Aprimoramento de Artefato de Transformação",
+        "material_icon": "assets/items/materials_artifactenchantmaterial_04.png",
+        "craft_recipe_id": "4020010",
+        "craft_recipe_reqs": "180x Pedra de Aprimoramento de Artefato, 25x Trindade, 30.000 Gold",
+        "description": "Artefato supremo desbloqueado no Nível 100. Possui 20 estágios de avanço cíclico com 100% de probabilidade de retenção (0% de falha ou destruição), mitigando progressivamente as 5 disciplinas de dano do jogo: Corpo a Corpo, Habilidade, À Distância, Ataque Básico e Magia.",
+        "progression": [
+            {"level": "+1", "stat_name": "Redução de Poder de Ataque Corpo a Corpo", "stat_key": "AttackPowerReductionMelee", "bonus": "+4", "discipline": "Corpo a Corpo", "discipline_badge": "badge-crimson", "cost_stones": 5, "cost_gold": "400.000", "rates": "55% / 24% / 21%", "fail": "0%"},
+            {"level": "+2", "stat_name": "Redução de Dano Corpo a Corpo", "stat_key": "DamageReductionMelee", "bonus": "+2", "discipline": "Corpo a Corpo", "discipline_badge": "badge-crimson", "cost_stones": 5, "cost_gold": "400.000", "rates": "55% / 24% / 21%", "fail": "0%"},
+            {"level": "+3", "stat_name": "Redução de Dano Geral", "stat_key": "DamageReduction", "bonus": "+2", "discipline": "Mitigação Geral", "discipline_badge": "badge-gold", "cost_stones": 5, "cost_gold": "400.000", "rates": "55% / 24% / 21%", "fail": "0%"},
+            {"level": "+4", "stat_name": "Redução de Poder de Ataque", "stat_key": "AttackPowerReduction", "bonus": "+3", "discipline": "Mitigação Geral", "discipline_badge": "badge-gold", "cost_stones": 5, "cost_gold": "400.000", "rates": "55% / 24% / 21%", "fail": "0%"},
+            {"level": "+5", "stat_name": "Redução de Poder de Ataque de Habilidade", "stat_key": "AttackPowerReductionSkill", "bonus": "+4", "discipline": "Habilidade", "discipline_badge": "badge-purple", "cost_stones": 6, "cost_gold": "450.000", "rates": "55% / 24% / 21%", "fail": "0%"},
+            {"level": "+6", "stat_name": "Redução de Dano de Habilidade", "stat_key": "DamageReductionSkill", "bonus": "+2", "discipline": "Habilidade", "discipline_badge": "badge-purple", "cost_stones": 6, "cost_gold": "450.000", "rates": "55% / 24% / 21%", "fail": "0%"},
+            {"level": "+7", "stat_name": "Redução de Dano Geral", "stat_key": "DamageReduction", "bonus": "+2", "discipline": "Mitigação Geral", "discipline_badge": "badge-gold", "cost_stones": 6, "cost_gold": "450.000", "rates": "55% / 24% / 21%", "fail": "0%"},
+            {"level": "+8", "stat_name": "Redução de Poder de Ataque", "stat_key": "AttackPowerReduction", "bonus": "+3", "discipline": "Mitigação Geral", "discipline_badge": "badge-gold", "cost_stones": 6, "cost_gold": "450.000", "rates": "55% / 24% / 21%", "fail": "0%"},
+            {"level": "+9", "stat_name": "Redução de Poder de Ataque à Distância", "stat_key": "AttackPowerReductionRange", "bonus": "+4", "discipline": "À Distância", "discipline_badge": "badge-blue", "cost_stones": 7, "cost_gold": "500.000", "rates": "55% / 24% / 21%", "fail": "0%"},
+            {"level": "+10", "stat_name": "Redução de Dano à Distância", "stat_key": "DamageReductionRange", "bonus": "+2", "discipline": "À Distância", "discipline_badge": "badge-blue", "cost_stones": 7, "cost_gold": "500.000", "rates": "55% / 24% / 21%", "fail": "0%"},
+            {"level": "+11", "stat_name": "Redução de Dano Geral", "stat_key": "DamageReduction", "bonus": "+2", "discipline": "Mitigação Geral", "discipline_badge": "badge-gold", "cost_stones": 7, "cost_gold": "500.000", "rates": "55% / 24% / 21%", "fail": "0%"},
+            {"level": "+12", "stat_name": "Redução de Poder de Ataque", "stat_key": "AttackPowerReduction", "bonus": "+3", "discipline": "Mitigação Geral", "discipline_badge": "badge-gold", "cost_stones": 7, "cost_gold": "500.000", "rates": "55% / 24% / 21%", "fail": "0%"},
+            {"level": "+13", "stat_name": "Redução de Poder de Ataque Normal", "stat_key": "AttackPowerReductionNormalAttack", "bonus": "+4", "discipline": "Ataque Básico", "discipline_badge": "badge-gray", "cost_stones": 7, "cost_gold": "500.000", "rates": "55% / 24% / 21%", "fail": "0%"},
+            {"level": "+14", "stat_name": "Redução de Dano de Ataque Normal", "stat_key": "DamageReductionNormalAttack", "bonus": "+2", "discipline": "Ataque Básico", "discipline_badge": "badge-gray", "cost_stones": 7, "cost_gold": "500.000", "rates": "55% / 24% / 21%", "fail": "0%"},
+            {"level": "+15", "stat_name": "Redução de Dano Geral", "stat_key": "DamageReduction", "bonus": "+2", "discipline": "Mitigação Geral", "discipline_badge": "badge-gold", "cost_stones": 10, "cost_gold": "550.000", "rates": "55% / 24% / 21%", "fail": "0%"},
+            {"level": "+16", "stat_name": "Redução de Poder de Ataque", "stat_key": "AttackPowerReduction", "bonus": "+3", "discipline": "Mitigação Geral", "discipline_badge": "badge-gold", "cost_stones": 10, "cost_gold": "550.000", "rates": "55% / 24% / 21%", "fail": "0%"},
+            {"level": "+17", "stat_name": "Redução de Poder de Ataque Mágico", "stat_key": "AttackPowerReductionMagic", "bonus": "+4", "discipline": "Magia", "discipline_badge": "badge-blue", "cost_stones": 10, "cost_gold": "550.000", "rates": "55% / 24% / 21%", "fail": "0%"},
+            {"level": "+18", "stat_name": "Redução de Dano Mágico", "stat_key": "DamageReductionMagic", "bonus": "+2", "discipline": "Magia", "discipline_badge": "badge-blue", "cost_stones": 10, "cost_gold": "550.000", "rates": "55% / 24% / 21%", "fail": "0%"},
+            {"level": "+19", "stat_name": "Redução de Dano Geral", "stat_key": "DamageReduction", "bonus": "+2", "discipline": "Mitigação Geral", "discipline_badge": "badge-gold", "cost_stones": 10, "cost_gold": "550.000", "rates": "55% / 24% / 21%", "fail": "0%"},
+            {"level": "+20", "stat_name": "Redução de Poder de Ataque", "stat_key": "AttackPowerReduction", "bonus": "+3", "discipline": "Mitigação Geral", "discipline_badge": "badge-gold", "cost_stones": 13, "cost_gold": "600.000", "rates": "55% / 24% / 21%", "fail": "0%"}
+        ]
+    }
 }
 
 with open(os.path.join(OUT_DIR, "enchantment.json"), "w", encoding="utf-8") as f:
@@ -1754,6 +1816,8 @@ categories_list = [
     {"id": "19", "name": "Masmorra de Elite", "count": cat_counts.get("19", 0)},
     {"id": "90", "name": "Evento Alto-Baixo", "count": cat_counts.get("90", 0)},
     {"id": "91", "name": "Roleta do Crocodilo", "count": cat_counts.get("91", 0)},
+    {"id": "10", "name": "Evocação Especial", "count": cat_counts.get("10", 0)},
+    {"id": "11", "name": "Invocação Especial II", "count": cat_counts.get("11", 0)},
     {"id": "5", "name": "Loja de Equipamentos", "count": cat_counts.get("5", 0)},
     {"id": "3", "name": "Loja Geral", "count": cat_counts.get("3", 0)}
 ]

@@ -375,7 +375,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "7500",
+        "amount": "3000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -433,7 +433,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "30000",
+        "amount": "7500",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -491,7 +491,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "150000",
+        "amount": "30000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -1023,7 +1023,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "7500",
+        "amount": "3000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -1081,7 +1081,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "30000",
+        "amount": "7500",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -1139,7 +1139,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "150000",
+        "amount": "30000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -1671,7 +1671,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "7500",
+        "amount": "3000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -1729,7 +1729,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "30000",
+        "amount": "7500",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -1787,7 +1787,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "150000",
+        "amount": "30000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -2319,7 +2319,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "7500",
+        "amount": "3000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -2377,7 +2377,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "30000",
+        "amount": "7500",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -2435,7 +2435,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "150000",
+        "amount": "30000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -2967,7 +2967,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "7500",
+        "amount": "3000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -3025,7 +3025,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "30000",
+        "amount": "7500",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -3083,7 +3083,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "150000",
+        "amount": "30000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -3615,7 +3615,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "4500",
+        "amount": "1200",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -3673,7 +3673,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "18000",
+        "amount": "3000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -3731,7 +3731,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "90000",
+        "amount": "12000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -4161,7 +4161,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "4500",
+        "amount": "1200",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -4219,7 +4219,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "18000",
+        "amount": "3000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -4277,7 +4277,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "90000",
+        "amount": "12000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -4707,7 +4707,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "4500",
+        "amount": "1200",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -4765,7 +4765,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "18000",
+        "amount": "3000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -4823,7 +4823,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "90000",
+        "amount": "12000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -5253,7 +5253,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "4500",
+        "amount": "1200",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -5311,7 +5311,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "18000",
+        "amount": "3000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -5369,7 +5369,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "90000",
+        "amount": "12000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -5817,7 +5817,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "10000",
+        "amount": "6000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -5875,7 +5875,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "40000",
+        "amount": "15000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -5933,7 +5933,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "200000",
+        "amount": "60000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -6341,7 +6341,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "10000",
+        "amount": "6000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -6399,7 +6399,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "40000",
+        "amount": "15000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -6457,7 +6457,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "200000",
+        "amount": "60000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -6865,7 +6865,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "10000",
+        "amount": "6000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -6923,7 +6923,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "40000",
+        "amount": "15000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -6981,7 +6981,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "200000",
+        "amount": "60000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -7389,7 +7389,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "10000",
+        "amount": "6000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -7447,7 +7447,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "40000",
+        "amount": "15000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -7505,7 +7505,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "200000",
+        "amount": "60000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -7913,7 +7913,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "10000",
+        "amount": "6000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -7971,7 +7971,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "40000",
+        "amount": "15000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -8029,7 +8029,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "200000",
+        "amount": "60000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -8289,7 +8289,7 @@
       },
       {
         "name": "Trindade",
-        "amount": "20000",
+        "amount": "12000",
         "type": "Item",
         "icon": "assets/items/materials_craftmaterial_01.png"
       },
@@ -20412,5 +20412,39 @@
     ],
     "tradeable_on_big": true,
     "icon_img": "assets/items/materials_craftmaterial_80.png"
+  },
+  {
+    "id": "4020010",
+    "target_name": "Pedra de Aprimoramento de Artefato de Transformação",
+    "target_item_id": "110000776",
+    "rarity": "2",
+    "tab_id": "402",
+    "tab_name": "Material de Aprimoramento",
+    "category": "materials",
+    "category_label": "Materiais & Forja",
+    "success_rate": "100%",
+    "big_success_rate": "0%",
+    "materials": [
+      {
+        "name": "Pedra de Aprimoramento de Artefato",
+        "amount": "180",
+        "type": "Item",
+        "icon": "assets/items/materials_artifactenchantmaterial_01.png"
+      },
+      {
+        "name": "Trindade",
+        "amount": "25",
+        "type": "Item",
+        "icon": "assets/items/materials_craftmaterial_01.png"
+      },
+      {
+        "name": "Ouro (Gold)",
+        "amount": "30000",
+        "type": "Asset",
+        "icon": "assets/items/asset_gold.png"
+      }
+    ],
+    "tradeable_on_big": false,
+    "icon_img": "assets/items/materials_artifactenchantmaterial_04.png"
   }
 ]
