@@ -1109,6 +1109,13 @@ for mid in RESEARCH_MATERIAL_IDS:
         curated_items.append(all_processed_items[mid])
         curated_ids.add(mid)
 
+# 12. Kits de Restauração de Retratos
+PORTRAIT_MATERIAL_IDS = {'140015010', '140018010', '140010010', '140004010', '140003010', '140011010', '140017010', '140010011', '140002010', '140019010', '140014010', '140007010', '140009010', '140010012', '140006010', '140016010', '140008010', '140013010', '140005010', '140012010'}
+for pid in PORTRAIT_MATERIAL_IDS:
+    if pid in all_processed_items and pid not in curated_ids:
+        curated_items.append(all_processed_items[pid])
+        curated_ids.add(pid)
+
 with open(os.path.join(OUT_DIR, "items.json"), "w", encoding="utf-8") as f:
     json.dump(curated_items, f, indent=2, ensure_ascii=False)
 
@@ -2455,6 +2462,108 @@ with open(os.path.join(OUT_DIR, "research.json"), "w", encoding="utf-8") as f:
     json.dump(research_catalog, f, ensure_ascii=False)
 print(f"  ✓ Processed Magic Research ({len(magic_flasks_data)} flasks across 6 lines, 890 infusion steps).")
 
+
+# ==========================================
+# 16. PORTRAITS CATALOG (PORTRAIT & FRAGMENTS SYSTEM)
+# ==========================================
+print("Processing Portraits & Fragments catalog...")
+PORTRAITS_REPORTS_DIR = os.path.join(BASE_DIR, "analysis/versions/2026-10-31/reports/retratos")
+
+RARITY_PT_MAP = {
+    "Common": "Comum",
+    "Uncommon": "Incomum",
+    "Rare": "Raro",
+    "Epic": "Heroico",
+    "Legendary": "Lendário",
+    "Mythic": "Mítico"
+}
+TYPE_PT_MAP = {
+    "0": "Personagens & Linhagens",
+    "1": "Especiais & Eventos",
+    "2": "Retrato Inicial Padrão"
+}
+
+portraits_list = []
+portraits_csv_path = os.path.join(PORTRAITS_REPORTS_DIR, "retratos.csv")
+if os.path.exists(portraits_csv_path):
+    with open(portraits_csv_path, "r", encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            frags = json.loads(r["fragmentos_json"])
+            rets = json.loads(r["retencao_json"])
+
+            effects_summary = defaultdict(int)
+            compact_ret = []
+            for ret in rets:
+                effs = json.loads(ret.get("efeitos_json", "[]"))
+                rews = json.loads(ret.get("recompensas_json", "[]"))
+                eff_list = []
+                for e in effs:
+                    raw_t = e.get("tipo_nome") or e.get("Type")
+                    tname = STAT_NAME_MAP.get(raw_t, raw_t)
+                    min_v = int(e.get("Min", "0") or 0)
+                    effects_summary[tname] += min_v
+                    eff_list.append({"name": tname, "val": f"+{e.get('Min', '0')}"})
+
+                rew_list = []
+                for rw in rews:
+                    p = rw.get("Param") or rw.get("item_nome") or "Recompensa"
+                    min_c = rw.get("MinCount", "0")
+                    rew_list.append({"name": p, "count": f"{int(min_c):,}" if str(min_c).isdigit() else str(min_c)})
+
+                compact_ret.append({
+                    "milestone": int(ret.get("Count", 0)),
+                    "effects": eff_list,
+                    "rewards": rew_list
+                })
+
+            compact_frags = []
+            for fr in frags:
+                m_id = fr.get("MaterialItemInfoId", "")
+                m_item = all_processed_items.get(m_id)
+                m_icon = m_item["icon_img"] if m_item else "assets/items/flat_relic.png"
+                compact_frags.append({
+                    "num": int(fr.get("Num", 0)),
+                    "mat_id": m_id,
+                    "mat_name": fr.get("material_nome", ""),
+                    "qty": int(fr.get("MaterialItemNeedCount", 0) or 0),
+                    "individual": fr.get("IsIndividualCount", "0") == "1",
+                    "icon": m_icon
+                })
+
+            rate_raw = r["AcquireSuccessRate"] or "10000"
+            rate_disp = f"{int(rate_raw)/100:.1f}%" if str(rate_raw).isdigit() else "100.0%"
+
+            portraits_list.append({
+                "id": r["Id"],
+                "group_id": r["GroupId"],
+                "name": r["nome_pt"],
+                "rarity_code": r["Rarity"],
+                "rarity": RARITY_PT_MAP.get(r["raridade_nome"], r["raridade_nome"]),
+                "type_code": r["PortraitBigType"],
+                "type": TYPE_PT_MAP.get(r["PortraitBigType"], "Geral"),
+                "is_default": r["IsDefault"] == "1",
+                "rate": rate_raw,
+                "rate_display": rate_disp,
+                "frags_count": len(compact_frags),
+                "fragments": compact_frags,
+                "retention": compact_ret,
+                "summary_effects": [{"name": k, "total": f"+{v}"} for k, v in effects_summary.items()]
+            })
+
+portraits_catalog = {
+    "stats": {
+        "total_portraits": len(portraits_list),
+        "total_fragments": 665,
+        "portraits_with_fragments": sum(1 for p in portraits_list if p["frags_count"] > 0),
+        "total_retention_rules": 665
+    },
+    "portraits": portraits_list
+}
+
+with open(os.path.join(OUT_DIR, "portraits.json"), "w", encoding="utf-8") as f:
+    json.dump(portraits_catalog, f, ensure_ascii=False)
+print(f"  ✓ Processed Portraits catalog ({len(portraits_list)} portraits, 665 fragments).")
+
 # ==========================================
 # 8. BUNDLE GENERATION
 # ==========================================
@@ -2476,6 +2585,7 @@ bundle_data = {
     "shops": shops_catalog,
     "codex": codex_catalog,
     "research": research_catalog,
+    "portraits": portraits_catalog,
     "constants": constants_dict,
     "faq": faq_catalog
 }

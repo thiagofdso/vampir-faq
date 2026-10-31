@@ -50,6 +50,11 @@
     researchSearchTerm: '',
     researchPage: 1,
     researchPerPage: 18,
+    portraitsFilter: 'all',
+    portraitsType: 'all',
+    portraitsSearchTerm: '',
+    portraitsPage: 1,
+    portraitsPerPage: 18,
     modesFilter: 'all',
     pvpTab: 'arena',
     enchantTab: 'scrolls',
@@ -85,7 +90,7 @@
     }
 
     try {
-      const [classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, faq, constants] = await Promise.all([
+      const [classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, faq, constants] = await Promise.all([
         fetch('data/classes.json').then(r => r.json()),
         fetch('data/builds.json').then(r => r.json()),
         fetch('data/skills.json').then(r => r.json()),
@@ -100,11 +105,12 @@
         fetch('data/shops.json').then(r => r.json()),
         fetch('data/codex.json').then(r => r.json()),
         fetch('data/research.json').then(r => r.json()),
+        fetch('data/portraits.json').then(r => r.json()),
         fetch('data/faq.json').then(r => r.json()),
         fetch('data/constants.json').then(r => r.json())
       ]);
 
-      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, faq, constants };
+      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, faq, constants };
       initApp();
     } catch (e) {
       console.error('Failed to load JSON data asynchronously:', e);
@@ -139,6 +145,7 @@
     if (tabId === 'shops') renderShops();
     if (tabId === 'codex') renderCodex();
     if (tabId === 'research') renderResearch();
+    if (tabId === 'portraits') renderPortraits();
   }
 
   window.navTo = function(tabId) {
@@ -2120,6 +2127,244 @@
     detailModal.classList.add('open');
   };
 
+  // ==========================================
+  // PORTRAITS & FRAGMENTS SYSTEM
+  // ==========================================
+  function renderPortraits() {
+    const container = document.getElementById('portraitsContainer');
+    const pagination = document.getElementById('portraitsPagination');
+    if (!container || !state.data.portraits || !state.data.portraits.portraits) return;
+
+    let portraits = state.data.portraits.portraits;
+
+    // Filter by Rarity
+    if (state.portraitsFilter === 'defaults') {
+      portraits = portraits.filter(p => p.is_default);
+    } else if (state.portraitsFilter !== 'all') {
+      portraits = portraits.filter(p => p.rarity === state.portraitsFilter);
+    }
+
+    // Filter by Type
+    if (state.portraitsType !== 'all') {
+      portraits = portraits.filter(p => p.type_code === state.portraitsType);
+    }
+
+    // Search query
+    if (state.portraitsSearchTerm.trim()) {
+      const q = state.portraitsSearchTerm.toLowerCase();
+      portraits = portraits.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        p.id.includes(q) ||
+        p.type.toLowerCase().includes(q) ||
+        p.rarity.toLowerCase().includes(q) ||
+        (p.fragments && p.fragments.some(f => f.mat_name.toLowerCase().includes(q))) ||
+        (p.summary_effects && p.summary_effects.some(e => e.name.toLowerCase().includes(q)))
+      );
+    }
+
+    const total = portraits.length;
+    const pages = Math.ceil(total / state.portraitsPerPage) || 1;
+    if (state.portraitsPage > pages) state.portraitsPage = 1;
+
+    const start = (state.portraitsPage - 1) * state.portraitsPerPage;
+    const currentList = portraits.slice(start, start + state.portraitsPerPage);
+
+    const RARITY_BADGE_MAP = {
+      'Comum': 'badge-gray',
+      'Incomum': 'badge-blue',
+      'Raro': 'badge-blue',
+      'Heroico': 'badge-purple',
+      'Lendário': 'badge-gold',
+      'Mítico': 'badge-crimson'
+    };
+
+    container.innerHTML = currentList.map(p => {
+      const rarityBadgeColor = RARITY_BADGE_MAP[p.rarity] || 'badge-blue';
+
+      let statsHtml = '';
+      if (p.summary_effects && p.summary_effects.length > 0) {
+        statsHtml = `
+          <div style="margin-top: 10px;">
+            <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--gold-primary); font-weight: 700; margin-bottom: 6px;">
+              ✨ Atributos Totais de Restauração:
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              ${p.summary_effects.map(eff => `
+                <span class="entity-badge badge-gold" style="font-size: 0.72rem; padding: 2px 6px;">
+                  ${eff.name}: <strong>${eff.total}</strong>
+                </span>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      } else if (p.is_default) {
+        statsHtml = `
+          <div style="margin-top: 10px; font-size: 0.8rem; color: #94a3b8; font-style: italic;">
+            Retrato padrão inicial concedido automaticamente ao criar o personagem.
+          </div>
+        `;
+      }
+
+      return `
+        <div class="entity-card" style="display: flex; flex-direction: column; justify-content: space-between; border-left: 3px solid var(--border-gold); cursor: pointer;" onclick="window.inspectPortrait('${p.id}')">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+              <div>
+                <div class="entity-title" style="font-size: 1.05rem; color: #fff; margin-bottom: 2px;">${p.name}</div>
+                <div style="font-size: 0.72rem; color: #94a3b8;">
+                  <span class="entity-badge ${rarityBadgeColor}" style="font-size: 0.65rem;">${p.rarity}</span>
+                  <span class="entity-badge badge-gray" style="font-size: 0.65rem; margin-left: 4px;">${p.type}</span>
+                  <span style="margin-left: 6px;">ID #${p.id}</span>
+                </div>
+              </div>
+              <span class="entity-badge badge-blue" style="font-size: 0.68rem; flex-shrink: 0;">
+                🎯 ${p.rate_display}
+              </span>
+            </div>
+
+            <!-- Restoration Status Preview -->
+            <div style="background: rgba(0,0,0,0.35); border-radius: 6px; padding: 10px; margin: 12px 0 8px; border: 1px solid rgba(255,255,255,0.06);">
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem;">
+                <span style="color: #cbd5e1;">
+                  🧩 <strong>${p.frags_count > 0 ? p.frags_count + ' Fragmentos' : 'Retrato Base'}</strong>
+                </span>
+                <span style="color: #38bdf8; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px;">
+                  ${p.fragments[0]?.mat_name || 'Desbloqueio Livre'}
+                </span>
+              </div>
+            </div>
+
+            ${statsHtml}
+          </div>
+
+          <!-- Card Footer -->
+          <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
+            <div style="color: #94a3b8;">
+              ${p.frags_count > 0 ? `${p.fragments[0]?.qty || '20'}x Kit por etapa` : 'Sem custo de kit'}
+            </div>
+            <button class="filter-btn" style="padding: 3px 8px; font-size: 0.7rem;">Inspecionar 🧩</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    renderPagination(pagination, state.portraitsPage, pages, 'window.changePortraitsPage');
+  }
+
+  window.changePortraitsPage = function(page) {
+    state.portraitsPage = page;
+    renderPortraits();
+    document.getElementById('portraits').scrollIntoView({ behavior: 'smooth' });
+  };
+
+  window.inspectPortrait = function(id) {
+    if (!state.data.portraits || !state.data.portraits.portraits) return;
+    const p = state.data.portraits.portraits.find(x => x.id === id);
+    if (!p) return;
+
+    modalTitle.innerText = p.name;
+    modalSubtitle.innerText = `${p.rarity} • ${p.type} (Retrato ID #${p.id})`;
+
+    let summaryStatsHtml = '';
+    if (p.summary_effects && p.summary_effects.length > 0) {
+      summaryStatsHtml = `
+        <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid var(--gold-primary);">
+          <div class="panel-title">✨ Atributos Totais Concedidos ao Completar</div>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin: 4px 0 10px; line-height: 1.4;">
+            Soma acumulada de todos os bônus permanentes adquiridos ao restaurar os ${p.frags_count} fragmentos:
+          </p>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            ${p.summary_effects.map(eff => `
+              <span class="entity-badge badge-gold" style="font-size: 0.82rem; padding: 4px 10px;">
+                ${eff.name}: <strong style="color: #fff; margin-left: 4px;">${eff.total}</strong>
+              </span>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    let fragsListHtml = '';
+    if (p.fragments && p.fragments.length > 0) {
+      fragsListHtml = `
+        <div class="panel-box" style="border-left: 3px solid #38bdf8;">
+          <div class="panel-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <span>🧩 Roteiro de Restauração dos ${p.fragments.length} Fragmentos</span>
+            <span style="font-size: 0.75rem; color: #94a3b8; font-weight: normal;">Fonte: PortraitPiece.csv / PortraitRetention.csv</span>
+          </div>
+          <div style="max-height: 360px; overflow-y: auto; padding-right: 4px;">
+            ${p.fragments.map((fr, idx) => {
+              const ret = p.retention && p.retention[idx];
+              let retEffectHtml = '';
+              if (ret) {
+                if (ret.effects && ret.effects.length > 0) {
+                  retEffectHtml = ret.effects.map(e => `
+                    <span class="entity-badge badge-gold" style="font-size: 0.72rem;">
+                      ${e.name}: <strong>${e.val}</strong>
+                    </span>
+                  `).join(' ');
+                } else if (ret.rewards && ret.rewards.length > 0) {
+                  retEffectHtml = ret.rewards.map(rw => `
+                    <span class="entity-badge badge-blue" style="font-size: 0.72rem;">
+                      🎁 ${rw.count}x ${rw.name}
+                    </span>
+                  `).join(' ');
+                }
+              }
+
+              return `
+                <div style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 10px 14px; margin-bottom: 8px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <div style="font-weight: 700; color: #fff; font-size: 0.88rem;">
+                      Fragmento ${fr.num} de ${p.fragments.length}
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                      <img src="${fr.icon}" style="width: 22px; height: 22px; border-radius: 4px; object-fit: contain;" onerror="this.src='assets/items/flat_relic.png'">
+                      <span style="color: #38bdf8; font-size: 0.8rem; font-weight: 600;">
+                        ${fr.qty}x ${fr.mat_name}
+                      </span>
+                    </div>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                    <span style="font-size: 0.75rem; color: #94a3b8;">Marco ${fr.num}:</span>
+                    <div>${retEffectHtml || '<span style="font-size: 0.75rem; color: #64748b;">Nenhum efeito registrado</span>'}</div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    } else {
+      fragsListHtml = `
+        <div class="panel-box" style="border-left: 3px solid #64748b;">
+          <div class="panel-title">👤 Retrato Inicial Padrão</div>
+          <p style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; margin-top: 4px;">
+            Este retrato é concedido por padrão no início do jogo para sua classe correspondente, sem necessidade de restauração de fragmentos.
+          </p>
+        </div>
+      `;
+    }
+
+    modalBody.innerHTML = `
+      <!-- Portrait Overview & Equipment Rules -->
+      <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid #10b981;">
+        <div class="panel-title" style="display: flex; justify-content: space-between;">
+          <span>👑 Obtenção & Equipamento de Perfil</span>
+          <span style="color: #10b981; font-weight: 700;">Taxa de Obtenção: ${p.rate_display}</span>
+        </div>
+        <p style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; margin: 6px 0 0;">
+          Após restaurar todos os fragmentos, o retrato pode ser obtido e equipado no menu de personagem. Ele substitui seu ícone exibido na barra de status superior, no chat público de clã/mundo e nas telas de classificação de temporada.
+        </p>
+      </div>
+
+      ${summaryStatsHtml}
+      ${fragsListHtml}
+    `;
+
+    detailModal.classList.add('open');
+  };
+
   // Render FAQ
   function renderFaq() {
     const container = document.getElementById('faqContainer');
@@ -2690,6 +2935,10 @@
         state.researchSearchTerm = q;
         state.researchPage = 1;
         renderResearch();
+      } else if (state.currentTab === 'portraits') {
+        state.portraitsSearchTerm = q;
+        state.portraitsPage = 1;
+        renderPortraits();
       }
     });
 
@@ -2848,6 +3097,22 @@
         renderResearch();
       }
     });
+
+    document.getElementById('portraitsFilterBar')?.addEventListener('click', e => {
+      if (e.target.tagName === 'BUTTON') {
+        document.querySelectorAll('#portraitsFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        state.portraitsFilter = e.target.dataset.prarity;
+        state.portraitsPage = 1;
+        renderPortraits();
+      }
+    });
+
+    document.getElementById('portraitsTypeSelect')?.addEventListener('change', e => {
+      state.portraitsType = e.target.value;
+      state.portraitsPage = 1;
+      renderPortraits();
+    });
   }
 
   function initApp() {
@@ -2865,6 +3130,7 @@
     renderShops();
     renderCodex();
     renderResearch();
+    renderPortraits();
     renderFaq();
     setupListeners();
   }

@@ -100,6 +100,11 @@
           <span>Pesquisa Mágica</span>
           <span class="nav-count" id="countResearch">90</span>
         </a>
+        <a class="nav-item" data-target="portraits">
+          <span class="nav-icon"><img src="assets/items/portraitgrowthmaterial_01.png" style="width: 18px; height: 18px; vertical-align: middle;" onerror="this.outerHTML='🖼️'"></span>
+          <span>Retratos</span>
+          <span class="nav-count" id="countPortraits">79</span>
+        </a>
         <a class="nav-item" data-target="faq">
           <span class="nav-icon">❓</span>
           <span>FAQ & Sistemas</span>
@@ -736,7 +741,68 @@
         </section>
 
         <!-- ==============================================
-             16. FAQ SECTION
+             16. PORTRAITS (RETRATOS & FRAGMENTOS) SECTION
+             ============================================== -->
+        <section id="portraits" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <img src="assets/items/portraitgrowthmaterial_01.png" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 8px;" onerror="this.outerHTML='🖼️'">
+              Retratos & Restauração de Fragmentos
+            </h2>
+            <p class="section-subtitle">Catálogo de 79 retratos ancestrais, 665 fragmentos restauráveis, kits de materiais e atributos permanentes</p>
+          </div>
+
+          <!-- Overview & Mechanics Panel -->
+          <div class="panel-box" style="margin-bottom: 24px; border-left: 3px solid var(--gold-primary);">
+            <div class="panel-title" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>🧩 Como Funciona a Restauração de Retratos (Tutoriais #40901, #40902 & #40903)</span>
+              <span style="font-size: 0.72rem; color: #94a3b8; font-weight: normal;">Fonte: Portrait.csv / PortraitPiece.csv / PortraitRetention.csv</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 10px; font-size: 0.85rem; color: #cbd5e1; line-height: 1.5;">
+              <div style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 10px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="color: #38bdf8; font-weight: 700; margin-bottom: 4px;">1. Restaurar Fragmentos (Kits)</div>
+                Cada retrato é dividido em 3 a 10 fragmentos. O jogador registra os <strong>Kits de Restauração</strong> de cada classe ou evento para ativar os fragmentos sequencialmente.
+              </div>
+              <div style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 10px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="color: var(--gold-primary); font-weight: 700; margin-bottom: 4px;">2. Marcos de Bônus Imediatos</div>
+                A cada fragmento ativado, o jogador atinge um marco de restauração (<code>PortraitRetention</code>), recebendo <strong>atributos permanentes imediatos</strong> (HP, Ataque, Precisão, Esquiva) ou ouro.
+              </div>
+              <div style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 10px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="color: #10b981; font-weight: 700; margin-bottom: 4px;">3. Obter e Equipar Retrato</div>
+                Ao concluir 100% dos fragmentos, o retrato é obtido (taxa cadastrada de 100%) e pode ser equipado livremente para exibição pública na barra de status, chat e rankings de temporada.
+              </div>
+            </div>
+          </div>
+
+          <!-- Filters Bar -->
+          <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 14px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 0.85rem; color: #94a3b8; font-weight: 600;">🏷️ Categoria:</span>
+              <select id="portraitsTypeSelect" class="filter-select" style="background: rgba(15,20,30,0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 6px 14px; border-radius: 6px; font-size: 0.85rem; cursor: pointer;">
+                <option value="all">Todas as Categorias</option>
+                <option value="0">Personagens & Linhagens</option>
+                <option value="1">Especiais & Eventos</option>
+                <option value="2">Retratos Iniciais Padrão</option>
+              </select>
+            </div>
+          </div>
+          <div class="filter-bar" id="portraitsFilterBar" style="margin-bottom: 20px;">
+            <button class="filter-btn active" data-prarity="all">Todos os Retratos (82)</button>
+            <button class="filter-btn" data-prarity="Comum">⚪ Comum (26)</button>
+            <button class="filter-btn" data-prarity="Incomum">🟢 Incomum (13)</button>
+            <button class="filter-btn" data-prarity="Raro">🔵 Raro (13)</button>
+            <button class="filter-btn" data-prarity="Heroico">🟣 Heroico (13)</button>
+            <button class="filter-btn" data-prarity="Lendário">🟡 Lendário (13)</button>
+            <button class="filter-btn" data-prarity="Mítico">🔴 Mítico (4)</button>
+          </div>
+
+          <!-- Portraits Grid -->
+          <div class="entity-grid" id="portraitsContainer"></div>
+          <div id="portraitsPagination" style="margin-top: 30px; text-align: center;"></div>
+        </section>
+
+        <!-- ==============================================
+             17. FAQ SECTION
              ============================================== -->
         <section id="faq" class="view-section">
           <div class="section-header">
