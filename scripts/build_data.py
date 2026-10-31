@@ -1116,6 +1116,13 @@ for pid in PORTRAIT_MATERIAL_IDS:
         curated_items.append(all_processed_items[pid])
         curated_ids.add(pid)
 
+# 13. Materiais de Aprimoramento de Artefatos
+ARTIFACT_MATERIAL_IDS = {'60000000', '110000613', '110000776', '60000001', '60000014', '60000015'}
+for aid in ARTIFACT_MATERIAL_IDS:
+    if aid in all_processed_items and aid not in curated_ids:
+        curated_items.append(all_processed_items[aid])
+        curated_ids.add(aid)
+
 with open(os.path.join(OUT_DIR, "items.json"), "w", encoding="utf-8") as f:
     json.dump(curated_items, f, indent=2, ensure_ascii=False)
 
@@ -2165,6 +2172,7 @@ STAT_NAME_MAP = {
     "DodgeValueSkill": "Esquiva de Habilidade",
     "ExpAmountMultiplier": "Bônus de EXP (%)",
     "GoldAmountMultiplier": "Bônus de Ouro (%)",
+    "HitRateCrowdControl": "Taxa de Acerto de CC (%)",
     "HitValue": "Precisão",
     "HitValueBoss": "Precisão contra Chefes",
     "HitValueMonster": "Precisão contra Monstros",
@@ -2565,6 +2573,177 @@ with open(os.path.join(OUT_DIR, "portraits.json"), "w", encoding="utf-8") as f:
 print(f"  ✓ Processed Portraits catalog ({len(portraits_list)} portraits, 665 fragments).")
 
 # ==========================================
+# 17. ARTIFACTS CATALOG (5 ORIGINAIS + TRANSFORMAÇÃO I)
+# ==========================================
+print("Processing Artifacts & Enhancement catalog...")
+ARTIFACTS_REPORTS_DIR = os.path.join(BASE_DIR, "analysis/versions/2026-10-31/reports/artefatos")
+
+PCT_STAT_KEYS = {
+    'DamageMultiplier', 'CriticalDamageMultiplier', 'IgnoreCriticalDamageMultiplier',
+    'DamageReducer', 'HitRateCrowdControl', 'DamageMultiplierNormalAttack',
+    'DamageMultiplierSkill', 'DamageMultiplierBoss', 'DamageMultiplierPvp'
+}
+
+artifacts_list = []
+artifacts_csv_path = os.path.join(ARTIFACTS_REPORTS_DIR, "artefatos.csv")
+enchant_csv_path = os.path.join(ARTIFACTS_REPORTS_DIR, "aprimoramentos.csv")
+
+if os.path.exists(artifacts_csv_path) and os.path.exists(enchant_csv_path):
+    levels_by_artifact = defaultdict(list)
+    with open(enchant_csv_path, "r", encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            levels_by_artifact[r["ArtifactId"]].append(r)
+
+    with open(artifacts_csv_path, "r", encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            aid = r["Id"]
+            al = levels_by_artifact.get(aid, [])
+            totals = defaultdict(float)
+            compact_levels = []
+            materials_seen = {}
+            milestones = []
+
+            for l in al:
+                lvl = int(l["Level"])
+                fail_r = round(float(l["EnchantFailRate"] or 0) / 100, 1)
+                s1_r = round(float(l["EnchantSuccessRate1"] or 0) / 100, 1)
+                s2_r = round(float(l["EnchantSuccessRate2"] or 0) / 100, 1)
+                s3_r = round(float(l["EnchantSuccessRate3"] or 0) / 100, 1)
+
+                costs_raw = json.loads(l["custos_json"])
+                costs_compact = []
+                for co in costs_raw:
+                    c_param = co.get("CostParam")
+                    c_val = int(co.get("CostValue") or 0)
+                    c_name = co.get("item_nome") or ("Ouro" if c_param == "Gold" else c_param)
+                    if c_param == "Gold":
+                        c_icon = "assets/items/asset_gold.png"
+                    elif c_param in all_processed_items:
+                        c_icon = all_processed_items[c_param].get("icon_img") or "assets/items/materials_artifactenchantmaterial_01.png"
+                    else:
+                        c_icon = "assets/items/materials_artifactenchantmaterial_01.png"
+
+                    costs_compact.append({"name": c_name, "param": c_param, "amount": c_val, "icon": c_icon})
+                    if c_name not in materials_seen:
+                        materials_seen[c_name] = {"name": c_name, "icon": c_icon}
+
+                effs_raw = json.loads(l["efeitos_json"])
+                effs_compact = []
+                for e in effs_raw:
+                    t = e.get("tipo_nome")
+                    v = float(e.get("Min") or 0)
+                    totals[t] += v
+                    t_name = STAT_NAME_MAP.get(t, t)
+                    v_disp = f"+{v/100:.1f}%" if t in PCT_STAT_KEYS else f"+{int(v):,}"
+                    effs_compact.append({"key": t, "name": t_name, "val": v_disp, "raw_val": v})
+
+                rews_raw = json.loads(l["recompensas_json"])
+                rews_compact = []
+                for rw in rews_raw:
+                    rw_p = rw.get("Param") or rw.get("item_nome") or "Recompensa de Marco"
+                    rw_cnt = rw.get("MinCount", "1")
+                    rews_compact.append({"name": f"Emblema de Marco {rw_p}" if rw.get("Type") == "20" else rw_p, "count": rw_cnt})
+
+                is_final = l["FinalStageEvent"] == "1"
+                if rews_compact or is_final:
+                    milestones.append({"level": lvl, "rewards": rews_compact, "is_final": is_final})
+
+                compact_levels.append({
+                    "level": lvl,
+                    "fail": fail_r,
+                    "s1": s1_r,
+                    "s2": s2_r,
+                    "s3": s3_r,
+                    "costs": costs_compact,
+                    "effects": effs_compact,
+                    "rewards": rews_compact,
+                    "final": is_final
+                })
+
+            summary_effects = []
+            for t, v in totals.items():
+                name = STAT_NAME_MAP.get(t, t)
+                disp = f"+{v/100:.1f}%" if t in PCT_STAT_KEYS else f"+{int(v):,}"
+                summary_effects.append({"key": t, "name": name, "total": disp, "raw_total": v, "is_pct": t in PCT_STAT_KEYS})
+            summary_effects.sort(key=lambda x: (not x["is_pct"], -x["raw_total"]))
+
+            art_map = {
+                "1001": ("assets/items/materials_artifactenchantmaterial_01.png", "assets/items/artifact_01.png"),
+                "1101": ("assets/items/materials_artifactenchantmaterial_04.png", "assets/items/artifact_01.png"),
+                "1002": ("assets/items/materials_artifactenchantmaterial_01.png", "assets/items/artifact_01.png"),
+                "1003": ("assets/items/materials_artifactenchantmaterial_01.png", "assets/items/artifact_01.png"),
+                "1004": ("assets/items/materials_artifactenchantmaterial_01.png", "assets/items/artifact_02.png"),
+                "1005": ("assets/items/materials_artifactenchantmaterial_03.png", "assets/items/artifact_02.png"),
+            }
+            icon_img, art_img = art_map.get(aid, ("assets/items/materials_artifactenchantmaterial_01.png", "assets/items/artifact_01.png"))
+
+            disp_name = r["categoria_nome"]
+            if r["Type"] == "1":
+                disp_name = f"{r['categoria_nome']} ({r['variante_nome']})"
+
+            divergence = None
+            if aid == "1004":
+                divergence = "Divergência: O texto da interface do jogo afirma Nv. 90, mas a condição técnica cadastrada exige Nv. 100."
+
+            transform_info = None
+            if r["Type"] == "1":
+                transform_info = {
+                    "limit_count": int(r["EnchantLimitCount"] or 20),
+                    "save_cost": "100.000 Ouro",
+                    "load_cost": "200.000 Ouro",
+                    "reset_cost": "200.000 Ouro",
+                    "unlock_condition": "Exige Olga Original Nv. 100 (Requer Servidor 4000)",
+                    "rules": [
+                        "Limite estrito de 20 tentativas de aprimoramento por ciclo.",
+                        "Taxas fixas sem risco: 55% (+1 Estágio), 24% (+2 Estágios), 21% (+3 Estágios) e 0% de Falha.",
+                        "Com 20 tentativas e saltos, atinge entre o Nível 20 e 50.",
+                        "Salvar (100k Ouro) registra o nível alcançado para substituição.",
+                        "Carregar (200k Ouro) restaura o nível salvo anteriormente.",
+                        "Redefinir (200k Ouro) reinicia o ciclo com 20 tentativas para tentar uma nova sequência."
+                    ]
+                }
+
+            max_lvl = max([l["level"] for l in compact_levels]) if compact_levels else 0
+
+            artifacts_list.append({
+                "id": aid,
+                "category_id": r["CategoryId"],
+                "name": disp_name,
+                "category_name": r["categoria_nome"],
+                "variant_name": r["variante_nome"],
+                "type": int(r["Type"]),
+                "type_label": "Transformação" if r["Type"] == "1" else "Original",
+                "max_level": max_lvl,
+                "levels_count": len(compact_levels),
+                "enchant_limit": int(r["EnchantLimitCount"]) if r["EnchantLimitCount"] else None,
+                "server_group": r["ServerServiceGroupId"] or "Geral",
+                "contents_lock_id": r["ContentsLockId"],
+                "unlock_text": r["desbloqueio_texto"] or ("Exige Olga Nv. 100" if r["Type"] == "1" else ""),
+                "divergence": divergence,
+                "transform_info": transform_info,
+                "icon": icon_img,
+                "art": art_img,
+                "materials": list(materials_seen.values()),
+                "milestones": milestones,
+                "summary_effects": summary_effects,
+                "levels": compact_levels
+            })
+
+artifacts_catalog = {
+    "stats": {
+        "total_artifacts": len(artifacts_list),
+        "total_original": sum(1 for a in artifacts_list if a["type"] == 0),
+        "total_transformation": sum(1 for a in artifacts_list if a["type"] == 1),
+        "total_progression_records": sum(len(a["levels"]) for a in artifacts_list)
+    },
+    "artifacts": artifacts_list
+}
+
+with open(os.path.join(OUT_DIR, "artifacts.json"), "w", encoding="utf-8") as f:
+    json.dump(artifacts_catalog, f, ensure_ascii=False)
+print(f"  ✓ Processed Artifacts catalog ({len(artifacts_list)} artifacts, {artifacts_catalog['stats']['total_progression_records']} progression records).")
+
+# ==========================================
 # 8. BUNDLE GENERATION
 # ==========================================
 print("Writing bundle.js...")
@@ -2586,6 +2765,7 @@ bundle_data = {
     "codex": codex_catalog,
     "research": research_catalog,
     "portraits": portraits_catalog,
+    "artifacts": artifacts_catalog,
     "constants": constants_dict,
     "faq": faq_catalog
 }

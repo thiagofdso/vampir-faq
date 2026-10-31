@@ -105,6 +105,11 @@
           <span>Retratos</span>
           <span class="nav-count" id="countPortraits">79</span>
         </a>
+        <a class="nav-item" data-target="artifacts">
+          <span class="nav-icon"><img src="assets/items/materials_artifactenchantmaterial_01.png" style="width: 18px; height: 18px; vertical-align: middle;" onerror="this.outerHTML='🏺'"></span>
+          <span>Artefatos</span>
+          <span class="nav-count" id="countArtifacts">6</span>
+        </a>
         <a class="nav-item" data-target="faq">
           <span class="nav-icon">❓</span>
           <span>FAQ & Sistemas</span>
@@ -802,7 +807,63 @@
         </section>
 
         <!-- ==============================================
-             17. FAQ SECTION
+             17. ARTIFACTS SECTION
+             ============================================== -->
+        <section id="artifacts" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <img src="assets/items/materials_artifactenchantmaterial_01.png" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 8px;" onerror="this.outerHTML='🏺'">
+              Artefatos & Progressão de Aprimoramento
+            </h2>
+            <p class="section-subtitle">Catálogo oficial dos 5 Artefatos Originais e Transformação I de Olga (756 registros de progressão)</p>
+          </div>
+
+          <!-- Mechanics Card -->
+          <div class="info-card" style="background: linear-gradient(135deg, rgba(30,20,40,0.8), rgba(20,15,35,0.9)); border: 1px solid rgba(168,85,247,0.3); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+            <div style="display: flex; gap: 14px; align-items: flex-start;">
+              <span style="font-size: 2rem;">🏺</span>
+              <div>
+                <h3 style="color: #c084fc; margin-bottom: 8px; font-size: 1.15rem;">Como Funciona o Sistema de Artefatos no ProjectRED</h3>
+                <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; margin-bottom: 12px;">
+                  Os artefatos concedem atributos de combate cumulativos essenciais (Poder de Ataque, Dano Básico, Redução de Dano, Amplificação de Dano e Dano Crítico) através de aprimoramento sequencial com <strong>Pedras de Aprimoramento</strong> e <strong>Ouro</strong>.
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 10px;">
+                  <div style="background: rgba(0,0,0,0.3); border-left: 3px solid #10b981; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+                    <div style="font-weight: 700; color: #34d399; font-size: 0.88rem; margin-bottom: 4px;">🛡️ Nível Atual Mantido em Falhas</div>
+                    <div style="font-size: 0.8rem; color: #94a3b8;">
+                      Diferente de equipamentos, uma tentativa falha <strong>não quebra nem reduz o nível</strong>. O aprimoramento bem-sucedido pode saltar <strong>+1, +2 ou +3 estágios</strong> de uma vez.
+                    </div>
+                  </div>
+                  <div style="background: rgba(0,0,0,0.3); border-left: 3px solid #f59e0b; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+                    <div style="font-weight: 700; color: #fbbf24; font-size: 0.88rem; margin-bottom: 4px;">⚡ Transformação I (20 Tentativas)</div>
+                    <div style="font-size: 0.8rem; color: #94a3b8;">
+                      Exige Olga Nv. 100. Possui <strong>0% de falha</strong> e 20 tentativas para atingir o Nv. 50. Permite <strong>Salvar (100k)</strong>, <strong>Carregar (200k)</strong> e <strong>Redefinir (200k)</strong> o progresso.
+                    </div>
+                  </div>
+                  <div style="background: rgba(0,0,0,0.3); border-left: 3px solid #ef4444; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+                    <div style="font-weight: 700; color: #f87171; font-size: 0.88rem; margin-bottom: 4px;">⚠️ Divergência em Philippos</div>
+                    <div style="font-size: 0.8rem; color: #94a3b8;">
+                      A descrição da interface menciona nível 90 para desbloqueio, mas o gatilho lógico cadastrado em <code>ContentsLockCondition</code> requer <strong>Nível 100</strong>.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filters Bar -->
+          <div class="filter-bar" id="artifactsFilterBar" style="margin-bottom: 20px;">
+            <button class="filter-btn active" data-atype="all">Todos os Artefatos (6)</button>
+            <button class="filter-btn" data-atype="0">💎 Originais (5)</button>
+            <button class="filter-btn" data-atype="1">⚡ Transformação I (1)</button>
+          </div>
+
+          <!-- Artifacts Grid -->
+          <div class="entity-grid" id="artifactsContainer"></div>
+        </section>
+
+        <!-- ==============================================
+             18. FAQ SECTION
              ============================================== -->
         <section id="faq" class="view-section">
           <div class="section-header">

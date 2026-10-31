@@ -55,6 +55,8 @@
     portraitsSearchTerm: '',
     portraitsPage: 1,
     portraitsPerPage: 18,
+    artifactsFilter: 'all',
+    artifactsSearchTerm: '',
     modesFilter: 'all',
     pvpTab: 'arena',
     enchantTab: 'scrolls',
@@ -90,7 +92,7 @@
     }
 
     try {
-      const [classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, faq, constants] = await Promise.all([
+      const [classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, faq, constants] = await Promise.all([
         fetch('data/classes.json').then(r => r.json()),
         fetch('data/builds.json').then(r => r.json()),
         fetch('data/skills.json').then(r => r.json()),
@@ -106,11 +108,12 @@
         fetch('data/codex.json').then(r => r.json()),
         fetch('data/research.json').then(r => r.json()),
         fetch('data/portraits.json').then(r => r.json()),
+        fetch('data/artifacts.json').then(r => r.json()),
         fetch('data/faq.json').then(r => r.json()),
         fetch('data/constants.json').then(r => r.json())
       ]);
 
-      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, faq, constants };
+      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, faq, constants };
       initApp();
     } catch (e) {
       console.error('Failed to load JSON data asynchronously:', e);
@@ -146,6 +149,7 @@
     if (tabId === 'codex') renderCodex();
     if (tabId === 'research') renderResearch();
     if (tabId === 'portraits') renderPortraits();
+    if (tabId === 'artifacts') renderArtifacts();
   }
 
   window.navTo = function(tabId) {
@@ -2365,6 +2369,368 @@
     detailModal.classList.add('open');
   };
 
+  // ==========================================
+  // ARTIFACTS SYSTEM (5 ORIGINAIS + TRANSFORMAÇÃO I)
+  // ==========================================
+  function renderArtifacts() {
+    const container = document.getElementById('artifactsContainer');
+    if (!container || !state.data.artifacts || !state.data.artifacts.artifacts) return;
+
+    let artifacts = state.data.artifacts.artifacts;
+
+    // Filter by type (0 = Original, 1 = Transformação)
+    if (state.artifactsFilter !== 'all') {
+      const typeNum = Number(state.artifactsFilter);
+      artifacts = artifacts.filter(a => a.type === typeNum);
+    }
+
+    // Search filter
+    if (state.artifactsSearchTerm) {
+      const q = state.artifactsSearchTerm.toLowerCase();
+      artifacts = artifacts.filter(a => 
+        a.name.toLowerCase().includes(q) ||
+        a.category_name.toLowerCase().includes(q) ||
+        (a.unlock_text && a.unlock_text.toLowerCase().includes(q)) ||
+        (a.divergence && a.divergence.toLowerCase().includes(q)) ||
+        a.summary_effects.some(e => e.name.toLowerCase().includes(q) || e.total.toLowerCase().includes(q))
+      );
+    }
+
+    if (artifacts.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #94a3b8;">
+          <p style="font-size: 1.1rem; margin-bottom: 8px;">Nenhum artefato encontrado para o filtro selecionado.</p>
+          <p style="font-size: 0.85rem; color: #64748b;">Tente ajustar o termo de busca ou alternar para "Todos os Artefatos".</p>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = artifacts.map(art => {
+      const isTransform = art.type === 1;
+      const typeBadge = isTransform
+        ? `<span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4);">⚡ Transformação I</span>`
+        : `<span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4);">💎 Original</span>`;
+
+      const levelBadge = `<span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4);">Nv. Máx ${art.max_level}</span>`;
+      
+      const attemptsBadge = art.enchant_limit
+        ? `<span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4);">🎯 ${art.enchant_limit} Tentativas</span>`
+        : '';
+
+      const divergenceBadge = art.divergence
+        ? `<div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px; padding: 6px 10px; font-size: 0.78rem; color: #fca5a5; margin-top: 10px; display: flex; align-items: center; gap: 6px;">
+             <span>⚠️</span>
+             <span><strong>Divergência:</strong> Texto diz Nv. 90 / Condição exige Nv. 100</span>
+           </div>`
+        : '';
+
+      const topStats = art.summary_effects.slice(0, 4).map(e => `
+        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; padding: 3px 0; border-bottom: 1px dashed rgba(255,255,255,0.08);">
+          <span style="color: #94a3b8;">${e.name}</span>
+          <strong style="color: ${e.is_pct ? '#fbbf24' : '#34d399'}; font-family: monospace;">${e.total}</strong>
+        </div>
+      `).join('');
+
+      const matsHtml = art.materials.map(m => `
+        <div style="display: inline-flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; color: #cbd5e1; border: 1px solid rgba(255,255,255,0.06);">
+          <img src="${m.icon}" style="width: 14px; height: 14px; object-fit: contain;" onerror="this.outerHTML='🔹'">
+          <span>${m.name}</span>
+        </div>
+      `).join('');
+
+      return `
+        <div class="entity-card" style="background: rgba(15, 20, 30, 0.75); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; transition: all 0.25s ease;" onmouseover="this.style.borderColor='rgba(168,85,247,0.5)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.transform='none'">
+          <div>
+            <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 14px;">
+              <div style="width: 58px; height: 58px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; flex-shrink: 0;">
+                <img src="${art.art}" style="width: 46px; height: 46px; object-fit: contain;" onerror="this.outerHTML='🏺'">
+                <img src="${art.icon}" style="position: absolute; bottom: 2px; right: 2px; width: 20px; height: 20px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));" title="Material de Aprimoramento">
+              </div>
+              <div style="flex: 1; min-width: 0;">
+                <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 4px;">
+                  ${typeBadge}
+                  ${levelBadge}
+                  ${attemptsBadge}
+                </div>
+                <h3 style="margin: 0; font-size: 1.05rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${art.name}">${art.name}</h3>
+                <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">ID: #${art.id} • Servidor: ${art.server_group}</div>
+              </div>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 8px 10px; font-size: 0.8rem; margin-bottom: 12px; color: #cbd5e1;">
+              <div style="color: #94a3b8; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 2px;">🔓 Desbloqueio</div>
+              <div style="line-height: 1.3;">${art.unlock_text || 'Disponível no jogo'}</div>
+            </div>
+
+            ${divergenceBadge}
+
+            <div style="margin-top: 12px; margin-bottom: 14px;">
+              <div style="color: #a855f7; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: flex; justify-content: space-between;">
+                <span>Atributos Acumulados (Nv. Máx)</span>
+                <span style="color: #64748b;">${art.summary_effects.length} status</span>
+              </div>
+              <div style="background: rgba(0,0,0,0.25); border-radius: 6px; padding: 8px 10px;">
+                ${topStats}
+              </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="color: #94a3b8; font-size: 0.72rem; text-transform: uppercase; font-weight: 600; margin-bottom: 6px;">Insumos Requeridos</div>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                ${matsHtml}
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="window.inspectArtifact('${art.id}')" style="width: 100%; justify-content: center; font-size: 0.85rem; padding: 8px 12px; margin-top: 10px; background: linear-gradient(135deg, #7c3aed, #4f46e5); border: none; border-radius: 6px; color: #fff; font-weight: 600; cursor: pointer;">
+            🔍 Inspecionar Níveis & Progressão (${art.levels_count} estágios)
+          </button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.inspectArtifact = function(id) {
+    if (!state.data.artifacts || !state.data.artifacts.artifacts) return;
+    const art = state.data.artifacts.artifacts.find(x => x.id === id);
+    if (!art) return;
+
+    modalTitle.innerText = art.name;
+    modalSubtitle.innerText = `${art.type_label} • Nv. Máx ${art.max_level} • ID #${art.id}`;
+
+    let divergenceHtml = '';
+    if (art.divergence) {
+      divergenceHtml = `
+        <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid #ef4444; background: rgba(239, 68, 68, 0.08);">
+          <div class="panel-title" style="color: #f87171;">⚠️ Divergência Técnica Documentada</div>
+          <p style="font-size: 0.85rem; color: #fca5a5; margin: 4px 0 0; line-height: 1.4;">
+            ${art.divergence}
+          </p>
+        </div>
+      `;
+    }
+
+    let transformHtml = '';
+    if (art.transform_info) {
+      const tf = art.transform_info;
+      transformHtml = `
+        <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid #f59e0b; background: rgba(245, 158, 11, 0.08);">
+          <div class="panel-title" style="color: #fbbf24; display: flex; justify-content: space-between; align-items: center;">
+            <span>⚡ Mecânica Especial de Transformação I (20 Tentativas)</span>
+            <span style="font-size: 0.8rem; font-weight: normal; color: #fcd34d;">0% Taxa de Falha</span>
+          </div>
+          <p style="font-size: 0.84rem; color: #cbd5e1; margin: 6px 0 10px; line-height: 1.4;">
+            Diferente dos artefatos convencionais, a Transformação I possui um ciclo de <strong>20 tentativas fixas</strong> sem risco de falha (55% de chance de +1, 24% de +2 e 21% de +3). Ao término das tentativas, você pode preservar ou reiniciar:
+          </p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 10px;">
+            <div style="background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.2);">
+              <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">💾 Salvar Progresso</div>
+              <div style="font-size: 0.95rem; font-weight: 700; color: #fbbf24;">${tf.save_cost}</div>
+              <div style="font-size: 0.75rem; color: #cbd5e1; margin-top: 2px;">Substitui o nível salvo pelo atual se for superior.</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.2);">
+              <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">📂 Carregar Progresso</div>
+              <div style="font-size: 0.95rem; font-weight: 700; color: #fbbf24;">${tf.load_cost}</div>
+              <div style="font-size: 0.75rem; color: #cbd5e1; margin-top: 2px;">Restaura o melhor nível salvo (mantém 0 tentativas).</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.2);">
+              <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">🔄 Redefinir Ciclo</div>
+              <div style="font-size: 0.95rem; font-weight: 700; color: #fbbf24;">${tf.reset_cost}</div>
+              <div style="font-size: 0.75rem; color: #cbd5e1; margin-top: 2px;">Restaura 20 tentativas para buscar novos saltos de +2/+3.</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    let generalMechanicsHtml = '';
+    if (art.type === 0) {
+      generalMechanicsHtml = `
+        <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid #10b981; background: rgba(16, 185, 129, 0.06);">
+          <div class="panel-title" style="color: #34d399; display: flex; justify-content: space-between;">
+            <span>🛡️ Regras de Aprimoramento & Retenção de Nível</span>
+            <span style="font-size: 0.8rem; color: #6ee7b7; font-weight: normal;">Fonte: TutorialGuide (40501)</span>
+          </div>
+          <p style="font-size: 0.84rem; color: #cbd5e1; margin: 6px 0 0; line-height: 1.4;">
+            Cada tentativa consome <strong>Pedras de Aprimoramento</strong> e <strong>Ouro</strong>. Sucessos avançam aleatoriamente <strong>+1, +2 ou +3 estágios</strong>. Em caso de falha, <strong>o nível atual de aprimoramento é estritamente mantido</strong> (sem perda de nível ou risco de destruição).
+          </p>
+        </div>
+      `;
+    }
+
+    let summaryStatsHtml = '';
+    if (art.summary_effects && art.summary_effects.length > 0) {
+      summaryStatsHtml = `
+        <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid var(--gold-primary);">
+          <div class="panel-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>✨ Atributos Totais Cumulativos no Nível Máximo (${art.max_level})</span>
+            <span style="font-size: 0.75rem; color: #94a3b8;">${art.summary_effects.length} status</span>
+          </div>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin: 4px 0 10px; line-height: 1.4;">
+            Total somado de todos os efeitos permanentes desbloqueados ao completar o artefato:
+          </p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px;">
+            ${art.summary_effects.map(eff => `
+              <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.78rem; color: #cbd5e1;">${eff.name}</span>
+                <strong style="font-size: 0.85rem; color: ${eff.is_pct ? '#fbbf24' : '#34d399'}; font-family: monospace;">${eff.total}</strong>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    let milestonesHtml = '';
+    if (art.milestones && art.milestones.length > 0) {
+      milestonesHtml = `
+        <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid #a855f7;">
+          <div class="panel-title">🏆 Marcos de Progressão & Recompensas Especiais</div>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px;">
+            ${art.milestones.map(m => `
+              <div style="background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); border-radius: 6px; padding: 6px 12px; font-size: 0.82rem; display: flex; align-items: center; gap: 6px;">
+                <span style="font-weight: 700; color: #c084fc;">Nv. ${m.level}</span>
+                <span style="color: #94a3b8;">•</span>
+                <span style="color: #e2e8f0;">${m.is_final ? '🎉 Conclusão Final do Artefato' : (m.rewards.map(r => r.name).join(', ') || 'Marco de Aprimoramento')}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    modalBody.innerHTML = `
+      ${divergenceHtml}
+      ${transformHtml}
+      ${generalMechanicsHtml}
+      ${summaryStatsHtml}
+      ${milestonesHtml}
+
+      <div class="panel-box" style="border-left: 3px solid #38bdf8;">
+        <div class="panel-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
+          <span>📈 Tabela Completa de Níveis & Aprimoramento (${art.levels.length} registros)</span>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <span style="font-size: 0.78rem; color: #94a3b8;">Filtrar Faixa:</span>
+            <select id="artifactLevelFilterSelect" onchange="window.filterArtifactLevels('${art.id}', this.value)" style="background: rgba(15,20,30,0.9); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 8px; border-radius: 6px; font-size: 0.78rem; cursor: pointer;">
+              <option value="all">Todos os Níveis (0 - ${art.max_level})</option>
+              <option value="milestones">Apenas Marcos com Recompensa</option>
+              ${art.max_level <= 50 ? `
+                <option value="0-25">Níveis 0 a 25</option>
+                <option value="26-50">Níveis 26 a 50</option>
+              ` : art.max_level <= 100 ? `
+                <option value="0-25">Níveis 0 a 25</option>
+                <option value="26-50">Níveis 26 a 50</option>
+                <option value="51-75">Níveis 51 a 75</option>
+                <option value="76-100">Níveis 76 a 100</option>
+              ` : `
+                <option value="0-50">Níveis 0 a 50</option>
+                <option value="51-100">Níveis 51 a 100</option>
+                <option value="101-150">Níveis 101 a 150</option>
+                <option value="151-200">Níveis 151 a 200</option>
+                <option value="201-250">Níveis 201 a 250</option>
+                <option value="251-300">Níveis 251 a 300</option>
+              `}
+            </select>
+          </div>
+        </div>
+
+        <div id="artifactLevelsContainer" style="max-height: 420px; overflow-y: auto; padding-right: 4px;">
+        </div>
+      </div>
+    `;
+
+    window.filterArtifactLevels(art.id, 'all');
+    detailModal.classList.add('open');
+  };
+
+  window.filterArtifactLevels = function(id, rangeKey) {
+    const container = document.getElementById('artifactLevelsContainer');
+    if (!container || !state.data.artifacts || !state.data.artifacts.artifacts) return;
+    const art = state.data.artifacts.artifacts.find(x => x.id === id);
+    if (!art) return;
+
+    let levels = art.levels;
+    if (rangeKey === 'milestones') {
+      levels = levels.filter(l => (l.rewards && l.rewards.length > 0) || l.final);
+    } else if (rangeKey.includes('-')) {
+      const [minStr, maxStr] = rangeKey.split('-');
+      const min = Number(minStr);
+      const max = Number(maxStr);
+      levels = levels.filter(l => l.level >= min && l.level <= max);
+    }
+
+    if (levels.length === 0) {
+      container.innerHTML = `<div style="text-align: center; padding: 20px; color: #94a3b8; font-size: 0.85rem;">Nenhum nível nesta faixa selecionada.</div>`;
+      return;
+    }
+
+    container.innerHTML = `
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: left;">
+        <thead>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.15); color: #94a3b8; font-size: 0.72rem; text-transform: uppercase;">
+            <th style="padding: 6px 8px;">Nível</th>
+            <th style="padding: 6px 8px;">Custos</th>
+            <th style="padding: 6px 8px;">Taxas de Sucesso / Falha</th>
+            <th style="padding: 6px 8px;">Efeito Concedido</th>
+            <th style="padding: 6px 8px;">Marco / Recompensa</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${levels.map(l => {
+            const isFinal = l.final;
+            const hasMilestone = l.rewards && l.rewards.length > 0;
+            const rowBg = isFinal ? 'background: rgba(168,85,247,0.12);' : hasMilestone ? 'background: rgba(245,158,11,0.08);' : '';
+
+            const costsHtml = l.costs && l.costs.length > 0 ? l.costs.map(c => `
+              <span style="display: inline-flex; align-items: center; gap: 4px; margin-right: 6px;">
+                <img src="${c.icon}" style="width: 14px; height: 14px; object-fit: contain;">
+                <span>${c.amount.toLocaleString()}</span>
+              </span>
+            `).join('') : '<span style="color: #64748b;">— (Nível Terminal)</span>';
+
+            let ratesHtml = '';
+            if (l.costs && l.costs.length > 0) {
+              const failStyle = l.fail > 0 ? 'color: #f87171;' : 'color: #94a3b8;';
+              ratesHtml = `
+                <div style="display: flex; gap: 6px; font-size: 0.75rem; font-family: monospace;">
+                  <span style="${failStyle}" title="Chance de Falha (Mantém Nível)">F:${l.fail}%</span>
+                  <span style="color: #60a5fa;" title="Avanço de +1 Estágio">+1:${l.s1}%</span>
+                  <span style="color: #c084fc;" title="Avanço de +2 Estágios">+2:${l.s2}%</span>
+                  <span style="color: #fbbf24;" title="Avanço de +3 Estágios">+3:${l.s3}%</span>
+                </div>
+              `;
+            } else {
+              ratesHtml = '<span style="color: #64748b;">—</span>';
+            }
+
+            const effectsHtml = l.effects && l.effects.length > 0 ? l.effects.map(e => `
+              <span style="color: #34d399; font-weight: 600;">${e.name}: <strong>${e.val}</strong></span>
+            `).join(', ') : '<span style="color: #64748b;">Nível Base</span>';
+
+            let milestoneHtml = '';
+            if (isFinal) {
+              milestoneHtml = `<span class="badge" style="background: rgba(168,85,247,0.25); color: #c084fc; border: 1px solid rgba(168,85,247,0.4); font-size: 0.7rem;">🎉 Evento Final</span>`;
+            } else if (hasMilestone) {
+              milestoneHtml = l.rewards.map(r => `<span class="badge" style="background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.4); font-size: 0.7rem;">🏆 ${r.name}</span>`).join(' ');
+            } else {
+              milestoneHtml = '<span style="color: #475569;">—</span>';
+            }
+
+            return `
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); ${rowBg}">
+                <td style="padding: 6px 8px; font-weight: 700; color: #fff; font-family: monospace;">Nv. ${l.level}</td>
+                <td style="padding: 6px 8px;">${costsHtml}</td>
+                <td style="padding: 6px 8px;">${ratesHtml}</td>
+                <td style="padding: 6px 8px;">${effectsHtml}</td>
+                <td style="padding: 6px 8px;">${milestoneHtml}</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+  };
+
   // Render FAQ
   function renderFaq() {
     const container = document.getElementById('faqContainer');
@@ -2939,6 +3305,9 @@
         state.portraitsSearchTerm = q;
         state.portraitsPage = 1;
         renderPortraits();
+      } else if (state.currentTab === 'artifacts') {
+        state.artifactsSearchTerm = q;
+        renderArtifacts();
       }
     });
 
@@ -3113,6 +3482,15 @@
       state.portraitsPage = 1;
       renderPortraits();
     });
+
+    document.getElementById('artifactsFilterBar')?.addEventListener('click', e => {
+      if (e.target.tagName === 'BUTTON') {
+        document.querySelectorAll('#artifactsFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        state.artifactsFilter = e.target.dataset.atype;
+        renderArtifacts();
+      }
+    });
   }
 
   function initApp() {
@@ -3131,6 +3509,7 @@
     renderCodex();
     renderResearch();
     renderPortraits();
+    renderArtifacts();
     renderFaq();
     setupListeners();
   }
