@@ -2947,6 +2947,226 @@ with open(os.path.join(OUT_DIR, "bloodline.json"), "w", encoding="utf-8") as f:
 print(f"  ✓ Processed Bloodline catalog ({len(bloodline_chapters)} chapters, {bloodline_catalog['stats']['total_transformations']} transformations).")
 
 # ==========================================
+# 19. BLOOD REALM EVOLUTION (MATRIX) CATALOG
+# ==========================================
+print("Processing Blood Realm Evolution (Matrix) catalog...")
+matrix_reports_dir = os.path.join(BASE_DIR, "analysis/versions/2026-10-31/reports/reino-de-sangue")
+matrix_quadros_path = os.path.join(matrix_reports_dir, "quadros.csv")
+matrix_fileiras_path = os.path.join(matrix_reports_dir, "fileiras.csv")
+matrix_celulas_path = os.path.join(matrix_reports_dir, "celulas.csv")
+matrix_bonus_path = os.path.join(matrix_reports_dir, "bonus_colunas.csv")
+
+STAT_NAME_MAP_MATRIX = {
+    "AttackPower": "Poder de Ataque",
+    "AttackPowerNormalAttack": "Poder de Ataque Básico",
+    "AttackPowerReduction": "Redução do Poder de Ataque Inimigo",
+    "AttackPowerReductionNormalAttack": "Redução de Ataque Básico Inimigo",
+    "AttackPowerReductionSkill": "Redução de Ataque de Habilidade Inimigo",
+    "AttackPowerSkill": "Poder de Ataque de Habilidade",
+    "DamageMultiplierNormalAttack": "Multiplicador de Dano Básico",
+    "DamageMultiplierSkill": "Multiplicador de Dano de Habilidade",
+    "DamageReducerNormalAttack": "Redução de Dano Básico",
+    "DamageReducerSkill": "Redução de Dano de Habilidade",
+    "DamageReduction": "Redução de Dano",
+    "DamageReductionCritical": "Redução de Dano Crítico",
+    "DamageReductionNormalAttack": "Redução de Dano Básico",
+    "DamageReductionSkill": "Redução de Dano de Habilidade",
+    "DamageValue": "Dano Adicional",
+    "DamageValueCritical": "Dano Crítico",
+    "DamageValueNormalAttack": "Dano Básico",
+    "DamageValueSkill": "Dano de Habilidade",
+    "DodgeValue": "Evasão",
+    "HitValue": "Precisão",
+    "HitValueNormalAttack": "Precisão de Ataque Básico",
+    "HitValueSkill": "Precisão de Habilidade",
+    "IgnoreCriticalDamageMultiplier": "Ignorar Multiplicador Crítico",
+    "MaxHp": "HP Máximo"
+}
+
+bloodrealm_boards = []
+
+if os.path.exists(matrix_quadros_path) and os.path.exists(matrix_fileiras_path) and os.path.exists(matrix_celulas_path):
+    with open(matrix_quadros_path, "r", encoding="utf-8-sig") as f:
+        quadros_raw = list(csv.DictReader(f))
+    with open(matrix_fileiras_path, "r", encoding="utf-8-sig") as f:
+        fileiras_raw = list(csv.DictReader(f))
+    with open(matrix_celulas_path, "r", encoding="utf-8-sig") as f:
+        celulas_raw = list(csv.DictReader(f))
+    bonus_raw = []
+    if os.path.exists(matrix_bonus_path):
+        with open(matrix_bonus_path, "r", encoding="utf-8-sig") as f:
+            bonus_raw = list(csv.DictReader(f))
+
+    rows_by_matrix = {}
+    for r in fileiras_raw:
+        mid = r["MatrixId"]
+        rows_by_matrix.setdefault(mid, []).append(r)
+
+    cells_by_row = {}
+    for c in celulas_raw:
+        rid = c.get("MatrixRowId")
+        if rid:
+            cells_by_row.setdefault(rid, []).append(c)
+
+    bonus_by_matrix = {}
+    for b in bonus_raw:
+        mid = b.get("MatrixId")
+        if mid:
+            bonus_by_matrix.setdefault(mid, []).append(b)
+
+    boards_map = {}
+    for q in quadros_raw:
+        qid = q["Id"]
+        if qid not in boards_map or q.get("SaveCostGroupId"):
+            boards_map[qid] = q
+
+    for qid, q in boards_map.items():
+        cat_name = q.get("categoria_nome", "Reino de Sangue")
+        tab_name = q.get("aba_nome", "Geral")
+        is_event = "Evento" in cat_name or bool(q.get("DateTimeSetting"))
+
+        if is_event:
+            cat_icon = "assets/matrix/matrix_event_tab01.png"
+            mat_icon = "assets/matrix/mat_stone_03.png"
+        elif "2" in cat_name:
+            cat_icon = "assets/matrix/matrix_tab02.png"
+            mat_icon = "assets/matrix/mat_stone_02.png"
+        else:
+            cat_icon = "assets/matrix/matrix_tab01.png"
+            mat_icon = "assets/matrix/mat_stone_01.png"
+
+        q_rows = rows_by_matrix.get(qid, [])
+        q_rows.sort(key=lambda r: int(r.get("RowIndex", 0) or 0))
+
+        rows_data = []
+        mat_name = "Pedra da Evolução"
+        mat_cost = 10
+        max_rerolls_per_row = 2
+        init_dia = 100
+        init_item = "Bilhete de Redefinição de Evolução do Reino de Sangue"
+
+        for r in q_rows:
+            rid = r["Id"]
+            mat_name = r.get("material_nome") or mat_name
+            mat_cost = int(r.get("RerollCostItemCount", 10) or 10)
+            max_rerolls_per_row = int(r.get("MaxRerollCount", 2) or 2)
+            init_dia = int(r.get("InitDiaCount", 100) or 100)
+            init_item = r.get("item_reset_nome") or init_item
+
+            r_cells = cells_by_row.get(rid, [])
+            r_cells.sort(key=lambda c: int(c.get("ColumnIndex", 0) or 0))
+
+            total_rate = sum(int(c.get("SelectRate", 0) or 0) for c in r_cells) or 10000
+
+            cells_data = []
+            for c in r_cells:
+                rate_raw = int(c.get("SelectRate", 0) or 0)
+                rate_pct = round((rate_raw / total_rate) * 100, 1)
+                niveis_raw = json.loads(c.get("niveis_json", "[]"))
+                levels_data = []
+                for nv in niveis_raw:
+                    effs_raw = json.loads(nv.get("efeitos_json", "[]"))
+                    effects_data = []
+                    for eff in effs_raw:
+                        t = eff.get("tipo_nome", "")
+                        val = float(eff.get("Min", 0) or 0)
+                        t_name = STAT_NAME_MAP_MATRIX.get(t, STAT_NAME_MAP.get(t, t))
+                        v_disp = f"+{val/100:.1f}%" if "Multiplier" in t else f"+{int(val):,}"
+                        effects_data.append({"key": t, "name": t_name, "val": v_disp, "raw_val": val})
+                    levels_data.append({
+                        "level": int(nv.get("Level", 1)),
+                        "effects": effects_data
+                    })
+
+                cells_data.append({
+                    "cell_id": c["Id"],
+                    "column_index": int(c.get("ColumnIndex", 1) or 1),
+                    "select_rate_raw": rate_raw,
+                    "select_rate_pct": rate_pct,
+                    "max_level": max([l["level"] for l in levels_data]) if levels_data else 1,
+                    "levels": levels_data
+                })
+
+            rows_data.append({
+                "row_id": rid,
+                "row_index": int(r.get("RowIndex", 1) or 1),
+                "reroll_cost_count": mat_cost,
+                "max_rerolls": max_rerolls_per_row,
+                "init_dia_count": init_dia,
+                "init_item_count": int(r.get("InitItemCount", 1) or 1),
+                "cells": cells_data
+            })
+
+        q_bonus = bonus_by_matrix.get(qid, [])
+        q_bonus.sort(key=lambda b: int(b.get("ColumnIndex", 0) or 0))
+        bonus_data = []
+        for b in q_bonus:
+            col_idx = int(b.get("ColumnIndex", 1) or 1)
+            niveis_raw = json.loads(b.get("niveis_json", "[]"))
+            levels_data = []
+            for nv in niveis_raw:
+                effs_raw = json.loads(nv.get("efeitos_json", "[]"))
+                effects_data = []
+                for eff in effs_raw:
+                    t = eff.get("tipo_nome", "")
+                    val = float(eff.get("Min", 0) or 0)
+                    t_name = STAT_NAME_MAP_MATRIX.get(t, STAT_NAME_MAP.get(t, t))
+                    v_disp = f"+{val/100:.1f}%" if "Multiplier" in t else f"+{int(val):,}"
+                    effects_data.append({"key": t, "name": t_name, "val": v_disp, "raw_val": val})
+                levels_data.append({
+                    "level": int(nv.get("Level", 1)),
+                    "effects": effects_data
+                })
+            bonus_data.append({
+                "column_index": col_idx,
+                "cell_id": b.get("CellId", ""),
+                "levels": levels_data
+            })
+
+        save_cost = "70.000 Ouro" if q.get("SaveCostGroupId") else None
+        load_cost = "100.000 Ouro" if q.get("LoadCostGroupId") else None
+
+        bloodrealm_boards.append({
+            "id": qid,
+            "name": q["nome_pt"],
+            "category_name": cat_name,
+            "category_code": 3 if is_event else (2 if "2" in cat_name else 1),
+            "tab_name": tab_name,
+            "category_icon": cat_icon,
+            "material_icon": mat_icon,
+            "material_name": mat_name,
+            "material_cost_per_attempt": mat_cost,
+            "max_rerolls_per_row": max_rerolls_per_row,
+            "reset_dia_cost": init_dia,
+            "reset_item_name": init_item,
+            "rows_count": int(q.get("RowCount", 3) or 3),
+            "columns_count": int(q.get("ColumnCount", 3) or 3),
+            "dimensions": f"{q.get('RowCount', 3)}×{q.get('ColumnCount', 3)}",
+            "is_temporary": is_event,
+            "date_setting": q.get("DateTimeSetting", ""),
+            "has_save_load": bool(save_cost),
+            "save_cost": save_cost,
+            "load_cost": load_cost,
+            "rows": rows_data,
+            "column_bonuses": bonus_data
+        })
+
+bloodrealm_catalog = {
+    "stats": {
+        "total_boards": len(bloodrealm_boards),
+        "total_rows": sum(len(b["rows"]) for b in bloodrealm_boards),
+        "total_cells": sum(sum(len(r["cells"]) for r in b["rows"]) for b in bloodrealm_boards),
+        "total_column_bonuses": sum(len(b["column_bonuses"]) for b in bloodrealm_boards),
+        "categories": ["Reino de Sangue 1", "Reino de Sangue 2", "Reino de Sangue do Evento"]
+    },
+    "boards": bloodrealm_boards
+}
+
+with open(os.path.join(OUT_DIR, "bloodrealm.json"), "w", encoding="utf-8") as f:
+    json.dump(bloodrealm_catalog, f, ensure_ascii=False)
+print(f"  ✓ Processed Blood Realm Evolution catalog ({len(bloodrealm_boards)} boards, {bloodrealm_catalog['stats']['total_cells']} cells).")
+
+# ==========================================
 # 8. BUNDLE GENERATION
 # ==========================================
 print("Writing bundle.js...")
@@ -2970,6 +3190,7 @@ bundle_data = {
     "portraits": portraits_catalog,
     "artifacts": artifacts_catalog,
     "bloodline": bloodline_catalog,
+    "bloodrealm": bloodrealm_catalog,
     "constants": constants_dict,
     "faq": faq_catalog
 }

@@ -59,6 +59,9 @@
     artifactsSearchTerm: '',
     bloodlineFilter: 'all',
     bloodlineSearchTerm: '',
+    bloodrealmFilter: 'all',
+    bloodrealmTabFilter: 'all',
+    bloodrealmSearchTerm: '',
     modesFilter: 'all',
     pvpTab: 'arena',
     enchantTab: 'scrolls',
@@ -94,7 +97,7 @@
     }
 
     try {
-      const [classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, faq, constants] = await Promise.all([
+      const [classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, bloodrealm, faq, constants] = await Promise.all([
         fetch('data/classes.json').then(r => r.json()),
         fetch('data/builds.json').then(r => r.json()),
         fetch('data/skills.json').then(r => r.json()),
@@ -112,11 +115,12 @@
         fetch('data/portraits.json').then(r => r.json()),
         fetch('data/artifacts.json').then(r => r.json()),
         fetch('data/bloodline.json').then(r => r.json()),
+        fetch('data/bloodrealm.json').then(r => r.json()),
         fetch('data/faq.json').then(r => r.json()),
         fetch('data/constants.json').then(r => r.json())
       ]);
 
-      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, faq, constants };
+      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, bloodrealm, faq, constants };
       initApp();
     } catch (e) {
       console.error('Failed to load JSON data asynchronously:', e);
@@ -154,6 +158,7 @@
     if (tabId === 'portraits') renderPortraits();
     if (tabId === 'artifacts') renderArtifacts();
     if (tabId === 'bloodline') renderBloodline();
+    if (tabId === 'bloodrealm') renderBloodrealm();
   }
 
   window.navTo = function(tabId) {
@@ -3100,6 +3105,345 @@
     }
   };
 
+  // ==========================================
+  // 19. BLOOD REALM EVOLUTION (MATRIX) RENDERING
+  // ==========================================
+  function renderBloodrealm() {
+    const container = document.getElementById('bloodrealmContainer');
+    if (!container || !state.data.bloodrealm) return;
+
+    let boards = state.data.bloodrealm.boards || [];
+
+    // Filter by Category
+    if (state.bloodrealmFilter !== 'all') {
+      const code = parseInt(state.bloodrealmFilter);
+      boards = boards.filter(b => b.category_code === code);
+    }
+
+    // Filter by Tab
+    if (state.bloodrealmTabFilter && state.bloodrealmTabFilter !== 'all') {
+      boards = boards.filter(b => b.tab_name === state.bloodrealmTabFilter);
+    }
+
+    // Filter by Search Query
+    const q = (state.bloodrealmSearchTerm || '').toLowerCase().trim();
+    if (q) {
+      boards = boards.filter(b => 
+        b.name.toLowerCase().includes(q) ||
+        b.tab_name.toLowerCase().includes(q) ||
+        b.category_name.toLowerCase().includes(q) ||
+        b.dimensions.toLowerCase().includes(q) ||
+        b.id.includes(q) ||
+        b.material_name.toLowerCase().includes(q) ||
+        b.column_bonuses.some(cb => cb.levels.some(l => l.effects.some(e => e.name.toLowerCase().includes(q)))) ||
+        b.rows.some(r => r.cells.some(c => c.levels.some(l => l.effects.some(e => e.name.toLowerCase().includes(q)))))
+      );
+    }
+
+    if (boards.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 48px; color: #94a3b8; background: rgba(0,0,0,0.2); border-radius: 12px;">
+          <p style="font-size: 1.1rem; margin-bottom: 8px;">Nenhuma grade do Reino de Sangue encontrada para os filtros atuais.</p>
+          <p style="font-size: 0.85rem;">Tente ajustar sua busca ou selecionar "Todas as Grades".</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = boards.map(b => {
+      const hasBonus = b.column_bonuses && b.column_bonuses.length > 0;
+      const isTemporary = b.is_temporary;
+
+      // Compact preview of first row cells with probabilities
+      const firstRow = b.rows[0];
+      const probBadges = firstRow ? firstRow.cells.map(c => `
+        <span style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 2px 6px; font-size: 0.72rem; font-family: monospace;">
+          <span style="color: #94a3b8;">C${c.column_index}:</span>
+          <strong style="color: ${c.select_rate_pct >= 40 ? '#34d399' : (c.select_rate_pct <= 15 ? '#f87171' : '#fbbf24')};">${c.select_rate_pct}%</strong>
+        </span>
+      `).join('') : '';
+
+      return `
+        <div class="entity-card" style="display: flex; flex-direction: column; justify-content: space-between; border-color: ${isTemporary ? 'rgba(236,72,153,0.35)' : 'rgba(168,85,247,0.25)'}; background: linear-gradient(180deg, rgba(25,15,30,0.7) 0%, rgba(15,10,20,0.85) 100%);">
+          <div>
+            <!-- Header Badges -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span class="badge" style="background: rgba(168,85,247,0.2); color: #c084fc; border: 1px solid rgba(168,85,247,0.4); font-weight: 700;">
+                ${b.tab_name}
+              </span>
+              <div style="display: flex; gap: 6px;">
+                ${isTemporary ? `<span class="badge" style="background: rgba(236,72,153,0.2); color: #f472b6; border: 1px solid rgba(236,72,153,0.4); font-size: 0.72rem;">🌕 Evento</span>` : ''}
+                <span class="badge" style="background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15); font-family: monospace; font-weight: 700;">
+                  Grade ${b.dimensions}
+                </span>
+              </div>
+            </div>
+
+            <!-- Title & Category Info -->
+            <div style="display: flex; gap: 14px; margin-bottom: 14px;">
+              <div style="width: 56px; height: 56px; flex-shrink: 0; border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.5); border: 1px solid rgba(168,85,247,0.3); display: flex; align-items: center; justify-content: center; padding: 6px;">
+                <img src="${b.category_icon}" alt="${b.name}" style="width: 100%; height: 100%; object-fit: contain;">
+              </div>
+              <div style="flex: 1; min-width: 0;">
+                <h3 style="font-size: 1.15rem; color: #fff; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  ${b.name}
+                </h3>
+                <div style="font-size: 0.8rem; color: #a78bfa; margin-bottom: 4px;">
+                  ${b.category_name} • Quadro #${b.id}
+                </div>
+                <div style="font-size: 0.75rem; color: #94a3b8;">
+                  ${b.rows_count} Fileiras • ${b.columns_count} Colunas (${b.rows_count * b.columns_count} Células)
+                </div>
+              </div>
+            </div>
+
+            <!-- Costs and Rules -->
+            <div style="background: rgba(0,0,0,0.35); border-radius: 8px; padding: 10px; margin-bottom: 12px; font-size: 0.78rem; display: flex; flex-direction: column; gap: 6px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #94a3b8; display: flex; align-items: center; gap: 4px;">
+                  <img src="${b.material_icon}" style="width: 14px; height: 14px; object-fit: contain;">
+                  Custo por Tentativa:
+                </span>
+                <strong style="color: #fbbf24;">${b.material_cost_per_attempt}x ${b.material_name}</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #94a3b8;">Tentativas por Fileira:</span>
+                <strong style="color: #60a5fa;">${b.max_rerolls_per_row} Tentativas</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #94a3b8;">Custo de Reset:</span>
+                <span style="color: #f87171; font-size: 0.75rem;">${b.reset_dia_cost} Diamantes / Bilhete</span>
+              </div>
+              ${b.has_save_load ? `
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 4px; margin-top: 2px;">
+                  <span style="color: #94a3b8;">💾 Salvar / Carregar:</span>
+                  <span style="color: #34d399; font-size: 0.75rem;">70k / 100k Ouro (Srv 11000)</span>
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- Probabilities header preview -->
+            <div style="margin-bottom: 12px;">
+              <div style="font-size: 0.72rem; text-transform: uppercase; color: #64748b; font-weight: 700; margin-bottom: 6px;">
+                Pesos das Colunas na Fileira 1:
+              </div>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                ${probBadges}
+              </div>
+            </div>
+
+            <!-- Column Bonuses Preview -->
+            <div style="margin-bottom: 14px;">
+              <div style="font-size: 0.72rem; text-transform: uppercase; color: #64748b; font-weight: 700; margin-bottom: 6px;">
+                Bônus de Conclusão de Coluna:
+              </div>
+              ${hasBonus ? `
+                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                  ${b.column_bonuses.map(cb => {
+                    const eff = cb.levels[0]?.effects[0];
+                    return `
+                      <span class="badge" style="background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); font-size: 0.72rem;">
+                        🏆 Col ${cb.column_index}: ${eff ? eff.name + ' ' + eff.val : 'Ativado'}
+                      </span>
+                    `;
+                  }).join('')}
+                </div>
+              ` : `
+                <span style="color: #64748b; font-size: 0.75rem; font-style: italic;">
+                  Sem bônus de coluna cadastrado neste quadro.
+                </span>
+              `}
+            </div>
+          </div>
+
+          <!-- Action Button -->
+          <button class="btn btn-primary" onclick="window.inspectBloodrealm('${b.id}')" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #7e22ce 0%, #581c87 100%); border: 1px solid rgba(168,85,247,0.5); color: #fff;">
+            <span>Inspecionar Grade & Probabilidades</span>
+            <span>➔</span>
+          </button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Inspect Blood Realm Matrix Details in Modal
+  window.inspectBloodrealm = function(boardId) {
+    if (!state.data.bloodrealm) return;
+    const board = state.data.bloodrealm.boards.find(b => String(b.id) === String(boardId));
+    if (!board) return;
+
+    modalTitle.textContent = `${board.name} (${board.tab_name})`;
+    modalSubtitle.textContent = `Categoria: ${board.category_name} • Grade ${board.dimensions} • Quadro #${board.id}`;
+
+    // Map column bonuses for quick lookup
+    const bonusByCol = {};
+    board.column_bonuses.forEach(cb => {
+      bonusByCol[cb.column_index] = cb;
+    });
+
+    modalBody.innerHTML = `
+      <!-- Showcase Header Banner -->
+      <div style="background: linear-gradient(135deg, rgba(35,15,40,0.9), rgba(20,10,25,0.95)); border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid rgba(168,85,247,0.35);">
+        <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 16px; flex-wrap: wrap;">
+          <div style="width: 64px; height: 64px; border-radius: 10px; background: rgba(0,0,0,0.5); border: 2px solid #a855f7; display: flex; align-items: center; justify-content: center; padding: 8px;">
+            <img src="${board.category_icon}" style="width: 100%; height: 100%; object-fit: contain;">
+          </div>
+          <div style="flex: 1; min-width: 240px;">
+            <div style="display: flex; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;">
+              <span class="badge" style="background: rgba(168,85,247,0.25); color: #c084fc; border: 1px solid rgba(168,85,247,0.5); font-weight: 700;">
+                ${board.tab_name}
+              </span>
+              <span class="badge" style="background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.2); font-family: monospace;">
+                Grade ${board.dimensions}
+              </span>
+              ${board.is_temporary ? `<span class="badge" style="background: rgba(236,72,153,0.25); color: #f472b6; border: 1px solid rgba(236,72,153,0.5);">🌕 Evento Temporário</span>` : ''}
+              ${board.has_save_load ? `<span class="badge" style="background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.4);">💾 Salvar/Carregar Ativo</span>` : ''}
+            </div>
+            <h2 style="font-size: 1.4rem; color: #fff; margin: 0; font-family: var(--font-serif);">${board.name}</h2>
+          </div>
+        </div>
+
+        <!-- Costs Bar -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; background: rgba(0,0,0,0.4); border-radius: 8px; padding: 12px; font-size: 0.82rem; border: 1px solid rgba(255,255,255,0.08);">
+          <div>
+            <span style="color: #94a3b8;">Material por Tentativa:</span>
+            <div style="font-weight: 700; color: #fbbf24; display: flex; align-items: center; gap: 6px; margin-top: 2px;">
+              <img src="${board.material_icon}" style="width: 16px; height: 16px; object-fit: contain;">
+              <span>${board.material_cost_per_attempt}x ${board.material_name}</span>
+            </div>
+          </div>
+          <div>
+            <span style="color: #94a3b8;">Tentativas por Fileira:</span>
+            <div style="font-weight: 700; color: #60a5fa; margin-top: 2px;">${board.max_rerolls_per_row} Tentativas</div>
+          </div>
+          <div>
+            <span style="color: #94a3b8;">Custo de Redefinição:</span>
+            <div style="font-weight: 700; color: #f87171; margin-top: 2px;">${board.reset_dia_cost} Diamantes / Bilhete</div>
+          </div>
+          ${board.has_save_load ? `
+            <div>
+              <span style="color: #94a3b8;">Salvar / Carregar:</span>
+              <div style="font-weight: 700; color: #34d399; margin-top: 2px;">Salvar: ${board.save_cost} • Carregar: ${board.load_cost}</div>
+            </div>
+          ` : `
+            <div>
+              <span style="color: #94a3b8;">Salvar / Carregar:</span>
+              <div style="color: #64748b; margin-top: 2px;">Indisponível nesta variante</div>
+            </div>
+          `}
+        </div>
+      </div>
+
+      <!-- Warnings and Rules Box -->
+      <div style="background: rgba(239,68,68,0.1); border-left: 4px solid #ef4444; border-radius: 0 8px 8px 0; padding: 12px 16px; margin-bottom: 24px; font-size: 0.85rem; color: #fca5a5; line-height: 1.5;">
+        <strong>⚠️ Regras Críticas de Evolução:</strong>
+        <ul style="margin: 6px 0 0 18px; padding: 0;">
+          <li><strong>Chances Desiguais:</strong> As células não têm chances iguais de serem sorteadas. Confira as porcentagens calculadas em cada coluna.</li>
+          <li><strong>Sem Devolução de Materiais:</strong> Redefinir a fileira zera os níveis e restaura as tentativas, mas <strong>não devolve os materiais gastos</strong>.</li>
+          <li><strong>Reset Automático Perigoso:</strong> Configurar redefinição automática com célula evitada pode descartar sequências úteis e queimar recursos repetidamente.</li>
+        </ul>
+      </div>
+
+      <!-- Matrix Grid Table -->
+      <div style="margin-bottom: 24px;">
+        <h3 style="font-size: 1.15rem; color: #c084fc; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <span>📐</span>
+          <span>Grade de Evolução Interativa (${board.rows_count} Linhas × ${board.columns_count} Colunas)</span>
+        </h3>
+
+        <div style="overflow-x: auto; background: rgba(0,0,0,0.3); border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); padding: 14px;">
+          <table style="width: 100%; border-collapse: separate; border-spacing: 8px; font-size: 0.82rem;">
+            <thead>
+              <tr>
+                <th style="padding: 6px 10px; color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; text-align: center; width: 80px;">Fileira</th>
+                ${Array.from({ length: board.columns_count }, (_, i) => `
+                  <th style="padding: 6px 10px; color: #cbd5e1; font-size: 0.78rem; text-transform: uppercase; text-align: center; background: rgba(255,255,255,0.04); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                    Coluna ${i + 1}
+                  </th>
+                `).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${board.rows.map(r => `
+                <tr>
+                  <!-- Row Header -->
+                  <td style="padding: 8px 10px; background: rgba(255,255,255,0.03); border-radius: 6px; text-align: center; border: 1px solid rgba(255,255,255,0.06);">
+                    <div style="font-weight: 700; color: #fff;">Linha ${r.row_index}</div>
+                    <div style="font-size: 0.68rem; color: #60a5fa; margin-top: 2px;">${r.max_rerolls} Tentativas</div>
+                  </td>
+
+                  <!-- Cells in Row -->
+                  ${r.cells.map(c => {
+                    const rateColor = c.select_rate_pct >= 40 ? '#34d399' : (c.select_rate_pct <= 15 ? '#f87171' : '#fbbf24');
+                    return `
+                      <td style="background: rgba(20,15,30,0.7); border: 1px solid rgba(168,85,247,0.25); border-radius: 8px; padding: 10px; vertical-align: top; min-width: 150px;">
+                        <!-- Cell Header: Rate and Level -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 4px;">
+                          <span class="badge" style="background: rgba(0,0,0,0.5); color: ${rateColor}; border: 1px solid rgba(255,255,255,0.1); font-family: monospace; font-size: 0.72rem; font-weight: 700;" title="Peso bruto: ${c.select_rate_raw}">
+                            🎯 ${c.select_rate_pct}%
+                          </span>
+                          <span style="font-size: 0.7rem; color: #94a3b8;">
+                            Máx: <strong style="color: #fff;">Nv. ${c.max_level}</strong>
+                          </span>
+                        </div>
+
+                        <!-- Levels Progression -->
+                        <div style="display: flex; flex-direction: column; gap: 4px; font-size: 0.76rem;">
+                          ${c.levels.map(l => `
+                            <div style="background: rgba(0,0,0,0.3); border-radius: 4px; padding: 3px 6px;">
+                              <span style="color: #a78bfa; font-weight: 700;">Nv. ${l.level}:</span>
+                              ${l.effects.map(e => `
+                                <span style="color: #cbd5e1;">${e.name} <strong style="color: #34d399;">${e.val}</strong></span>
+                              `).join(', ')}
+                            </div>
+                          `).join('')}
+                        </div>
+                      </td>
+                    `;
+                  }).join('')}
+                </tr>
+              `).join('')}
+
+              <!-- Column Bonus Footer Row -->
+              <tr>
+                <td style="padding: 8px 10px; background: rgba(245,158,11,0.1); border-radius: 6px; text-align: center; border: 1px solid rgba(245,158,11,0.3);">
+                  <div style="font-weight: 700; color: #fbbf24; font-size: 0.78rem;">🏆 Bônus de Coluna</div>
+                  <div style="font-size: 0.65rem; color: #94a3b8;">Ao Completar</div>
+                </td>
+                ${Array.from({ length: board.columns_count }, (_, i) => {
+                  const colIdx = i + 1;
+                  const cb = bonusByCol[colIdx];
+                  if (cb) {
+                    return `
+                      <td style="background: rgba(245,158,11,0.08); border: 2px dashed rgba(245,158,11,0.4); border-radius: 8px; padding: 10px; vertical-align: top;">
+                        <div style="font-weight: 700; color: #fbbf24; font-size: 0.78rem; margin-bottom: 4px;">
+                          Bônus Ativado (Col ${colIdx})
+                        </div>
+                        <div style="font-size: 0.76rem; color: #cbd5e1;">
+                          ${cb.levels.map(l => l.effects.map(e => `
+                            <div>${e.name}: <strong style="color: #34d399;">${e.val}</strong></div>
+                          `).join('')).join('')}
+                        </div>
+                      </td>
+                    `;
+                  } else {
+                    return `
+                      <td style="background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.08); border-radius: 8px; padding: 10px; text-align: center; color: #64748b; font-size: 0.72rem; vertical-align: middle;">
+                        Sem Bônus
+                      </td>
+                    `;
+                  }
+                }).join('')}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+
+    detailModal.classList.add('active');
+  };
+
   // Render FAQ
   function renderFaq() {
     const container = document.getElementById('faqContainer');
@@ -3875,6 +4219,26 @@
       state.bloodlineSearchTerm = e.target.value;
       renderBloodline();
     });
+
+    document.getElementById('bloodrealmFilterBar')?.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (btn && btn.dataset.brcat) {
+        document.querySelectorAll('#bloodrealmFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.bloodrealmFilter = btn.dataset.brcat;
+        renderBloodrealm();
+      }
+    });
+
+    document.getElementById('bloodrealmTabSelect')?.addEventListener('change', e => {
+      state.bloodrealmTabFilter = e.target.value;
+      renderBloodrealm();
+    });
+
+    document.getElementById('bloodrealmSearchInput')?.addEventListener('input', e => {
+      state.bloodrealmSearchTerm = e.target.value;
+      renderBloodrealm();
+    });
   }
 
   function initApp() {
@@ -3895,6 +4259,7 @@
     renderPortraits();
     renderArtifacts();
     renderBloodline();
+    renderBloodrealm();
     renderFaq();
     setupListeners();
   }

@@ -115,6 +115,11 @@
           <span>Linhagem</span>
           <span class="nav-count" id="countBloodline">10</span>
         </a>
+        <a class="nav-item" data-target="bloodrealm">
+          <span class="nav-icon"><img src="assets/matrix/flat_matrix.png" style="width: 18px; height: 18px; vertical-align: middle;" onerror="this.outerHTML='🔮'"></span>
+          <span>Reino de Sangue</span>
+          <span class="nav-count" id="countBloodRealm">22</span>
+        </a>
         <a class="nav-item" data-target="faq">
           <span class="nav-icon">❓</span>
           <span>FAQ & Sistemas</span>
@@ -927,7 +932,95 @@
         </section>
 
         <!-- ==============================================
-             19. FAQ SECTION
+             19. BLOOD REALM EVOLUTION (MATRIX) SECTION
+             ============================================== -->
+        <section id="bloodrealm" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <img src="assets/matrix/flat_matrix.png" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 8px;" onerror="this.outerHTML='🔮'">
+              Evolução do Reino de Sangue (Matrix)
+            </h2>
+            <p class="section-subtitle">Catálogo dos 22 quadros de evolução, distribuição de tentativas com pesos probabilísticos desiguais, redefinição e bônus de coluna</p>
+          </div>
+
+          <!-- Mechanics Card -->
+          <div class="info-card" style="background: linear-gradient(135deg, rgba(35,15,35,0.85), rgba(20,10,25,0.95)); border: 1px solid rgba(168,85,247,0.35); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+            <div style="display: flex; gap: 14px; align-items: flex-start;">
+              <span style="font-size: 2rem;">🔮</span>
+              <div style="flex: 1;">
+                <h3 style="color: #c084fc; margin-bottom: 8px; font-size: 1.15rem;">Como Funciona a Evolução do Reino de Sangue no ProjectRED</h3>
+                <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; margin-bottom: 12px;">
+                  O Reino de Sangue distribui tentativas de evolução entre as células de cada fileira gastando <strong>Pedras de Evolução</strong>. Cada ativação seleciona uma célula, eleva seu nível e concede atributos fixos. Completar colunas inteiras desbloqueia bônus adicionais.
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 10px;">
+                  <div style="background: rgba(0,0,0,0.35); border-left: 3px solid #f59e0b; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+                    <div style="font-weight: 700; color: #fbbf24; font-size: 0.88rem; margin-bottom: 4px;">🎲 Chances Desiguais de Seleção</div>
+                    <div style="font-size: 0.8rem; color: #94a3b8;">
+                      As células de uma fileira têm taxas diferentes (<code>SelectRate</code>). Exemplo na Fonte I: <strong>Coluna 1 (10%)</strong>, <strong>Coluna 2 (50%)</strong> e <strong>Coluna 3 (40%)</strong>. A seleção não é uniforme.
+                    </div>
+                  </div>
+                  <div style="background: rgba(0,0,0,0.35); border-left: 3px solid #ef4444; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+                    <div style="font-weight: 700; color: #f87171; font-size: 0.88rem; margin-bottom: 4px;">🔄 Redefinir Não Devolve Materiais</div>
+                    <div style="font-size: 0.8rem; color: #94a3b8;">
+                      O reset zera todos os níveis de célula da fileira e recupera as tentativas, mas <strong>não devolve as Pedras de Evolução gastas</strong>. Custa Bilhete ou Diamantes.
+                    </div>
+                  </div>
+                  <div style="background: rgba(0,0,0,0.35); border-left: 3px solid #ec4899; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+                    <div style="font-weight: 700; color: #f472b6; font-size: 0.88rem; margin-bottom: 4px;">⚠️ Risco do Reset Automático</div>
+                    <div style="font-size: 0.8rem; color: #94a3b8;">
+                      Configurar redefinição automática com célula evitada pode descartar resultados úteis e <strong>consumir materiais repetidamente em loop</strong> até zerar os recursos.
+                    </div>
+                  </div>
+                  <div style="background: rgba(0,0,0,0.35); border-left: 3px solid #3b82f6; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+                    <div style="font-weight: 700; color: #60a5fa; font-size: 0.88rem; margin-bottom: 4px;">💾 Salvar / Carregar por Variante</div>
+                    <div style="font-size: 0.8rem; color: #94a3b8;">
+                      Variantes de serviço (como 11000) possuem Salvar (70k Ouro) e Carregar (100k Ouro). Carregar <strong>substitui o quadro atual</strong> e não restitui materiais.
+                    </div>
+                  </div>
+                  <div style="background: rgba(0,0,0,0.35); border-left: 3px solid #10b981; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+                    <div style="font-weight: 700; color: #34d399; font-size: 0.88rem; margin-bottom: 4px;">🏆 Bônus de Conclusão de Coluna</div>
+                    <div style="font-size: 0.8rem; color: #94a3b8;">
+                      Evoluir todas as células de uma coluna ativa o bônus de coluna (ex.: +20 Poder de Ataque Básico/Habilidade). Quadros posteriores não possuem bônus.
+                    </div>
+                  </div>
+                  <div style="background: rgba(0,0,0,0.35); border-left: 3px solid #8b5cf6; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+                    <div style="font-weight: 700; color: #a78bfa; font-size: 0.88rem; margin-bottom: 4px;">🌕 Quadros de Evento Temporários</div>
+                    <div style="font-size: 0.8rem; color: #94a3b8;">
+                      A aba <em>Lua Cheia</em> traz os 4 quadros temáticos <strong>L, U, N, A</strong> (5×4), vinculados a períodos específicos de evento (<code>DateTimeSetting=11979</code>).
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Search and Filter Bar -->
+          <div class="filter-bar" id="bloodrealmFilterBar" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 20px;">
+            <div style="flex: 1; min-width: 250px;">
+              <input type="text" id="bloodrealmSearchInput" class="search-input" placeholder="🔍 Buscar por nome do quadro (ex: Fonte I, Avançado, L, U, N, A), dimensão ou atributo..." style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(15,20,30,0.8); color: #fff; font-size: 0.9rem;">
+            </div>
+            <button class="filter-btn active" data-brcat="all">Todas as Grades (22)</button>
+            <button class="filter-btn" data-brcat="1">Reino de Sangue 1 (10)</button>
+            <button class="filter-btn" data-brcat="2">Reino de Sangue 2 (8)</button>
+            <button class="filter-btn" data-brcat="3">🌕 Evento Lua Cheia (4)</button>
+            <select id="bloodrealmTabSelect" style="padding: 9px 12px; border-radius: 8px; background: rgba(15,20,30,0.8); color: #fff; border: 1px solid rgba(255,255,255,0.15); font-size: 0.88rem;">
+              <option value="all">Todas as Abas</option>
+              <option value="Fonte">Fonte (3×3)</option>
+              <option value="Avançado">Avançado (4×4)</option>
+              <option value="Manifestação">Manifestação (5×5)</option>
+              <option value="Libertação">Libertação (5×5)</option>
+              <option value="Novo Começo">Novo Começo (3×4 e 3×6)</option>
+              <option value="Fissão">Fissão (4×4 e 4×6)</option>
+              <option value="Lua Cheia">Lua Cheia (5×4)</option>
+            </select>
+          </div>
+
+          <!-- Blood Realm Boards Grid -->
+          <div class="entity-grid" id="bloodrealmContainer"></div>
+        </section>
+
+        <!-- ==============================================
+             20. FAQ SECTION
              ============================================== -->
         <section id="faq" class="view-section">
           <div class="section-header">
