@@ -91,6 +91,52 @@ for r in dungeon_list:
         dungeon_boss_map[bid].append(dname)
 
 # ==========================================
+# 0. DROPS DATABASE (recompensas_por_npc.csv)
+# ==========================================
+print("Loading Monster Drops catalog from analysis/versions/2026-10-31/reports/drops/recompensas_por_npc.csv...")
+DROPS_CSV = os.path.join(BASE_DIR, "analysis/versions/2026-10-31/reports/drops/recompensas_por_npc.csv")
+npc_drops = defaultdict(list)
+item_droppers_raw = defaultdict(list)
+drop_npc_ids = set()
+dropped_item_ids = set()
+
+if os.path.exists(DROPS_CSV):
+    with open(DROPS_CSV, encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            nid = r["npc_id"].strip()
+            nname = r["npc_nome"].strip()
+            nlvl = r.get("npc_nivel", "").strip()
+            ngrade = r.get("npc_grade", "0").strip()
+            iid = r.get("reward_param", "").strip()
+            iname = r.get("item_nome", "").strip()
+            rarity = r.get("item_raridade", "0").strip()
+            qmin = r.get("quantidade_min", "1").strip()
+            qmax = r.get("quantidade_max", "1").strip()
+            rate = r.get("taxa_raiz_bruta", "").strip()
+            if not iid or not iname or not iid.isdigit():
+                continue
+            drop_npc_ids.add(nid)
+            dropped_item_ids.add(iid)
+            npc_drops[nid].append({
+                "item_id": iid,
+                "name": iname,
+                "rarity": rarity,
+                "qty_min": qmin,
+                "qty_max": qmax,
+                "rate": rate
+            })
+            item_droppers_raw[iid].append({
+                "npc_id": nid,
+                "npc_name": nname,
+                "npc_level": nlvl,
+                "npc_grade": ngrade,
+                "qty_min": qmin,
+                "qty_max": qmax,
+                "rate": rate
+            })
+print(f"  ✓ Loaded drops for {len(npc_drops)} NPCs, covering {len(dropped_item_ids)} distinct dropped items.")
+
+# ==========================================
 # 1. CLASSES
 # ==========================================
 print("Processing Classes with official portraits and icons...")
@@ -466,6 +512,7 @@ ATTRIBUTE_MAP = {
     '7': 'Neutro / Físico'
 }
 grade_map = {
+    "0": "Monstro Comum",
     "1": "Monstro de Elite",
     "2": "Chefe de Masmorra (Boss)",
     "3": "Chefe de Campo (Field Boss)"
@@ -486,7 +533,8 @@ default_boss_portraits = [
 # Exclude invisible UE5 collision dummies / triggers (BP_Monster_Invisible01)
 visible_npcs = [
     n for n in npc_list
-    if n.get("GradeType") in ["1", "2", "3"] and "invisible" not in n.get("Blueprint", "").lower()
+    if (n.get("GradeType", "").strip() in ["1", "2", "3"] or n.get("Id", "").strip() in drop_npc_ids)
+    and "invisible" not in n.get("Blueprint", "").lower()
 ]
 
 # Deduplicate into unique combat profiles
@@ -496,7 +544,7 @@ for n in visible_npcs:
     name_row = npc_names.get(nid, {})
     name = name_row.get("Name", "").strip() or n.get("NameEN", "").strip() or f"Monstro #{nid}"
     bp = n.get("Blueprint", "").strip()
-    grade = n.get("GradeType", "0")
+    grade = n.get("GradeType", "0").strip()
 
     # Disambiguate appendages if name is identical in localization
     if bp == "BP_MonsterAlrauneTentacleFrontBoss":
@@ -513,7 +561,7 @@ for (name, bp, grade), items in groups.items():
     title_row = npc_names.get(pid, {})
     title = title_row.get("Title", "").strip()
     if not title:
-        title = "Chefe Mundial" if grade == "3" else ("Guardião de Masmorra" if grade == "2" else "Inimigo de Elite")
+        title = "Chefe Mundial" if grade == "3" else ("Guardião de Masmorra" if grade == "2" else ("Inimigo de Elite" if grade == "1" else "Monstro de Campo / Caçada"))
 
     levels = sorted(list(set(int(x.get("Level", 0)) for x in items if x.get("Level", "").isdigit())))
     min_lvl = levels[0] if levels else 1
@@ -619,6 +667,31 @@ for (name, bp, grade), items in groups.items():
             if d not in dung_list:
                 dung_list.append(d)
 
+    # Drops matching from npc_drops (recompensas_por_npc.csv)
+    boss_drops = []
+    seen_drops = set()
+    for item_inst in items:
+        nid = item_inst.get("Id", "").strip()
+        for d in npc_drops.get(nid, []):
+            d_key = d["item_id"]
+            if d_key not in seen_drops:
+                seen_drops.add(d_key)
+                it_row = item_raw.get(d["item_id"], {})
+                raw_img = it_row.get("Img", "").strip()
+                clean_img_file = raw_img.replace("IMG_", "").replace("TEX_", "").lower() + ".png"
+                drop_icon = f"assets/items/{clean_img_file}" if clean_img_file in item_pngs else "assets/items/flat_relic.png"
+                qmin = d["qty_min"]
+                qmax = d["qty_max"]
+                qty_str = f"{qmin}~{qmax}" if qmin != qmax else qmin
+                boss_drops.append({
+                    "id": d["item_id"],
+                    "name": d["name"],
+                    "rarity": d["rarity"],
+                    "qty": qty_str,
+                    "rate": d["rate"],
+                    "icon": drop_icon
+                })
+
     bg0 = primary.get("BattleGroupId", "").strip()
     bat0 = npc_battles_map.get(bg0, [{}])[0] if npc_battles_map.get(bg0) else {}
     sight_raw = bat0.get("SightRange", "0")
@@ -649,6 +722,8 @@ for (name, bp, grade), items in groups.items():
         "sight_range": sight_disp,
         "attribute": attr_disp,
         "world_map": ", ".join(sorted(w_set)) if w_set else "Masmorra / Campo Dimensional",
+        "regions": sorted(list(w_set)),
+        "drops": boss_drops,
         "spawn_schedule": ", ".join(sched_list),
         "dungeons": dung_list,
         "skills": skills_data,
@@ -659,6 +734,17 @@ for (name, bp, grade), items in groups.items():
     })
 
 bosses_catalog.sort(key=lambda x: (int(x["grade_code"]), int(x["level"])), reverse=True)
+
+npc_to_boss_map = {}
+all_regions_set = set()
+for b in bosses_catalog:
+    for inst_id in b["instance_ids"]:
+        npc_to_boss_map[inst_id] = b
+    for r in b.get("regions", []):
+        if r:
+            all_regions_set.add(r)
+all_regions_list = sorted(list(all_regions_set))
+
 with open(os.path.join(OUT_DIR, "bosses.json"), "w", encoding="utf-8") as f:
     json.dump(bosses_catalog, f, indent=2, ensure_ascii=False)
 
@@ -738,7 +824,40 @@ print("Processing Items & Gear with official game icons...")
 # Category mappings based on EItemType enum from libUnreal.so
 POTION_TYPES = {"5", "26", "48", "79", "80", "81", "36", "37", "38"}
 
+# Build Item Droppers mapping using npc_to_boss_map
+item_droppers_map = defaultdict(list)
+for iid, dlist in item_droppers_raw.items():
+    seen_bosses = set()
+    dropper_entries = []
+    for dr in dlist:
+        nid = dr["npc_id"]
+        boss = npc_to_boss_map.get(nid)
+        boss_id = boss["id"] if boss else nid
+        if boss_id in seen_bosses:
+            continue
+        seen_bosses.add(boss_id)
+        b_name = boss["name"] if boss else dr["npc_name"]
+        b_grade = boss["grade_name"] if boss else ("Elite" if dr["npc_grade"] == "1" else "Monstro Comum")
+        b_grade_code = boss["grade_code"] if boss else dr["npc_grade"]
+        b_lvl = dr["npc_level"]
+        b_world = boss["world_map"] if boss else ""
+        qmin = dr["qty_min"]
+        qmax = dr["qty_max"]
+        qty_str = f"{qmin}~{qmax}" if qmin != qmax else qmin
+        dropper_entries.append({
+            "id": boss_id,
+            "name": b_name,
+            "lvl": b_lvl,
+            "grade": b_grade,
+            "grade_code": b_grade_code,
+            "world": b_world,
+            "qty": qty_str
+        })
+    dropper_entries.sort(key=lambda x: (int(x["lvl"]) if str(x["lvl"]).isdigit() else 0), reverse=True)
+    item_droppers_map[iid] = dropper_entries[:25]
+
 items_by_cat = defaultdict(list)
+all_processed_items = {}
 
 for iid, irow in item_raw.items():
     iname_row = item_names.get(iid)
@@ -814,6 +933,11 @@ for iid, irow in item_raw.items():
         type_label = "Traje, Cosmético & Selo"
         clean_name = re.sub(r'\{[^}]+\}', '', name).strip()
         clean_desc = re.sub(r'\{[^}]+\}', '', desc).strip()
+    elif iid in dropped_item_ids:
+        cat = "drops"
+        type_label = "Drop de Monstro / Campo"
+        clean_name = re.sub(r'\{[^}]+\}', '', name).strip()
+        clean_desc = re.sub(r'\{[^}]+\}', '', desc).strip()
     else:
         continue
 
@@ -872,11 +996,16 @@ for iid, irow in item_raw.items():
             if b in item_pngs:
                 item_img = f"assets/items/{b}"
                 break
+    elif cat == "drops":
+        for d_icon in ["flat_relic.png", "flat_itemcraft.png", "asset_gold.png"]:
+            if d_icon in item_pngs:
+                item_img = f"assets/items/{d_icon}"
+                break
 
     if not item_img:
         item_img = "assets/logo.png"
 
-    items_by_cat[cat].append({
+    item_dict = {
         "id": iid,
         "name": clean_name,
         "desc": clean_desc if clean_desc else "Item de uso e progressão vampírica.",
@@ -888,8 +1017,11 @@ for iid, irow in item_raw.items():
         "rarity": rarity,
         "max_enchant": "+15 (Encantamento Seguro até +5, Risco de Falha/Degradação acima)",
         "usable": irow.get("Usable", "0") == "1",
-        "weight": irow.get("Weight", "0")
-    })
+        "weight": irow.get("Weight", "0"),
+        "droppers": item_droppers_map.get(iid, [])
+    }
+    all_processed_items[iid] = item_dict
+    items_by_cat[cat].append(item_dict)
 
 # Curate a balanced collection across ALL categories with real extracted icons prioritized:
 curated_items = []
@@ -920,6 +1052,13 @@ curated_items.extend(items_by_cat["materials"])
 
 # 9. Trajes, Cosméticos & Medalhas Comemorativas
 curated_items.extend(items_by_cat["costumes"])
+
+# 10. Todos os Itens com Drop Confirmado de Monstros (Garantia de 100% de cobertura e cross-linking)
+curated_ids = set(it["id"] for it in curated_items)
+for iid in dropped_item_ids:
+    if iid in all_processed_items and iid not in curated_ids:
+        curated_items.append(all_processed_items[iid])
+        curated_ids.add(iid)
 
 with open(os.path.join(OUT_DIR, "items.json"), "w", encoding="utf-8") as f:
     json.dump(curated_items, f, indent=2, ensure_ascii=False)
@@ -1916,6 +2055,7 @@ bundle_data = {
     "builds": builds_data,
     "skills": skills_catalog,
     "bosses": bosses_catalog,
+    "regions": all_regions_list,
     "dungeons": dungeons_catalog,
     "items": curated_items,
     "quests": quests_catalog,

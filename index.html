@@ -48,7 +48,7 @@
         <a class="nav-item" data-target="bosses">
           <span class="nav-icon">💀</span>
           <span>Inimigos & Chefes</span>
-          <span class="nav-count" id="countBosses">449</span>
+          <span class="nav-count" id="countBosses">459</span>
         </a>
         <a class="nav-item" data-target="dungeons">
           <span class="nav-icon">🏰</span>
@@ -58,7 +58,7 @@
         <a class="nav-item" data-target="items">
           <span class="nav-icon">🎒</span>
           <span>Itens & Equipamentos</span>
-          <span class="nav-count" id="countItems">934</span>
+          <span class="nav-count" id="countItems">1.6k</span>
         </a>
         <a class="nav-item" data-target="quests">
           <span class="nav-icon">📜</span>
@@ -291,13 +291,23 @@
         <section id="bosses" class="view-section">
           <div class="section-header">
             <h2 class="section-title">💀 Inimigos & Grandes Chefes</h2>
-            <p class="section-subtitle">Catálogo unificado e desduplicado com horários de respawn, habilidades reais e atributos</p>
+            <p class="section-subtitle">Catálogo unificado e desduplicado com horários de respawn, drops confirmados por NPC, busca por região e atributos</p>
+          </div>
+          <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 14px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 0.85rem; color: #94a3b8; font-weight: 600;">🗺️ Região / Mapa:</span>
+              <select id="bossesRegionSelect" class="filter-select" style="background: rgba(15,20,30,0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 6px 14px; border-radius: 6px; font-size: 0.85rem; cursor: pointer;">
+                <option value="all">Todas as Regiões (Geral)</option>
+              </select>
+            </div>
           </div>
           <div class="filter-bar" id="bossesFilterBar">
-            <button class="filter-btn active" data-grade="all">Todos os Inimigos (449)</button>
+            <button class="filter-btn active" data-grade="all">Todos os Inimigos (459)</button>
             <button class="filter-btn" data-grade="3">Chefes de Campo (75)</button>
             <button class="filter-btn" data-grade="2">Chefes de Masmorra (171)</button>
             <button class="filter-btn" data-grade="1">Monstros de Elite (203)</button>
+            <button class="filter-btn" data-grade="0">Monstros Comuns (10)</button>
+            <button class="filter-btn" data-grade="drops_only">Com Drops Confirmados 📦 (54)</button>
           </div>
           <div class="cards-grid" id="bossesContainer">
             <!-- Dynamically populated -->

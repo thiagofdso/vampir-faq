@@ -15,6 +15,7 @@
     skillsPage: 1,
     skillsPerPage: 36,
     bossesFilter: 'all',
+    bossesRegion: 'all',
     bossesSearchTerm: '',
     bossesPage: 1,
     dungeonsFilter: 'all',
@@ -427,8 +428,14 @@
 
     let filtered = state.data.bosses;
 
-    if (state.bossesFilter !== 'all') {
+    if (state.bossesFilter === 'drops_only') {
+      filtered = filtered.filter(b => b.drops && b.drops.length > 0);
+    } else if (state.bossesFilter !== 'all') {
       filtered = filtered.filter(b => b.grade_code === state.bossesFilter);
+    }
+
+    if (state.bossesRegion && state.bossesRegion !== 'all') {
+      filtered = filtered.filter(b => (b.regions && b.regions.includes(state.bossesRegion)) || (b.world_map && b.world_map.includes(state.bossesRegion)));
     }
 
     if (state.bossesSearchTerm.trim()) {
@@ -439,7 +446,8 @@
         b.id.includes(q) ||
         (b.instance_ids && b.instance_ids.some(id => id.includes(q))) ||
         (b.blueprint && b.blueprint.toLowerCase().includes(q)) ||
-        (b.world_map && b.world_map.toLowerCase().includes(q))
+        (b.world_map && b.world_map.toLowerCase().includes(q)) ||
+        (b.drops && b.drops.some(d => d.name.toLowerCase().includes(q)))
       );
     }
 
@@ -448,7 +456,7 @@
     const paginated = filtered.slice(0, state.bossesPage * pageSize);
 
     container.innerHTML = paginated.map(b => {
-      const badgeColor = b.grade_code === '3' ? 'badge-crimson' : (b.grade_code === '2' ? 'badge-gold' : 'badge-blue');
+      const badgeColor = b.grade_code === '3' ? 'badge-crimson' : (b.grade_code === '2' ? 'badge-gold' : (b.grade_code === '1' ? 'badge-blue' : 'badge-gray'));
       return `
         <div class="entity-card boss-card" onclick="window.inspectBoss('${b.id}')">
           <!-- Boss Official Artwork Banner -->
@@ -469,6 +477,7 @@
 
             <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
               ${b.instance_count > 1 ? `<span class="entity-badge badge-gold" style="font-size: 0.72rem;">👥 ${b.instance_count} Instâncias</span>` : ''}
+              ${b.drops && b.drops.length ? `<span class="entity-badge badge-gold" style="font-size: 0.72rem;">📦 ${b.drops.length} Drops</span>` : ''}
               ${b.skills && b.skills.length ? `<span class="entity-badge badge-crimson" style="font-size: 0.72rem;">⚔️ ${b.skills.length} Golpes</span>` : ''}
               ${b.spawn_schedule ? `<span class="entity-badge badge-blue" style="font-size: 0.72rem;">⏰ ${b.spawn_schedule}</span>` : ''}
             </div>
@@ -565,7 +574,8 @@
         i.name.toLowerCase().includes(q) ||
         i.desc.toLowerCase().includes(q) ||
         i.id.includes(q) ||
-        i.type_name.toLowerCase().includes(q)
+        i.type_name.toLowerCase().includes(q) ||
+        (i.droppers && i.droppers.some(d => d.name.toLowerCase().includes(q) || (d.world && d.world.toLowerCase().includes(q))))
       );
     }
 
@@ -584,9 +594,10 @@
           </div>
           <div style="flex: 1; margin-left: 14px;">
             <div class="entity-title" style="font-size: 1.05rem;">${item.name}</div>
-            <div style="display: flex; gap: 8px; margin-top: 4px;">
+            <div style="display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap;">
               <span class="entity-badge badge-gold" style="font-size: 0.7rem;">${item.type_name}</span>
               <span class="entity-badge badge-crimson" style="font-size: 0.7rem;">Tier ${item.tier}</span>
+              ${item.droppers && item.droppers.length ? `<span class="entity-badge badge-blue" style="font-size: 0.68rem;">💀 ${item.droppers.length} Monstros</span>` : ''}
             </div>
           </div>
         </div>
@@ -1772,6 +1783,36 @@
       `;
     }
 
+    // Monster Drops & Rewards
+    let dropsHtml = '';
+    if (b.drops && b.drops.length > 0) {
+      dropsHtml = `
+        <div class="panel-box" style="margin-bottom: 20px; border-left: 3px solid var(--gold-primary);">
+          <div class="panel-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>📦 Drops & Recompensas Confirmadas (${b.drops.length} itens)</span>
+            <span style="font-size: 0.72rem; color: #94a3b8; font-weight: normal;">Fonte: NpcReward.csv</span>
+          </div>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin: 4px 0 12px; line-height: 1.4;">
+            Itens e equipamentos cadastrados no grupo de recompensa deste monstro. Clique em <strong>Ver Item</strong> para inspecionar os detalhes do item.
+          </p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; max-height: 320px; overflow-y: auto; padding-right: 4px;">
+            ${b.drops.map(d => `
+              <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                  <img src="${d.icon}" style="width: 34px; height: 34px; border-radius: 6px; object-fit: contain; background: rgba(0,0,0,0.4); padding: 2px;" onerror="this.src='assets/logo.png'">
+                  <div style="min-width: 0;">
+                    <div style="font-size: 0.82rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${d.name}">${d.name}</div>
+                    <div style="font-size: 0.72rem; color: #fbbf24;">Qtd: <strong>${d.qty}</strong></div>
+                  </div>
+                </div>
+                <button class="filter-btn" style="padding: 3px 8px; font-size: 0.72rem; flex-shrink: 0;" onclick="window.openItemFromBoss('${d.id}')">Ver Item 🎒</button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
     modalBody.innerHTML = `
       <div style="margin-bottom: 20px; text-align: center;">
         <img src="${b.portrait_img}" alt="${b.name}" style="max-height: 220px; border-radius: 8px; border: 1px solid var(--border-gold); box-shadow: 0 0 20px rgba(0,0,0,0.8);" onerror="this.src='assets/splash.png'">
@@ -1807,6 +1848,7 @@
       ${tiersHtml}
       ${skillsHtml}
       ${spawnHtml}
+      ${dropsHtml}
 
       <div class="panel-box">
         <div class="panel-title">⚙️ Parâmetros de Motor & IA (Unreal Engine 5)</div>
@@ -1852,12 +1894,71 @@
     detailModal.classList.add('open');
   };
 
+  window.openItemFromBoss = function(itemId) {
+    detailModal.classList.remove('open');
+    switchTab('items');
+    setTimeout(() => {
+      window.inspectItem(itemId);
+    }, 120);
+  };
+
+  window.openBossFromItem = function(bossId) {
+    detailModal.classList.remove('open');
+    switchTab('bosses');
+    setTimeout(() => {
+      window.inspectBoss(bossId);
+    }, 120);
+  };
+
   window.inspectItem = function(id) {
     const item = state.data.items.find(x => x.id === id);
     if (!item) return;
 
     modalTitle.innerText = item.name;
     modalSubtitle.innerText = `${item.type_name} • Tier ${item.tier} (ID #${item.id})`;
+
+    let droppersHtml = '';
+    if (item.droppers && item.droppers.length > 0) {
+      droppersHtml = `
+        <div class="panel-box" style="margin-top: 16px; border-left: 3px solid #38bdf8;">
+          <div class="panel-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>💀 Monstros que Dropam este Item (${item.droppers.length} fontes)</span>
+            <span style="font-size: 0.72rem; color: #94a3b8; font-weight: normal;">Fonte: NpcReward.csv</span>
+          </div>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin: 4px 0 10px; line-height: 1.4;">
+            Monstros e chefes de campo com drop direto catalogado. Clique em <strong>Ver Monstro</strong> para ver horários, habilidades e localização.
+          </p>
+          <div style="display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; padding-right: 4px;">
+            ${item.droppers.map(dr => {
+              const gradeClass = dr.grade_code === '3' ? 'badge-crimson' : (dr.grade_code === '2' ? 'badge-gold' : (dr.grade_code === '1' ? 'badge-blue' : 'badge-gray'));
+              return `
+                <div style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                  <div>
+                    <div style="font-size: 0.85rem; font-weight: 600; color: #fff;">
+                      ${dr.name} <span class="entity-badge ${gradeClass}" style="font-size: 0.68rem; margin-left: 4px;">${dr.grade}</span>
+                      ${dr.lvl ? `<span style="font-size: 0.75rem; color: #38bdf8; margin-left: 4px;">(Nv. ${dr.lvl})</span>` : ''}
+                    </div>
+                    <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px;">
+                      <strong>Região:</strong> ${dr.world || 'Campo / Masmorra'} • <strong>Qtd:</strong> ${dr.qty}
+                    </div>
+                  </div>
+                  <button class="filter-btn" style="padding: 4px 10px; font-size: 0.75rem; flex-shrink: 0;" onclick="window.openBossFromItem('${dr.id}')">Ver Monstro 💀</button>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    } else {
+      droppersHtml = `
+        <div class="panel-box" style="margin-top: 16px; border-left: 3px solid #64748b;">
+          <div class="panel-title">💀 Monstros que Dropam este Item</div>
+          <p style="font-size: 0.84rem; color: #94a3b8; margin: 4px 0 0; line-height: 1.4;">
+            Este item não possui drop direto registrado na tabela de NPCs locais (obtido através de Forja, Missão de Campanha, Baús de Evento ou Lojas do Jogo).
+          </p>
+        </div>
+      `;
+    }
 
     modalBody.innerHTML = `
       <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
@@ -1874,6 +1975,7 @@
           ${item.max_enchant}
         </div>
       </div>
+      ${droppersHtml}
     `;
 
     detailModal.classList.add('open');
@@ -2060,6 +2162,18 @@
         renderSkills();
       }
     });
+
+    const regionSelect = document.getElementById('bossesRegionSelect');
+    if (regionSelect) {
+      const regions = state.data.regions || Array.from(new Set((state.data.bosses || []).flatMap(b => b.regions || []))).filter(Boolean).sort();
+      regionSelect.innerHTML = `<option value="all">Todas as Regiões (${regions.length})</option>` +
+        regions.map(r => `<option value="${r}">${r}</option>`).join('');
+      regionSelect.addEventListener('change', e => {
+        state.bossesRegion = e.target.value;
+        state.bossesPage = 1;
+        renderBosses();
+      });
+    }
 
     document.getElementById('bossesFilterBar')?.addEventListener('click', e => {
       if (e.target.tagName === 'BUTTON') {
