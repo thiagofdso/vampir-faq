@@ -29,6 +29,7 @@
     questsPage: 1,
     questsPerPage: 24,
     craftingFilter: 'all',
+    craftingTierFilter: 'all',
     craftingSearchTerm: '',
     craftingPage: 1,
     craftingPerPage: 24,
@@ -796,12 +797,18 @@
       filtered = filtered.filter(c => c.category === state.craftingFilter);
     }
 
+    if (state.craftingTierFilter && state.craftingTierFilter !== 'all') {
+      const targetTier = parseInt(state.craftingTierFilter);
+      filtered = filtered.filter(c => c.tier === targetTier);
+    }
+
     if (state.craftingSearchTerm.trim()) {
       const s = state.craftingSearchTerm.toLowerCase();
       filtered = filtered.filter(c =>
         c.target_name.toLowerCase().includes(s) ||
         c.tab_name.toLowerCase().includes(s) ||
         c.id.includes(s) ||
+        (c.tier && (`t${c.tier}`.includes(s) || `tier ${c.tier}`.includes(s))) ||
         c.materials.some(m => m.name.toLowerCase().includes(s))
       );
     }
@@ -821,8 +828,13 @@
           </div>
           <div style="flex: 1; margin-left: 12px;">
             <div class="entity-title" style="font-size: 1rem;">${c.target_name}</div>
-            <div style="display: flex; gap: 6px; margin-top: 3px;">
+            <div style="display: flex; gap: 6px; margin-top: 3px; align-items: center; flex-wrap: wrap;">
               <span class="entity-badge badge-gold" style="font-size: 0.68rem;">${c.tab_name}</span>
+              ${c.tier ? `
+                <span class="badge" style="background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.4); font-size: 0.68rem; font-weight: 700; padding: 1px 6px;">
+                  Tier ${c.tier} (T${c.tier})
+                </span>
+              ` : ''}
               <span class="entity-badge ${c.big_success_rate !== '0%' ? 'badge-blue' : 'badge-crimson'}" style="font-size: 0.68rem;">
                 Sucesso: ${c.success_rate} ${c.big_success_rate !== '0%' ? '• Gr. Sucesso: ' + c.big_success_rate : ''}
               </span>
@@ -4669,14 +4681,25 @@
         </div>
         <div style="flex: 1;">
           <div style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 4px;">${c.target_name}</div>
-          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+          <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
             <span class="entity-badge badge-gold">${c.tab_name}</span>
+            ${c.tier ? `
+              <span class="badge" style="background: rgba(245,158,11,0.25); color: #fbbf24; border: 1px solid rgba(245,158,11,0.5); font-weight: 700; padding: 2px 8px; font-size: 0.8rem;">
+                🛡️ Tier ${c.tier} (T${c.tier})
+              </span>
+            ` : ''}
             <span class="entity-badge ${c.big_success_rate !== '0%' ? 'badge-blue' : 'badge-crimson'}">
               Sucesso: ${c.success_rate} ${c.big_success_rate !== '0%' ? '• Gr. Sucesso: ' + c.big_success_rate : ''}
             </span>
           </div>
         </div>
       </div>
+      ${c.tier ? `
+        <div style="background: rgba(245,158,11,0.08); border-left: 3px solid #f59e0b; border-radius: 0 6px 6px 0; padding: 10px 14px; margin-bottom: 16px; font-size: 0.82rem; color: #fde68a; line-height: 1.5;">
+          <strong>⚔️ Especificação de Tier ${c.tier}:</strong> Este equipamento pertence ao escalão de poder <strong>Tier ${c.tier}</strong> da categoria <em>${c.tab_name}</em>.
+          Tiers superiores oferecem maior ATQ/DEF base, bônus adicionais de subatributos e utilizam as tabelas avançadas de desmontagem e quebra em encantamento (<code>ItemEnchant Tier ${c.tier}</code>).
+        </div>
+      ` : ''}
       <div class="panel-box">
         <div class="panel-title" style="display: flex; align-items: center; gap: 8px;">
           <img src="assets/items/flat_itemcraft.png" style="width: 18px; height: 18px; vertical-align: middle;" onerror="this.src='assets/logo.png'">
@@ -4892,10 +4915,22 @@
     });
 
     document.getElementById('craftingFilterBar')?.addEventListener('click', e => {
-      if (e.target.tagName === 'BUTTON') {
+      const btn = e.target.closest('button');
+      if (btn) {
         document.querySelectorAll('#craftingFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
-        e.target.classList.add('active');
-        state.craftingFilter = e.target.dataset.ccat;
+        btn.classList.add('active');
+        state.craftingFilter = btn.dataset.ccat;
+        state.craftingPage = 1;
+        renderCrafting();
+      }
+    });
+
+    document.getElementById('craftingTierFilterBar')?.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (btn) {
+        document.querySelectorAll('#craftingTierFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.craftingTierFilter = btn.dataset.ctier;
         state.craftingPage = 1;
         renderCrafting();
       }

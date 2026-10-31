@@ -437,11 +437,23 @@
           <div class="filter-bar" id="craftingFilterBar">
             <button class="filter-btn active" data-ccat="all">Todas as Receitas</button>
             <button class="filter-btn" data-ccat="weapons">Armas de Classe</button>
+            <button class="filter-btn" data-ccat="books">Livros de Habilidade</button>
             <button class="filter-btn" data-ccat="armors">Armaduras & Peças</button>
             <button class="filter-btn" data-ccat="accessories">Acessórios & Joias</button>
             <button class="filter-btn" data-ccat="materials">Materiais & Forja</button>
             <button class="filter-btn" data-ccat="consumables">Consumíveis & Poções</button>
             <button class="filter-btn" data-ccat="events">Eventos & Emblemas</button>
+          </div>
+          <div class="filter-bar" id="craftingTierFilterBar" style="margin-top: -8px; margin-bottom: 20px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <span style="font-size: 0.78rem; color: #94a3b8; font-weight: 700; margin-right: 4px; display: inline-flex; align-items: center; gap: 4px;">
+              <span>🛡️</span>
+              <span>Tier de Equipamento:</span>
+            </span>
+            <button class="filter-btn active" data-ctier="all" style="font-size: 0.75rem; padding: 4px 10px;">Todos os Tiers</button>
+            <button class="filter-btn" data-ctier="1" style="font-size: 0.75rem; padding: 4px 10px;">T1 (Tier 1 • 94)</button>
+            <button class="filter-btn" data-ctier="2" style="font-size: 0.75rem; padding: 4px 10px;">T2 (Tier 2 • 55)</button>
+            <button class="filter-btn" data-ctier="3" style="font-size: 0.75rem; padding: 4px 10px;">T3 (Tier 3 • 44)</button>
+            <button class="filter-btn" data-ctier="4" style="font-size: 0.75rem; padding: 4px 10px;">T4 (Tier 4 • 14)</button>
           </div>
           <div class="cards-grid" id="craftingContainer">
             <!-- Dynamically populated -->

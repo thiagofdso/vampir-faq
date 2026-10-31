@@ -1245,9 +1245,12 @@ if os.path.exists(receitas_path):
         big_rate = (int(r.get('BigSuccessRate') or 0)) // 10000
         
         tab_num = int(tab_id) if tab_id.isdigit() else 0
-        if tab_num in range(101, 106) or tab_num in range(601, 606):
+        if tab_num in range(101, 106):
             recipe_category = "weapons"
             cat_label = "Armas de Classe"
+        elif tab_num in range(601, 606):
+            recipe_category = "books"
+            cat_label = "Livros de Habilidade"
         elif tab_num in range(201, 205):
             recipe_category = "armors"
             cat_label = "Armaduras & Peças"
@@ -1264,10 +1267,15 @@ if os.path.exists(receitas_path):
             recipe_category = "events"
             cat_label = "Eventos / Emblemas"
 
+        raw_tier = target_row.get("Tier", "").strip()
+        tier_val = int(raw_tier) if raw_tier.isdigit() else None
+
         crafting_catalog.append({
             "id": rid,
             "target_name": target_name,
             "target_item_id": target_param,
+            "tier": tier_val,
+            "tier_label": f"T{tier_val}" if tier_val else None,
             "rarity": target_rarity,
             "tab_id": tab_id,
             "tab_name": tab_name,
