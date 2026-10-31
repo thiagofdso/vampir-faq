@@ -2188,7 +2188,9 @@ STAT_NAME_MAP = {
     "MaxMp": "MP Máximo",
     "MpRecovery": "Recuperação de MP",
     "NormalAttackSpeedMultiplier": "Velocidade de Ataque Normal (%)",
-    "SkillAttackSpeedMultiplier": "Velocidade de Ataque de Habilidade (%)"
+    "SkillAttackSpeedMultiplier": "Velocidade de Ataque de Habilidade (%)",
+    "WeaponAttackPower": "Poder de Ataque da Arma",
+    "WeaponAttackPowerMax": "Poder de Ataque Máx. da Arma"
 }
 
 codex_collections_list = []
@@ -3167,6 +3169,242 @@ with open(os.path.join(OUT_DIR, "bloodrealm.json"), "w", encoding="utf-8") as f:
 print(f"  ✓ Processed Blood Realm Evolution catalog ({len(bloodrealm_boards)} boards, {bloodrealm_catalog['stats']['total_cells']} cells).")
 
 # ==========================================
+# 20. ITEM REFINEMENT (REFINAMENTO COM TRINDADE)
+# ==========================================
+print("Processing Item Refinement catalog...")
+REFINEMENT_REPORTS_DIR = os.path.join(BASE_DIR, "analysis/versions/2026-10-31/reports/refinamento")
+refinement_rules_path = os.path.join(REFINEMENT_REPORTS_DIR, "regras.csv")
+refinement_effects_path = os.path.join(REFINEMENT_REPORTS_DIR, "efeitos_possiveis.csv")
+
+EQUIP_TYPE_NAMES = {
+    "BloodSword": "Espada de Sangue",
+    "Gun": "Arma de Fogo",
+    "Orb": "Orbe",
+    "Scythe": "Foice",
+    "Tonfa": "Tonfa",
+    "Armor": "Armadura",
+    "Boots": "Botas",
+    "Gloves": "Luvas",
+    "Helmet": "Elmo",
+    "Belt": "Cinto",
+    "Bracelet": "Bracelete",
+    "Choker": "Gargantilha",
+    "Crest": "Brasão",
+    "Earring": "Brinco",
+    "Necklace": "Colar",
+    "Ring": "Anel",
+    "Diary": "Diário",
+    "Goblet": "Cálice",
+    "Mask": "Máscara",
+    "MusicBox": "Caixa de Música",
+    "Pen": "Caneta",
+    "PocketWatch": "Relógio de Bolso",
+    "Ribbon": "Fita",
+    "Perfume": "Perfume"
+}
+
+CATEGORY_NAMES = {
+    "1": "Armas",
+    "2": "Armaduras",
+    "3": "Acessórios",
+    "4": "Relíquias Especiais"
+}
+
+RARITY_NAMES = {
+    "Rare": "Raro",
+    "Epic": "Heroico",
+    "Legendary": "Lendário",
+    "Mythic": "Mítico",
+    "Unique": "Especial"
+}
+
+GRADE_INFO = {
+    0: {"label": "Comum / Básico", "icon": "assets/refinement/grade_none.png", "color": "#94a3b8"},
+    1: {"label": "Intermediário", "icon": "assets/refinement/grade_mid.png", "color": "#38bdf8"},
+    2: {"label": "Supremo", "icon": "assets/refinement/grade_max.png", "color": "#f59e0b"}
+}
+
+available_item_files = item_pngs
+
+def get_refinement_icon(cat, eq_type, rar):
+    rar_key = rar.lower()
+    eq_lower = eq_type.lower()
+    if cat == "1":
+        fname = f"weapon_{eq_lower}_{rar_key}_01.png"
+        if fname in available_item_files:
+            return f"assets/items/{fname}"
+        for f in available_item_files:
+            if f.startswith(f"weapon_{eq_lower}") and rar_key in f:
+                return f"assets/items/{f}"
+        return f"assets/items/weapon_{eq_lower}_common_01.png"
+    elif cat == "2":
+        fname = f"armor_{eq_lower}_{rar_key}_01.png"
+        if fname in available_item_files:
+            return f"assets/items/{fname}"
+        for f in available_item_files:
+            if f.startswith(f"armor_{eq_lower}") and rar_key in f:
+                return f"assets/items/{f}"
+        return f"assets/items/armor_{eq_lower}_common_01.png"
+    elif cat == "3":
+        fname = f"accessory_{eq_lower}_{rar_key}_01.png"
+        if fname in available_item_files:
+            return f"assets/items/{fname}"
+        for f in available_item_files:
+            if f.startswith(f"accessory_{eq_lower}") and rar_key in f:
+                return f"assets/items/{f}"
+        return f"assets/items/accessory_{eq_lower}_common_01.png"
+    elif cat == "4":
+        for f in available_item_files:
+            if f"enchanted{eq_lower}" in f:
+                return f"assets/items/{f}"
+        for f in available_item_files:
+            if eq_lower in f and ("itembox" in f or "objet" in f):
+                return f"assets/items/{f}"
+        return "assets/refinement/flat_refine.png"
+    return "assets/refinement/flat_refine.png"
+
+refinement_groups = defaultdict(list)
+if os.path.exists(refinement_effects_path):
+    with open(refinement_effects_path, "r", encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            gid = r["GroupId"]
+            rar_val = int(r["OperationRarity"])
+            rate_raw = int(r["SelectedRate"])
+            rate_pct = round(rate_raw / 1000.0, 3)
+            min_v = int(r["Min"])
+            max_v = int(r["Max"])
+            t_name = r["tipo_nome"]
+            disp_name = STAT_NAME_MAP.get(t_name, t_name)
+            val_disp = f"+{min_v}%" if "Multiplier" in t_name or "Rate" in t_name else (f"+{min_v}" if min_v == max_v else f"+{min_v}~{max_v}")
+            g_info = GRADE_INFO.get(rar_val, GRADE_INFO[0])
+            refinement_groups[gid].append({
+                "id": r["Id"],
+                "group_id": gid,
+                "type_code": r["Type"],
+                "type_name": t_name,
+                "name": disp_name,
+                "rarity": rar_val,
+                "rarity_label": g_info["label"],
+                "rarity_icon": g_info["icon"],
+                "rarity_color": g_info["color"],
+                "min": min_v,
+                "max": max_v,
+                "val_display": val_disp,
+                "operation_level": int(r["OperationLevel"]),
+                "rate_raw": rate_raw,
+                "rate_pct": rate_pct,
+                "rate_display": f"{rate_pct:.3f}%"
+            })
+
+refinement_rules = []
+if os.path.exists(refinement_rules_path):
+    with open(refinement_rules_path, "r", encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            cid = r["EquipmentCategory"]
+            cname = CATEGORY_NAMES.get(cid, f"Categoria {cid}")
+            eq_type = r["tipo_equipamento"]
+            eq_name = EQUIP_TYPE_NAMES.get(eq_type, eq_type)
+            rar = r["raridade_nome"]
+            rar_name = RARITY_NAMES.get(rar, rar)
+            gid = r["OperationGroupId1"]
+            slots = int(r["espacos"])
+            tri_cost = int(r["RefinementMarerialCount"] or 0)
+            gold_cost = int(r["NeedGold"] or 0)
+            save_val = int(r["OperationSaveCostValue"] or 0)
+            load_val = int(r["OperationLoadCostValue"] or 0)
+            load_item_name = r["item_carregar_nome"] or ("Ouro" if r["OperationLoadCostType"] == "1" else "Pedra de Restauração de Refinamento")
+            load_icon = "assets/items/asset_gold.png" if r["OperationLoadCostType"] == "1" else "assets/refinement/refinement_stone.png"
+            load_formatted = f"{load_val:,} Ouro".replace(",", ".") if r["OperationLoadCostType"] == "1" else f"{load_val}x {load_item_name}"
+            save_formatted = f"{save_val:,} Ouro".replace(",", ".")
+            icon = get_refinement_icon(cid, eq_type, rar)
+
+            refinement_rules.append({
+                "id": int(r["Id"]),
+                "category_id": int(cid),
+                "category_name": cname,
+                "equipment_type": eq_type,
+                "equipment_type_name": eq_name,
+                "rarity": rar,
+                "rarity_name": rar_name,
+                "rarity_code": int(r["EquipmentRarity"]),
+                "slots": slots,
+                "trinity_cost": tri_cost,
+                "trinity_icon": "assets/items/materials_craftmaterial_01.png",
+                "gold_cost": gold_cost,
+                "gold_cost_formatted": f"{gold_cost:,} Ouro".replace(",", "."),
+                "save_cost_value": save_val,
+                "save_cost_formatted": save_formatted,
+                "load_cost_value": load_val,
+                "load_cost_name": load_item_name,
+                "load_cost_icon": load_icon,
+                "load_cost_formatted": load_formatted,
+                "icon": icon,
+                "group_id": gid,
+                "effects_count": len(refinement_groups.get(gid, []))
+            })
+
+cost_matrix = [
+    {
+        "category": "Armas",
+        "category_id": 1,
+        "types": ["Espada de Sangue", "Arma de Fogo", "Orbe", "Foice", "Tonfa"],
+        "rows": [
+            {"rarity": "Raro", "slots": 2, "trinity": 10, "gold": "15.000", "save": "30.000 Ouro", "load": "150.000 Ouro"},
+            {"rarity": "Heroico", "slots": 3, "trinity": 30, "gold": "15.000", "save": "90.000 Ouro", "load": "5x Pedra de Restauração"},
+            {"rarity": "Lendário", "slots": 4, "trinity": 150, "gold": "15.000", "save": "450.000 Ouro", "load": "25x Pedra de Restauração"},
+            {"rarity": "Mítico", "slots": 4, "trinity": 750, "gold": "15.000", "save": "2.250.000 Ouro", "load": "125x Pedra de Restauração"}
+        ]
+    },
+    {
+        "category": "Armaduras",
+        "category_id": 2,
+        "types": ["Elmo", "Armadura", "Luvas", "Botas"],
+        "rows": [
+            {"rarity": "Raro", "slots": 2, "trinity": 3, "gold": "3.000", "save": "30.000 Ouro", "load": "150.000 Ouro"},
+            {"rarity": "Heroico", "slots": 3, "trinity": 10, "gold": "3.000", "save": "90.000 Ouro", "load": "5x Pedra de Restauração"},
+            {"rarity": "Lendário", "slots": 4, "trinity": 50, "gold": "3.000", "save": "450.000 Ouro", "load": "25x Pedra de Restauração"},
+            {"rarity": "Mítico", "slots": 4, "trinity": 250, "gold": "3.000", "save": "2.250.000 Ouro", "load": "125x Pedra de Restauração"}
+        ]
+    },
+    {
+        "category": "Acessórios",
+        "category_id": 3,
+        "types": ["Cinto", "Brasão", "Colar", "Brinco", "Bracelete", "Anel", "Gargantilha"],
+        "rows": [
+            {"rarity": "Raro", "slots": 2, "trinity": 15, "gold": "9.000", "save": "30.000 Ouro", "load": "150.000 Ouro"},
+            {"rarity": "Heroico", "slots": 3, "trinity": 20, "gold": "9.000", "save": "90.000 Ouro", "load": "5x Pedra de Restauração"},
+            {"rarity": "Lendário", "slots": 4, "trinity": 100, "gold": "9.000", "save": "450.000 Ouro", "load": "25x Pedra de Restauração"},
+            {"rarity": "Mítico", "slots": 4, "trinity": 500, "gold": "9.000", "save": "2.250.000 Ouro", "load": "125x Pedra de Restauração"}
+        ]
+    },
+    {
+        "category": "Relíquias Especiais",
+        "category_id": 4,
+        "types": ["Perfume", "Cálice", "Caneta", "Relógio de Bolso", "Diário", "Caixa de Música", "Máscara"],
+        "rows": [
+            {"rarity": "Especial (Unique)", "slots": 4, "trinity": 15, "gold": "9.000", "save": "80.000 Ouro", "load": "5x Pedra de Restauração"}
+        ]
+    }
+]
+
+refinement_catalog = {
+    "stats": {
+        "total_rules": len(refinement_rules),
+        "total_groups": len(refinement_groups),
+        "total_effects": sum(len(g) for g in refinement_groups.values()),
+        "categories": ["Armas", "Armaduras", "Acessórios", "Relíquias Especiais"],
+        "rarities": ["Raro", "Heroico", "Lendário", "Mítico", "Especial"]
+    },
+    "cost_matrix": cost_matrix,
+    "rules": refinement_rules,
+    "groups": refinement_groups
+}
+
+with open(os.path.join(OUT_DIR, "refinement.json"), "w", encoding="utf-8") as f:
+    json.dump(refinement_catalog, f, ensure_ascii=False)
+print(f"  ✓ Processed Item Refinement catalog ({len(refinement_rules)} rules, {refinement_catalog['stats']['total_effects']} subattributes across {len(refinement_groups)} groups).")
+
+# ==========================================
 # 8. BUNDLE GENERATION
 # ==========================================
 print("Writing bundle.js...")
@@ -3191,6 +3429,7 @@ bundle_data = {
     "artifacts": artifacts_catalog,
     "bloodline": bloodline_catalog,
     "bloodrealm": bloodrealm_catalog,
+    "refinement": refinement_catalog,
     "constants": constants_dict,
     "faq": faq_catalog
 }

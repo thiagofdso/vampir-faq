@@ -120,6 +120,11 @@
           <span>Reino de Sangue</span>
           <span class="nav-count" id="countBloodRealm">22</span>
         </a>
+        <a class="nav-item" data-target="refinement">
+          <span class="nav-icon"><img src="assets/refinement/flat_refine.png" style="width: 18px; height: 18px; vertical-align: middle;" onerror="this.outerHTML='⚒️'"></span>
+          <span>Refinamento</span>
+          <span class="nav-count" id="countRefinement">71</span>
+        </a>
         <a class="nav-item" data-target="faq">
           <span class="nav-icon">❓</span>
           <span>FAQ & Sistemas</span>
@@ -1020,7 +1025,193 @@
         </section>
 
         <!-- ==============================================
-             20. FAQ SECTION
+             20. ITEM REFINEMENT (REFINAMENTO COM TRINDADE)
+             ============================================== -->
+        <section id="refinement" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <img src="assets/refinement/flat_refine.png" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 8px;" onerror="this.outerHTML='⚒️'">
+              Refinamento de Equipamentos com Trindade
+            </h2>
+            <p class="section-subtitle">
+              Sorteio e customização de subatributos adicionais em Armas, Armaduras, Acessórios e Relíquias com Trindade + Ouro. Dados oficiais da versão 1.13.22.
+            </p>
+          </div>
+
+          <!-- Mechanics Overview Banner -->
+          <div class="card" style="margin-bottom: 24px; border: 1px solid rgba(234, 179, 8, 0.3); background: linear-gradient(135deg, rgba(30, 20, 15, 0.7), rgba(20, 25, 40, 0.9)); padding: 20px;">
+            <div style="display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap;">
+              <img src="assets/refinement/slot_refine.png" style="width: 56px; height: 56px; object-fit: contain; filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.5));" alt="Refinamento">
+              <div style="flex: 1; min-width: 280px;">
+                <h3 style="color: #f59e0b; margin-top: 0; margin-bottom: 8px; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+                  <span>Mecânicas Centrais, Custos de Trindade & Regras Oficiais</span>
+                  <span style="font-size: 0.75rem; background: rgba(245,158,11,0.2); color: #fbbf24; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(245,158,11,0.4);">71 Regras • 16 Grupos • 441 Efeitos</span>
+                </h3>
+                <div style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.55;">
+                  <ul style="margin: 0; padding-left: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 8px;">
+                    <li><strong>Material Principal:</strong> Consome <strong>Trindade</strong> (Item 100000000, obtida no desmanche de itens Raros+) e <strong>Ouro</strong> por tentativa.</li>
+                    <li><strong>Sem Pity / Sem Garantia:</strong> Cada refinamento rola novamente <strong>todos os compartimentos</strong> a taxas fixas. Não há acúmulo de chance.</li>
+                    <li><strong>Trava de Compartimento Ausente:</strong> Campos <code>SlotLockItemInfoId</code> e <code>SlotLockItemCount</code> estão <strong>vazios</strong> em todas as 71 regras desta versão (sem trava individual).</li>
+                    <li><strong>Salvar & Carregar:</strong> Permite salvar um conjunto favorável pagando Ouro (30k a 2.25M) e restaurá-lo com Ouro (Raro) ou <strong>Pedras de Restauração</strong> (5 a 125 pedras).</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cost Comparison Matrix -->
+            <div style="margin-top: 18px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 14px;">
+              <h4 style="color: #94a3b8; font-size: 0.88rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;">
+                Matriz Comparativa de Custos por Tentativa & Salvar/Carregar
+              </h4>
+              <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
+                  <thead>
+                    <tr style="background: rgba(255,255,255,0.06); color: #94a3b8; border-bottom: 1px solid rgba(255,255,255,0.15);">
+                      <th style="padding: 8px 10px;">Categoria</th>
+                      <th style="padding: 8px 10px;">Raridade</th>
+                      <th style="padding: 8px 10px; text-align: center;">Espaços</th>
+                      <th style="padding: 8px 10px;">Custo por Tentativa</th>
+                      <th style="padding: 8px 10px;">Salvar Atributos</th>
+                      <th style="padding: 8px 10px;">Carregar Atributos</th>
+                    </tr>
+                  </thead>
+                  <tbody id="refinementCostTableBody">
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                      <td style="padding: 8px 10px; font-weight: bold; color: #38bdf8;">Armas</td>
+                      <td style="padding: 8px 10px;"><span style="color: #3b82f6;">Raro</span></td>
+                      <td style="padding: 8px 10px; text-align: center;"><span class="badge">2</span></td>
+                      <td style="padding: 8px 10px;"><span style="color: #fbbf24;">10 Trindade</span> + 15.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #e2e8f0;">30.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #e2e8f0;">150.000 Ouro</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                      <td style="padding: 8px 10px; font-weight: bold; color: #38bdf8;">Armas</td>
+                      <td style="padding: 8px 10px;"><span style="color: #a855f7;">Heroico</span></td>
+                      <td style="padding: 8px 10px; text-align: center;"><span class="badge">3</span></td>
+                      <td style="padding: 8px 10px;"><span style="color: #fbbf24;">30 Trindade</span> + 15.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #e2e8f0;">90.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #38bdf8;">5x Pedra de Restauração</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                      <td style="padding: 8px 10px; font-weight: bold; color: #38bdf8;">Armas</td>
+                      <td style="padding: 8px 10px;"><span style="color: #eab308;">Lendário</span></td>
+                      <td style="padding: 8px 10px; text-align: center;"><span class="badge">4</span></td>
+                      <td style="padding: 8px 10px;"><span style="color: #fbbf24;">150 Trindade</span> + 15.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #e2e8f0;">450.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #38bdf8;">25x Pedra de Restauração</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(239,68,68,0.04);">
+                      <td style="padding: 8px 10px; font-weight: bold; color: #38bdf8;">Armas</td>
+                      <td style="padding: 8px 10px;"><span style="color: #ef4444;">Mítico</span></td>
+                      <td style="padding: 8px 10px; text-align: center;"><span class="badge">4</span></td>
+                      <td style="padding: 8px 10px;"><span style="color: #fbbf24; font-weight: bold;">750 Trindade</span> + 15.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #e2e8f0;">2.250.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #38bdf8; font-weight: bold;">125x Pedra de Restauração</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                      <td style="padding: 8px 10px; font-weight: bold; color: #4ade80;">Armaduras</td>
+                      <td style="padding: 8px 10px;"><span style="color: #3b82f6;">Raro</span></td>
+                      <td style="padding: 8px 10px; text-align: center;"><span class="badge">2</span></td>
+                      <td style="padding: 8px 10px;"><span style="color: #fbbf24;">3 Trindade</span> + 3.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #e2e8f0;">30.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #e2e8f0;">150.000 Ouro</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                      <td style="padding: 8px 10px; font-weight: bold; color: #4ade80;">Armaduras</td>
+                      <td style="padding: 8px 10px;"><span style="color: #a855f7;">Heroico</span></td>
+                      <td style="padding: 8px 10px; text-align: center;"><span class="badge">3</span></td>
+                      <td style="padding: 8px 10px;"><span style="color: #fbbf24;">10 Trindade</span> + 3.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #e2e8f0;">90.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #38bdf8;">5x Pedra de Restauração</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                      <td style="padding: 8px 10px; font-weight: bold; color: #4ade80;">Armaduras</td>
+                      <td style="padding: 8px 10px;"><span style="color: #eab308;">Lendário</span></td>
+                      <td style="padding: 8px 10px; text-align: center;"><span class="badge">4</span></td>
+                      <td style="padding: 8px 10px;"><span style="color: #fbbf24;">50 Trindade</span> + 3.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #e2e8f0;">450.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #38bdf8;">25x Pedra de Restauração</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(239,68,68,0.04);">
+                      <td style="padding: 8px 10px; font-weight: bold; color: #4ade80;">Armaduras</td>
+                      <td style="padding: 8px 10px;"><span style="color: #ef4444;">Mítico</span></td>
+                      <td style="padding: 8px 10px; text-align: center;"><span class="badge">4</span></td>
+                      <td style="padding: 8px 10px;"><span style="color: #fbbf24; font-weight: bold;">250 Trindade</span> + 3.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #e2e8f0;">2.250.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #38bdf8; font-weight: bold;">125x Pedra de Restauração</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                      <td style="padding: 8px 10px; font-weight: bold; color: #c084fc;">Acessórios</td>
+                      <td style="padding: 8px 10px;"><span style="color: #3b82f6;">Raro</span></td>
+                      <td style="padding: 8px 10px; text-align: center;"><span class="badge">2</span></td>
+                      <td style="padding: 8px 10px;"><span style="color: #fbbf24;">15 Trindade</span> + 9.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #e2e8f0;">30.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #e2e8f0;">150.000 Ouro</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                      <td style="padding: 8px 10px; font-weight: bold; color: #c084fc;">Acessórios</td>
+                      <td style="padding: 8px 10px;"><span style="color: #a855f7;">Heroico</span></td>
+                      <td style="padding: 8px 10px; text-align: center;"><span class="badge">3</span></td>
+                      <td style="padding: 8px 10px;"><span style="color: #fbbf24;">20 Trindade</span> + 9.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #e2e8f0;">90.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #38bdf8;">5x Pedra de Restauração</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                      <td style="padding: 8px 10px; font-weight: bold; color: #c084fc;">Acessórios</td>
+                      <td style="padding: 8px 10px;"><span style="color: #eab308;">Lendário</span></td>
+                      <td style="padding: 8px 10px; text-align: center;"><span class="badge">4</span></td>
+                      <td style="padding: 8px 10px;"><span style="color: #fbbf24;">100 Trindade</span> + 9.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #e2e8f0;">450.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #38bdf8;">25x Pedra de Restauração</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(239,68,68,0.04);">
+                      <td style="padding: 8px 10px; font-weight: bold; color: #c084fc;">Acessórios</td>
+                      <td style="padding: 8px 10px;"><span style="color: #ef4444;">Mítico</span></td>
+                      <td style="padding: 8px 10px; text-align: center;"><span class="badge">4</span></td>
+                      <td style="padding: 8px 10px;"><span style="color: #fbbf24; font-weight: bold;">500 Trindade</span> + 9.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #e2e8f0;">2.250.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #38bdf8; font-weight: bold;">125x Pedra de Restauração</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(168,85,247,0.05);">
+                      <td style="padding: 8px 10px; font-weight: bold; color: #f472b6;">Relíquias Especiais</td>
+                      <td style="padding: 8px 10px;"><span style="color: #ec4899;">Especial</span></td>
+                      <td style="padding: 8px 10px; text-align: center;"><span class="badge">4</span></td>
+                      <td style="padding: 8px 10px;"><span style="color: #fbbf24;">15 Trindade</span> + 9.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #e2e8f0;">80.000 Ouro</td>
+                      <td style="padding: 8px 10px; color: #38bdf8;">5x Pedra de Restauração</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filters Bar -->
+          <div class="filter-bar" id="refinementFilterBar" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 20px;">
+            <div style="flex: 1; min-width: 250px;">
+              <input type="text" id="refinementSearchInput" class="search-input" placeholder="🔍 Buscar por tipo (ex: Espada, Elmo, Anel, Cálice), atributo ou grupo..." style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(15,20,30,0.8); color: #fff; font-size: 0.9rem;">
+            </div>
+            <button class="filter-btn active" data-refcat="all">Todas as Categorias (71)</button>
+            <button class="filter-btn" data-refcat="1">Armas (20)</button>
+            <button class="filter-btn" data-refcat="2">Armaduras (16)</button>
+            <button class="filter-btn" data-refcat="3">Acessórios (28)</button>
+            <button class="filter-btn" data-refcat="4">Relíquias (7)</button>
+            <select id="refinementRaritySelect" style="padding: 9px 12px; border-radius: 8px; background: rgba(15,20,30,0.8); color: #fff; border: 1px solid rgba(255,255,255,0.15); font-size: 0.88rem;">
+              <option value="all">Todas as Raridades</option>
+              <option value="Rare">Raro (2 Espaços)</option>
+              <option value="Epic">Heroico (3 Espaços)</option>
+              <option value="Legendary">Lendário (4 Espaços)</option>
+              <option value="Mythic">Mítico (4 Espaços)</option>
+              <option value="Unique">Especial / Relíquia (4 Espaços)</option>
+            </select>
+          </div>
+
+          <!-- Rules Container -->
+          <div class="entity-grid" id="refinementContainer"></div>
+        </section>
+
+        <!-- ==============================================
+             21. FAQ SECTION
              ============================================== -->
         <section id="faq" class="view-section">
           <div class="section-header">

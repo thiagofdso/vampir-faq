@@ -62,6 +62,9 @@
     bloodrealmFilter: 'all',
     bloodrealmTabFilter: 'all',
     bloodrealmSearchTerm: '',
+    refinementFilter: 'all',
+    refinementRarityFilter: 'all',
+    refinementSearchTerm: '',
     modesFilter: 'all',
     pvpTab: 'arena',
     enchantTab: 'scrolls',
@@ -97,7 +100,7 @@
     }
 
     try {
-      const [classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, bloodrealm, faq, constants] = await Promise.all([
+      const [classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, bloodrealm, refinement, faq, constants] = await Promise.all([
         fetch('data/classes.json').then(r => r.json()),
         fetch('data/builds.json').then(r => r.json()),
         fetch('data/skills.json').then(r => r.json()),
@@ -116,11 +119,12 @@
         fetch('data/artifacts.json').then(r => r.json()),
         fetch('data/bloodline.json').then(r => r.json()),
         fetch('data/bloodrealm.json').then(r => r.json()),
+        fetch('data/refinement.json').then(r => r.json()),
         fetch('data/faq.json').then(r => r.json()),
         fetch('data/constants.json').then(r => r.json())
       ]);
 
-      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, bloodrealm, faq, constants };
+      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, bloodrealm, refinement, faq, constants };
       initApp();
     } catch (e) {
       console.error('Failed to load JSON data asynchronously:', e);
@@ -159,6 +163,7 @@
     if (tabId === 'artifacts') renderArtifacts();
     if (tabId === 'bloodline') renderBloodline();
     if (tabId === 'bloodrealm') renderBloodrealm();
+    if (tabId === 'refinement') renderRefinement();
   }
 
   window.navTo = function(tabId) {
@@ -3444,6 +3449,331 @@
     detailModal.classList.add('active');
   };
 
+  // ==========================================
+  // 20. ITEM REFINEMENT (REFINAMENTO COM TRINDADE)
+  // ==========================================
+  function renderRefinement() {
+    const container = document.getElementById('refinementContainer');
+    if (!container || !state.data.refinement) return;
+
+    let rules = state.data.refinement.rules || [];
+
+    // Filter by Category
+    if (state.refinementFilter !== 'all') {
+      const catId = parseInt(state.refinementFilter);
+      rules = rules.filter(r => r.category_id === catId);
+    }
+
+    // Filter by Rarity
+    if (state.refinementRarityFilter && state.refinementRarityFilter !== 'all') {
+      rules = rules.filter(r => r.rarity === state.refinementRarityFilter);
+    }
+
+    // Filter by Search Query
+    const q = (state.refinementSearchTerm || '').toLowerCase().trim();
+    if (q) {
+      rules = rules.filter(r => {
+        if (r.equipment_type_name.toLowerCase().includes(q) ||
+            r.equipment_type.toLowerCase().includes(q) ||
+            r.category_name.toLowerCase().includes(q) ||
+            r.rarity_name.toLowerCase().includes(q) ||
+            String(r.id).includes(q) ||
+            String(r.group_id).includes(q)) {
+          return true;
+        }
+        const effects = state.data.refinement.groups[r.group_id] || [];
+        return effects.some(e => e.name.toLowerCase().includes(q) || e.type_name.toLowerCase().includes(q));
+      });
+    }
+
+    if (rules.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 48px; color: #94a3b8; background: rgba(0,0,0,0.2); border-radius: 12px;">
+          <p style="font-size: 1.1rem; margin-bottom: 8px;">Nenhuma regra de refinamento encontrada para os filtros selecionados.</p>
+          <p style="font-size: 0.85rem;">Tente ajustar o termo de pesquisa ou selecionar "Todas as Categorias".</p>
+        </div>
+      `;
+      return;
+    }
+
+    const rarityColors = {
+      'Rare': { bg: 'rgba(59, 130, 246, 0.2)', text: '#60a5fa', border: 'rgba(59, 130, 246, 0.4)' },
+      'Epic': { bg: 'rgba(168, 85, 247, 0.2)', text: '#c084fc', border: 'rgba(168, 85, 247, 0.4)' },
+      'Legendary': { bg: 'rgba(234, 179, 8, 0.2)', text: '#fbbf24', border: 'rgba(234, 179, 8, 0.4)' },
+      'Mythic': { bg: 'rgba(239, 68, 68, 0.2)', text: '#f87171', border: 'rgba(239, 68, 68, 0.4)' },
+      'Unique': { bg: 'rgba(236, 72, 153, 0.2)', text: '#f472b6', border: 'rgba(236, 72, 153, 0.4)' }
+    };
+
+    container.innerHTML = rules.map(rule => {
+      const rColor = rarityColors[rule.rarity] || rarityColors['Rare'];
+      const effects = state.data.refinement.groups[rule.group_id] || [];
+      const supremeCount = effects.filter(e => e.rarity === 2).length;
+
+      // Slot indicators
+      const slotIcons = Array.from({ length: rule.slots }, (_, i) => `
+        <img src="assets/refinement/slot_refine.png" alt="Slot ${i+1}" style="width: 22px; height: 22px; object-fit: contain; filter: drop-shadow(0 0 3px rgba(251,191,36,0.3));" title="Compartimento ${i+1}">
+      `).join('');
+
+      return `
+        <div class="entity-card" style="display: flex; flex-direction: column; justify-content: space-between; border-color: ${rColor.border}; background: linear-gradient(180deg, rgba(20,25,35,0.7) 0%, rgba(15,18,25,0.85) 100%);">
+          <div>
+            <!-- Header Badges -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span class="badge" style="background: rgba(255,255,255,0.08); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.15); font-weight: 600;">
+                ${rule.category_name}
+              </span>
+              <div style="display: flex; gap: 6px;">
+                <span class="badge" style="background: ${rColor.bg}; color: ${rColor.text}; border: 1px solid ${rColor.border}; font-weight: 700;">
+                  ${rule.rarity_name}
+                </span>
+                <span class="badge" style="background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); font-family: monospace;">
+                  ${rule.slots} Espaços
+                </span>
+              </div>
+            </div>
+
+            <!-- Title & Item Artwork -->
+            <div style="display: flex; gap: 14px; margin-bottom: 14px;">
+              <div style="width: 58px; height: 58px; flex-shrink: 0; border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.5); border: 1px solid ${rColor.border}; display: flex; align-items: center; justify-content: center; padding: 4px;">
+                <img src="${rule.icon}" alt="${rule.equipment_type_name}" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.src='assets/refinement/flat_refine.png'">
+              </div>
+              <div style="flex: 1; min-width: 0;">
+                <h3 style="font-size: 1.12rem; color: #fff; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  ${rule.equipment_type_name}
+                </h3>
+                <div style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 6px;">
+                  ${rule.equipment_type} • Regra #${rule.id}
+                </div>
+                <div style="display: flex; gap: 4px; align-items: center;">
+                  ${slotIcons}
+                  <span style="font-size: 0.72rem; color: #94a3b8; margin-left: 4px;">(${rule.slots} subatributos)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Costs Box -->
+            <div style="background: rgba(0,0,0,0.35); border-radius: 8px; padding: 10px; margin-bottom: 12px; font-size: 0.8rem; display: flex; flex-direction: column; gap: 6px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #94a3b8; display: flex; align-items: center; gap: 5px;">
+                  <img src="${rule.trinity_icon}" style="width: 15px; height: 15px; object-fit: contain;">
+                  Tentativa:
+                </span>
+                <span style="color: #fbbf24; font-weight: 700;">
+                  ${rule.trinity_cost} Trindade <span style="color: #94a3b8; font-weight: normal;">+ ${rule.gold_cost_formatted}</span>
+                </span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #94a3b8;">💾 Salvar Resultado:</span>
+                <span style="color: #cbd5e1;">${rule.save_cost_formatted}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 4px; margin-top: 2px;">
+                <span style="color: #94a3b8; display: flex; align-items: center; gap: 4px;">
+                  <img src="${rule.load_cost_icon}" style="width: 14px; height: 14px; object-fit: contain;">
+                  Restaurar Salvo:
+                </span>
+                <span style="color: #38bdf8; font-weight: 600;">${rule.load_cost_formatted}</span>
+              </div>
+            </div>
+
+            <!-- Pool Summary -->
+            <div style="margin-bottom: 14px; font-size: 0.75rem; color: #94a3b8; display: flex; justify-content: space-between; align-items: center;">
+              <span>Pool #${rule.group_id}: <strong style="color: #fff;">${rule.effects_count}</strong> subatributos</span>
+              <span style="color: #f59e0b; display: flex; align-items: center; gap: 4px;">
+                <img src="assets/refinement/grade_max.png" style="width: 13px; height: 13px;"> ${supremeCount} Supremos
+              </span>
+            </div>
+          </div>
+
+          <!-- Inspect Button -->
+          <button class="btn btn-primary" onclick="window.inspectRefinement(${rule.id})" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #b45309 0%, #78350f 100%); border: 1px solid rgba(245,158,11,0.5); color: #fff;">
+            <span>Inspecionar Subatributos & Taxas</span>
+            <span>➔</span>
+          </button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Inspect Refinement Rule and Pool in Modal
+  window.inspectRefinement = function(ruleId) {
+    if (!state.data.refinement) return;
+    const rule = state.data.refinement.rules.find(r => r.id === ruleId);
+    if (!rule) return;
+
+    const effects = state.data.refinement.groups[rule.group_id] || [];
+
+    modalTitle.textContent = `${rule.equipment_type_name} (${rule.rarity_name})`;
+    modalSubtitle.textContent = `Categoria: ${rule.category_name} • ${rule.slots} Compartimentos • Grupo de Sorteio #${rule.group_id} (${effects.length} Subatributos)`;
+
+    // Sort effects by rarity descending (Supremo first), then by rate
+    const sortedEffects = [...effects].sort((a, b) => b.rarity - a.rarity || b.rate_raw - a.rate_raw);
+
+    const slotRender = Array.from({ length: rule.slots }, (_, i) => `
+      <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(251,191,36,0.3); border-radius: 8px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+        <img src="assets/refinement/slot_refine.png" style="width: 32px; height: 32px; object-fit: contain;">
+        <div>
+          <div style="font-size: 0.72rem; color: #94a3b8; text-transform: uppercase;">Compartimento ${i+1}</div>
+          <div style="font-size: 0.82rem; color: #fbbf24; font-weight: 700;">Grupo #${rule.group_id}</div>
+        </div>
+      </div>
+    `).join('');
+
+    const supremeCount = sortedEffects.filter(e => e.rarity === 2).length;
+    const midCount = sortedEffects.filter(e => e.rarity === 1).length;
+    const commonCount = sortedEffects.filter(e => e.rarity === 0).length;
+
+    modalBody.innerHTML = `
+      <!-- Showcase Header Banner -->
+      <div style="background: linear-gradient(135deg, rgba(30,25,35,0.9), rgba(20,20,30,0.95)); border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid rgba(245,158,11,0.35);">
+        <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 16px; flex-wrap: wrap;">
+          <div style="width: 64px; height: 64px; border-radius: 10px; background: rgba(0,0,0,0.5); border: 2px solid #f59e0b; display: flex; align-items: center; justify-content: center; padding: 6px;">
+            <img src="${rule.icon}" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.src='assets/refinement/flat_refine.png'">
+          </div>
+          <div style="flex: 1; min-width: 240px;">
+            <div style="display: flex; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;">
+              <span class="badge" style="background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.2);">
+                ${rule.category_name}
+              </span>
+              <span class="badge" style="background: rgba(245,158,11,0.25); color: #fbbf24; border: 1px solid rgba(245,158,11,0.5); font-weight: 700;">
+                ${rule.rarity_name}
+              </span>
+              <span class="badge" style="background: rgba(59,130,246,0.2); color: #60a5fa; border: 1px solid rgba(59,130,246,0.4);">
+                ${rule.slots} Espaços de Refinamento
+              </span>
+            </div>
+            <h3 style="color: #fff; font-size: 1.25rem; margin-bottom: 4px;">
+              ${rule.equipment_type_name} <span style="font-size: 0.9rem; color: #94a3b8;">(${rule.equipment_type})</span>
+            </h3>
+            <p style="color: #cbd5e1; font-size: 0.85rem; margin: 0;">
+              Regra Oficial #${rule.id} • Tabela <code>EquipmentRefinement.csv</code> da versão 1.13.22
+            </p>
+          </div>
+        </div>
+
+        <!-- Costs Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px;">
+          <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(245,158,11,0.2); border-radius: 8px; padding: 12px;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; color: #94a3b8; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+              <img src="${rule.trinity_icon}" style="width: 14px; height: 14px;">
+              Custo por Tentativa
+            </div>
+            <div style="font-size: 1.1rem; color: #fbbf24; font-weight: 700;">
+              ${rule.trinity_cost} Trindade
+            </div>
+            <div style="font-size: 0.78rem; color: #94a3b8;">+ ${rule.gold_cost_formatted}</div>
+          </div>
+
+          <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; color: #94a3b8; margin-bottom: 4px;">
+              💾 Salvar Subatributos
+            </div>
+            <div style="font-size: 1.1rem; color: #e2e8f0; font-weight: 700;">
+              ${rule.save_cost_formatted}
+            </div>
+            <div style="font-size: 0.78rem; color: #94a3b8;">Congela resultado atual</div>
+          </div>
+
+          <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(56,189,248,0.2); border-radius: 8px; padding: 12px;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; color: #94a3b8; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+              <img src="${rule.load_cost_icon}" style="width: 14px; height: 14px;">
+              Restaurar Resultado Salvo
+            </div>
+            <div style="font-size: 1.1rem; color: #38bdf8; font-weight: 700;">
+              ${rule.load_cost_formatted}
+            </div>
+            <div style="font-size: 0.78rem; color: #94a3b8;">Recupera atributos arquivados</div>
+          </div>
+        </div>
+
+        <!-- Warning / System Notes -->
+        <div style="background: rgba(239,68,68,0.1); border-left: 3px solid #ef4444; padding: 10px 14px; border-radius: 0 8px 8px 0; font-size: 0.8rem; color: #fca5a5; line-height: 1.5;">
+          <strong>Atenção:</strong> Cada tentativa de refinamento sorteia <strong>todos os ${rule.slots} compartimentos</strong> de forma independente. O bloqueio individual de compartimentos (slot lock) não está configurado nesta cópia do jogo. O salvamento permite guardar uma configuração excelente para posterior restauração caso novas tentativas resultem em atributos inferiores.
+        </div>
+      </div>
+
+      <!-- Compartments Layout -->
+      <div style="margin-bottom: 24px;">
+        <h4 style="color: #fff; font-size: 0.95rem; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+          <span>Compartimentos do Equipamento (${rule.slots} Espaços)</span>
+          <span style="font-size: 0.75rem; color: #94a3b8; font-weight: normal;">Todos os espaços usam a tabela do Grupo #${rule.group_id}</span>
+        </h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px;">
+          ${slotRender}
+        </div>
+      </div>
+
+      <!-- Subattributes Pool Table -->
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <h4 style="color: #fff; font-size: 0.95rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+            <span>Atributos de Refinamento Disponíveis (${sortedEffects.length} Opções)</span>
+          </h4>
+          <div style="display: flex; gap: 8px; font-size: 0.75rem;">
+            <span class="badge" style="background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.4); display: flex; align-items: center; gap: 4px;">
+              <img src="assets/refinement/grade_max.png" style="width: 12px; height: 12px;"> ${supremeCount} Supremos
+            </span>
+            <span class="badge" style="background: rgba(56,189,248,0.2); color: #38bdf8; border: 1px solid rgba(56,189,248,0.4); display: flex; align-items: center; gap: 4px;">
+              <img src="assets/refinement/grade_mid.png" style="width: 12px; height: 12px;"> ${midCount} Intermediários
+            </span>
+            <span class="badge" style="background: rgba(148,163,184,0.2); color: #cbd5e1; border: 1px solid rgba(148,163,184,0.4); display: flex; align-items: center; gap: 4px;">
+              <img src="assets/refinement/grade_none.png" style="width: 12px; height: 12px;"> ${commonCount} Básicos
+            </span>
+          </div>
+        </div>
+
+        <div style="overflow-x: auto; max-height: 440px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3);">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
+            <thead style="position: sticky; top: 0; background: #0f172a; z-index: 2;">
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.15); color: #94a3b8;">
+                <th style="padding: 10px 12px;">Grau</th>
+                <th style="padding: 10px 12px;">Subatributo</th>
+                <th style="padding: 10px 12px; text-align: center;">Valor</th>
+                <th style="padding: 10px 12px; text-align: right;">Probabilidade Oficial</th>
+                <th style="padding: 10px 12px; text-align: right; width: 140px;">Peso / Barra</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${sortedEffects.map(e => {
+                const barWidth = Math.min(100, Math.max(3, e.rate_pct * 7));
+                return `
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.15s ease;" onmouseover="this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.background='transparent'">
+                    <td style="padding: 8px 12px; white-space: nowrap;">
+                      <span class="badge" style="background: rgba(0,0,0,0.4); color: ${e.rarity_color}; border: 1px solid ${e.rarity_color}44; display: inline-flex; align-items: center; gap: 4px; font-size: 0.74rem;">
+                        <img src="${e.rarity_icon}" style="width: 13px; height: 13px;">
+                        ${e.rarity_label}
+                      </span>
+                    </td>
+                    <td style="padding: 8px 12px;">
+                      <div style="font-weight: 600; color: #fff;">${e.name}</div>
+                      <div style="font-size: 0.72rem; color: #64748b; font-family: monospace;">${e.type_name} • Nv.${e.operation_level}</div>
+                    </td>
+                    <td style="padding: 8px 12px; text-align: center;">
+                      <strong style="color: #34d399; font-size: 0.95rem;">${e.val_display}</strong>
+                    </td>
+                    <td style="padding: 8px 12px; text-align: right; white-space: nowrap;">
+                      <span style="font-family: monospace; font-weight: 700; color: ${e.rate_pct >= 8 ? '#34d399' : (e.rate_pct <= 1 ? '#f87171' : '#fbbf24')};">
+                        ${e.rate_display}
+                      </span>
+                      <div style="font-size: 0.68rem; color: #64748b; font-family: monospace;">Peso: ${e.rate_raw.toLocaleString()} / 100k</div>
+                    </td>
+                    <td style="padding: 8px 12px; text-align: right;">
+                      <div style="background: rgba(255,255,255,0.08); border-radius: 4px; height: 6px; overflow: hidden; width: 100%;">
+                        <div style="background: ${e.rarity_color}; width: ${barWidth}%; height: 100%; border-radius: 4px;"></div>
+                      </div>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+
+    detailModal.classList.add('open');
+    detailModal.classList.add('active');
+  };
+
   // Render FAQ
   function renderFaq() {
     const container = document.getElementById('faqContainer');
@@ -4239,6 +4569,26 @@
       state.bloodrealmSearchTerm = e.target.value;
       renderBloodrealm();
     });
+
+    document.getElementById('refinementFilterBar')?.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (btn && btn.dataset.refcat) {
+        document.querySelectorAll('#refinementFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.refinementFilter = btn.dataset.refcat;
+        renderRefinement();
+      }
+    });
+
+    document.getElementById('refinementRaritySelect')?.addEventListener('change', e => {
+      state.refinementRarityFilter = e.target.value;
+      renderRefinement();
+    });
+
+    document.getElementById('refinementSearchInput')?.addEventListener('input', e => {
+      state.refinementSearchTerm = e.target.value;
+      renderRefinement();
+    });
   }
 
   function initApp() {
@@ -4260,6 +4610,7 @@
     renderArtifacts();
     renderBloodline();
     renderBloodrealm();
+    renderRefinement();
     renderFaq();
     setupListeners();
   }
