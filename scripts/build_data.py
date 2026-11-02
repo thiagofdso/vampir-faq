@@ -46,6 +46,98 @@ def load_csv_list(filepath):
         reader = csv.DictReader(f)
         return list(reader)
 
+# Authentic Item Rarity System extracted from DT_CommonColor.uasset & ItemFilter.csv
+RARITY_MAP = {
+    0: {
+        "code": 0,
+        "name": "Comum",
+        "name_en": "Common",
+        "color": "#979694",
+        "highlight": "#CCCBC8",
+        "class_name": "rarity-common",
+        "badge_class": "badge-rarity-common"
+    },
+    1: {
+        "code": 1,
+        "name": "Incomum",
+        "name_en": "Uncommon",
+        "color": "#64935E",
+        "highlight": "#C5F1C0",
+        "class_name": "rarity-uncommon",
+        "badge_class": "badge-rarity-uncommon"
+    },
+    2: {
+        "code": 2,
+        "name": "Raro",
+        "name_en": "Rare",
+        "color": "#5E84CD",
+        "highlight": "#C9E1FF",
+        "class_name": "rarity-rare",
+        "badge_class": "badge-rarity-rare"
+    },
+    3: {
+        "code": 3,
+        "name": "Heroico",
+        "name_en": "Epic",
+        "color": "#A165E8",
+        "highlight": "#E6D8FF",
+        "class_name": "rarity-epic",
+        "badge_class": "badge-rarity-epic"
+    },
+    4: {
+        "code": 4,
+        "name": "Lendário",
+        "name_en": "Legendary",
+        "color": "#E2BE6F",
+        "highlight": "#FCF2D6",
+        "class_name": "rarity-legendary",
+        "badge_class": "badge-rarity-legendary"
+    },
+    5: {
+        "code": 5,
+        "name": "Mítico",
+        "name_en": "Mythic",
+        "color": "#FF7373",
+        "highlight": "#FFEAE0",
+        "class_name": "rarity-mythic",
+        "badge_class": "badge-rarity-mythic"
+    },
+    100: {
+        "code": 100,
+        "name": "Único",
+        "name_en": "Unique",
+        "color": "#FFA3D1",
+        "highlight": "#FFE6F1",
+        "class_name": "rarity-unique",
+        "badge_class": "badge-rarity-unique"
+    },
+    101: {
+        "code": 101,
+        "name": "Sazonal",
+        "name_en": "Seasonal",
+        "color": "#6EA8AC",
+        "highlight": "#CBE6E8",
+        "class_name": "rarity-seasonal",
+        "badge_class": "badge-rarity-seasonal"
+    },
+    102: {
+        "code": 102,
+        "name": "Único",
+        "name_en": "Unique",
+        "color": "#FFA3D1",
+        "highlight": "#FFE6F1",
+        "class_name": "rarity-unique",
+        "badge_class": "badge-rarity-unique"
+    }
+}
+
+def get_rarity_info(code):
+    try:
+        c = int(code)
+    except (ValueError, TypeError):
+        c = 0
+    return RARITY_MAP.get(c, RARITY_MAP[0])
+
 print("Reading CSVs...")
 class_raw = load_csv_dict(os.path.join(CSV_DIR, "Class.csv"))
 class_names = load_csv_dict(os.path.join(L10N_DIR, "Class_Name.csv"))
@@ -1046,6 +1138,9 @@ for iid, irow in item_raw.items():
     if not item_img:
         item_img = "assets/logo.png"
 
+    r_code = int(rarity) if str(rarity).isdigit() else 0
+    r_info = get_rarity_info(r_code)
+
     item_dict = {
         "id": iid,
         "name": clean_name,
@@ -1055,7 +1150,11 @@ for iid, irow in item_raw.items():
         "type_name": type_label,
         "icon_img": item_img,
         "tier": tier if tier else "1",
-        "rarity": rarity,
+        "rarity": r_code,
+        "rarity_name": r_info["name"],
+        "rarity_color": r_info["color"],
+        "rarity_highlight": r_info["highlight"],
+        "rarity_badge_class": r_info["badge_class"],
         "max_enchant": "+15 (Encantamento Seguro até +5, Risco de Falha/Degradação acima)",
         "usable": irow.get("Usable", "0") == "1",
         "weight": irow.get("Weight", "0"),
@@ -1200,14 +1299,19 @@ if os.path.exists(receitas_path):
         
         target_name = "Item Forjado"
         target_param = ""
-        target_rarity = "0"
+        target_rarity = 0
         if succ_list:
             target_name = succ_list[0].get('item_nome_pt', '').strip() or f"Item #{succ_list[0].get('Param')}"
             target_param = succ_list[0].get('Param', '')
-            target_rarity = succ_list[0].get('RewardRank', '0')
 
-        # Target Icon matching directly from Item.csv
+        # Target Icon & Rarity matching directly from Item.csv
         target_row = item_raw.get(target_param, {})
+        raw_rarity = target_row.get("Rarity", "").strip()
+        if not raw_rarity and succ_list:
+            raw_rarity = succ_list[0].get('RewardRank', '0')
+        target_rarity = int(raw_rarity) if raw_rarity.isdigit() else 0
+        rarity_info = get_rarity_info(target_rarity)
+
         target_img_raw = target_row.get("Img", "").strip()
         target_clean_img = target_img_raw.replace("IMG_", "").replace("TEX_", "").lower() + ".png"
         if target_clean_img in item_pngs:
@@ -1234,11 +1338,19 @@ if os.path.exists(receitas_path):
                 if m_clean in item_pngs:
                     mat_icon = f"assets/items/{m_clean}"
 
+            mat_row = item_raw.get(param, {})
+            mat_raw_rarity = mat_row.get("Rarity", "").strip()
+            mat_rarity_num = int(mat_raw_rarity) if mat_raw_rarity.isdigit() else 0
+            mat_rarity_info = get_rarity_info(mat_rarity_num)
+
             clean_mats.append({
                 "name": mname,
                 "amount": m.get('CostValue', '1'),
                 "type": m.get('custo_tipo_nome_enum', 'Item'),
-                "icon": mat_icon
+                "icon": mat_icon,
+                "rarity": mat_rarity_num,
+                "rarity_name": mat_rarity_info["name"],
+                "rarity_color": mat_rarity_info["color"]
             })
 
         succ_rate = (int(r.get('SuccessRate') or 0)) // 10000
@@ -1277,6 +1389,10 @@ if os.path.exists(receitas_path):
             "tier": tier_val,
             "tier_label": f"T{tier_val}" if tier_val else None,
             "rarity": target_rarity,
+            "rarity_name": rarity_info["name"],
+            "rarity_color": rarity_info["color"],
+            "rarity_highlight": rarity_info["highlight"],
+            "rarity_badge_class": rarity_info["badge_class"],
             "tab_id": tab_id,
             "tab_name": tab_name,
             "category": recipe_category,

@@ -30,6 +30,7 @@
     questsPerPage: 24,
     craftingFilter: 'all',
     craftingTierFilter: 'all',
+    craftingRarityFilter: 'all',
     craftingSearchTerm: '',
     craftingPage: 1,
     craftingPerPage: 24,
@@ -638,14 +639,15 @@
     const currentList = filtered.slice(start, start + state.itemsPerPage);
 
     container.innerHTML = currentList.map(item => `
-      <div class="entity-card item-card" onclick="window.inspectItem('${item.id}')">
+      <div class="entity-card item-card" onclick="window.inspectItem('${item.id}')" style="border-left: 3px solid ${item.rarity_color || 'var(--border-subtle)'};">
         <div class="entity-header">
-          <div class="item-slot-frame">
+          <div class="item-slot-frame" style="border-color: ${item.rarity_color ? item.rarity_color + '66' : 'var(--border-gold)'};">
             <img src="${item.icon_img}" alt="${item.name}" class="item-slot-img" onerror="this.src='assets/logo.png'">
           </div>
           <div style="flex: 1; margin-left: 14px;">
-            <div class="entity-title" style="font-size: 1.05rem;">${item.name}</div>
-            <div style="display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap;">
+            <div class="entity-title" style="font-size: 1.05rem; color: ${item.rarity_color || '#fff'}; font-weight: 700;">${item.name}</div>
+            <div style="display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; align-items: center;">
+              <span class="entity-badge ${item.rarity_badge_class || 'badge-rarity-common'}" style="font-size: 0.7rem; font-weight: 700;">● ${item.rarity_name || 'Comum'}</span>
               <span class="entity-badge badge-gold" style="font-size: 0.7rem;">${item.type_name}</span>
               <span class="entity-badge badge-crimson" style="font-size: 0.7rem;">Tier ${item.tier}</span>
               ${item.droppers && item.droppers.length ? `<span class="entity-badge badge-blue" style="font-size: 0.68rem;">💀 ${item.droppers.length} Monstros</span>` : ''}
@@ -802,11 +804,17 @@
       filtered = filtered.filter(c => c.tier === targetTier);
     }
 
+    if (state.craftingRarityFilter && state.craftingRarityFilter !== 'all') {
+      const targetRarity = parseInt(state.craftingRarityFilter);
+      filtered = filtered.filter(c => c.rarity === targetRarity);
+    }
+
     if (state.craftingSearchTerm.trim()) {
       const s = state.craftingSearchTerm.toLowerCase();
       filtered = filtered.filter(c =>
         c.target_name.toLowerCase().includes(s) ||
         c.tab_name.toLowerCase().includes(s) ||
+        (c.rarity_name && c.rarity_name.toLowerCase().includes(s)) ||
         c.id.includes(s) ||
         (c.tier && (`t${c.tier}`.includes(s) || `tier ${c.tier}`.includes(s))) ||
         c.materials.some(m => m.name.toLowerCase().includes(s))
@@ -821,14 +829,17 @@
     const currentList = filtered.slice(start, start + state.craftingPerPage);
 
     container.innerHTML = currentList.map(c => `
-      <div class="entity-card craft-card" onclick="window.inspectRecipe('${c.id}')">
+      <div class="entity-card craft-card rarity-card-${c.rarity}" onclick="window.inspectRecipe('${c.id}')" style="border-left: 3px solid ${c.rarity_color || 'var(--border-subtle)'};">
         <div class="entity-header">
-          <div class="item-slot-frame" style="width: 44px; height: 44px;">
+          <div class="item-slot-frame" style="width: 44px; height: 44px; border-color: ${c.rarity_color ? c.rarity_color + '66' : 'var(--border-gold)'};">
             <img src="${c.icon_img}" alt="${c.target_name}" class="item-slot-img" onerror="this.src='assets/logo.png'">
           </div>
           <div style="flex: 1; margin-left: 12px;">
-            <div class="entity-title" style="font-size: 1rem;">${c.target_name}</div>
+            <div class="entity-title" style="font-size: 1rem; color: ${c.rarity_color || '#fff'}; font-weight: 700;">${c.target_name}</div>
             <div style="display: flex; gap: 6px; margin-top: 3px; align-items: center; flex-wrap: wrap;">
+              <span class="entity-badge ${c.rarity_badge_class || 'badge-rarity-common'}" style="font-size: 0.68rem; font-weight: 700;">
+                ● ${c.rarity_name || 'Comum'}
+              </span>
               <span class="entity-badge badge-gold" style="font-size: 0.68rem;">${c.tab_name}</span>
               ${c.tier ? `
                 <span class="badge" style="background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.4); font-size: 0.68rem; font-weight: 700; padding: 1px 6px;">
@@ -848,9 +859,9 @@
           </div>
           <div style="display: flex; flex-direction: column; gap: 4px;">
             ${c.materials.slice(0, 3).map(m => `
-              <div style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.25); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.04);">
-                <img src="${m.icon || 'assets/items/flat_itemcraft.png'}" alt="${m.name}" style="width: 20px; height: 20px; border-radius: 3px; object-fit: contain; background: rgba(0,0,0,0.3);" onerror="this.src='assets/logo.png'">
-                <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #cbd5e1; font-size: 0.78rem;">${m.name}</span>
+              <div style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.25); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.04); border-left: 2px solid ${m.rarity_color || 'transparent'};">
+                <img src="${m.icon || 'assets/items/flat_itemcraft.png'}" alt="${m.name}" style="width: 20px; height: 20px; border-radius: 3px; object-fit: contain; background: rgba(0,0,0,0.3); border: 1px solid ${m.rarity_color ? m.rarity_color + '44' : 'transparent'};" onerror="this.src='assets/logo.png'">
+                <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: ${m.rarity_color || '#cbd5e1'}; font-size: 0.78rem; font-weight: 500;">${m.name}</span>
                 <span style="font-weight: 700; color: #f59e0b; font-family: monospace; font-size: 0.8rem;">×${Number(m.amount).toLocaleString('pt-BR')}</span>
               </div>
             `).join('')}
@@ -4544,8 +4555,8 @@
     const item = state.data.items.find(x => x.id === id);
     if (!item) return;
 
-    modalTitle.innerText = item.name;
-    modalSubtitle.innerText = `${item.type_name} • Tier ${item.tier} (ID #${item.id})`;
+    modalTitle.innerHTML = `<span style="color: ${item.rarity_color || '#fff'}; font-weight: 700;">${item.name}</span>`;
+    modalSubtitle.innerText = `${item.type_name} • ${item.rarity_name || 'Comum'} • Tier ${item.tier} (ID #${item.id})`;
 
     let droppersHtml = '';
     if (item.droppers && item.droppers.length > 0) {
@@ -4671,17 +4682,22 @@
     const c = state.data.crafting.find(x => x.id === id);
     if (!c) return;
 
-    modalTitle.innerText = `Forja: ${c.target_name}`;
-    modalSubtitle.innerText = `${c.tab_name} • Receita ID #${c.id}`;
+    modalTitle.innerHTML = `<span style="color: ${c.rarity_color || '#fff'}; font-weight: 700;">Forja: ${c.target_name}</span>`;
+    modalSubtitle.innerText = `${c.tab_name} • Raridade: ${c.rarity_name || 'Comum'} • Receita ID #${c.id}`;
 
     modalBody.innerHTML = `
       <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
-        <div class="item-slot-frame" style="width: 56px; height: 56px;">
+        <div class="item-slot-frame" style="width: 56px; height: 56px; border-color: ${c.rarity_color ? c.rarity_color + '99' : 'var(--border-gold)'}; box-shadow: 0 0 12px ${c.rarity_color ? c.rarity_color + '33' : 'transparent'};">
           <img src="${c.icon_img}" alt="${c.target_name}" class="item-slot-img" onerror="this.src='assets/logo.png'">
         </div>
         <div style="flex: 1;">
-          <div style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 4px;">${c.target_name}</div>
+          <div style="font-size: 1.15rem; font-weight: 700; color: ${c.rarity_color || '#fff'}; text-shadow: 0 0 10px ${c.rarity_color ? c.rarity_color + '44' : 'transparent'}; margin-bottom: 4px;">
+            ${c.target_name}
+          </div>
           <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+            <span class="entity-badge ${c.rarity_badge_class || 'badge-rarity-common'}" style="font-weight: 700; font-size: 0.8rem;">
+              ● Raridade ${c.rarity_name} (${c.rarity})
+            </span>
             <span class="entity-badge badge-gold">${c.tab_name}</span>
             ${c.tier ? `
               <span class="badge" style="background: rgba(245,158,11,0.25); color: #fbbf24; border: 1px solid rgba(245,158,11,0.5); font-weight: 700; padding: 2px 8px; font-size: 0.8rem;">
@@ -4693,6 +4709,9 @@
             </span>
           </div>
         </div>
+      </div>
+      <div style="background: rgba(0, 0, 0, 0.35); border-left: 3px solid ${c.rarity_color || '#94a3b8'}; border-radius: 0 6px 6px 0; padding: 10px 14px; margin-bottom: 16px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.5;">
+        <strong>💎 Padrão de Raridade:</strong> O item forjado possui graduação <strong>${c.rarity_name}</strong> (código nativo <code>Rarity ${c.rarity}</code>) com cor oficial <code style="color: ${c.rarity_color}; font-weight: 700;">${c.rarity_color}</code> e highlight <code style="color: ${c.rarity_highlight};">${c.rarity_highlight}</code> extraídos das tabelas <code>DT_CommonColor</code> e <code>ItemFilter.csv</code> da Unreal Engine 5.
       </div>
       ${c.tier ? `
         <div style="background: rgba(245,158,11,0.08); border-left: 3px solid #f59e0b; border-radius: 0 6px 6px 0; padding: 10px 14px; margin-bottom: 16px; font-size: 0.82rem; color: #fde68a; line-height: 1.5;">
@@ -4707,11 +4726,11 @@
         </div>
         <div style="display: flex; flex-direction: column; gap: 8px; margin: 12px 0;">
           ${c.materials.map(m => `
-            <div style="display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
-              <img src="${m.icon || 'assets/items/flat_itemcraft.png'}" style="width: 32px; height: 32px; border-radius: 6px; object-fit: contain; background: rgba(0,0,0,0.4);" onerror="this.src='assets/logo.png'">
+            <div style="display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); border-left: 2px solid ${m.rarity_color || 'transparent'};">
+              <img src="${m.icon || 'assets/items/flat_itemcraft.png'}" style="width: 32px; height: 32px; border-radius: 6px; object-fit: contain; background: rgba(0,0,0,0.4); border: 1px solid ${m.rarity_color ? m.rarity_color + '44' : 'transparent'};" onerror="this.src='assets/logo.png'">
               <div style="flex: 1;">
-                <div style="font-weight: 600; color: #f1f5f9;">${m.name}</div>
-                <div style="font-size: 0.75rem; color: #94a3b8;">${m.type}</div>
+                <div style="font-weight: 600; color: ${m.rarity_color || '#f1f5f9'};">${m.name}</div>
+                <div style="font-size: 0.75rem; color: #94a3b8;">${m.type} ${m.rarity_name ? '• ' + m.rarity_name : ''}</div>
               </div>
               <div style="font-weight: 700; color: #fbbf24; font-size: 1rem; font-family: monospace;">
                 × ${Number(m.amount).toLocaleString('pt-BR')}
@@ -4931,6 +4950,17 @@
         document.querySelectorAll('#craftingTierFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         state.craftingTierFilter = btn.dataset.ctier;
+        state.craftingPage = 1;
+        renderCrafting();
+      }
+    });
+
+    document.getElementById('craftingRarityFilterBar')?.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (btn) {
+        document.querySelectorAll('#craftingRarityFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.craftingRarityFilter = btn.dataset.crarity;
         state.craftingPage = 1;
         renderCrafting();
       }

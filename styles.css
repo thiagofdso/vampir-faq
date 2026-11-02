@@ -1237,3 +1237,134 @@ body {
   align-items: flex-start;
 }
 
+/* ==============================================
+   AUTHENTIC ITEM RARITY SYSTEM (Unreal Engine 5)
+   Extracted from DT_CommonColor.uasset / ItemFilter.csv
+   ============================================== */
+:root {
+  --rarity-common: #979694;
+  --rarity-common-highlight: #CCCBC8;
+  --rarity-uncommon: #64935E;
+  --rarity-uncommon-highlight: #C5F1C0;
+  --rarity-rare: #5E84CD;
+  --rarity-rare-highlight: #C9E1FF;
+  --rarity-epic: #A165E8;
+  --rarity-epic-highlight: #E6D8FF;
+  --rarity-legendary: #E2BE6F;
+  --rarity-legendary-highlight: #FCF2D6;
+  --rarity-mythic: #FF7373;
+  --rarity-mythic-highlight: #FFEAE0;
+  --rarity-unique: #FFA3D1;
+  --rarity-unique-highlight: #FFE6F1;
+  --rarity-seasonal: #6EA8AC;
+  --rarity-seasonal-highlight: #CBE6E8;
+}
+
+/* Rarity Text Colors */
+.rarity-text-common { color: var(--rarity-common) !important; }
+.rarity-text-uncommon { color: var(--rarity-uncommon) !important; }
+.rarity-text-rare { color: var(--rarity-rare) !important; }
+.rarity-text-epic { color: var(--rarity-epic) !important; }
+.rarity-text-legendary { color: var(--rarity-legendary) !important; }
+.rarity-text-mythic { color: var(--rarity-mythic) !important; }
+.rarity-text-unique { color: var(--rarity-unique) !important; }
+.rarity-text-seasonal { color: var(--rarity-seasonal) !important; }
+
+/* Rarity Badges */
+.badge-rarity-common {
+  background: rgba(151, 150, 148, 0.16);
+  color: var(--rarity-common-highlight);
+  border: 1px solid rgba(151, 150, 148, 0.4);
+}
+.badge-rarity-uncommon {
+  background: rgba(100, 147, 94, 0.18);
+  color: var(--rarity-uncommon-highlight);
+  border: 1px solid rgba(100, 147, 94, 0.45);
+}
+.badge-rarity-rare {
+  background: rgba(94, 132, 205, 0.18);
+  color: var(--rarity-rare-highlight);
+  border: 1px solid rgba(94, 132, 205, 0.45);
+}
+.badge-rarity-epic {
+  background: rgba(161, 101, 232, 0.2);
+  color: var(--rarity-epic-highlight);
+  border: 1px solid rgba(161, 101, 232, 0.5);
+}
+.badge-rarity-legendary {
+  background: rgba(226, 190, 111, 0.2);
+  color: var(--rarity-legendary-highlight);
+  border: 1px solid rgba(226, 190, 111, 0.5);
+}
+.badge-rarity-mythic {
+  background: rgba(255, 115, 115, 0.2);
+  color: var(--rarity-mythic-highlight);
+  border: 1px solid rgba(255, 115, 115, 0.5);
+}
+.badge-rarity-unique {
+  background: rgba(255, 163, 209, 0.2);
+  color: var(--rarity-unique-highlight);
+  border: 1px solid rgba(255, 163, 209, 0.5);
+}
+.badge-rarity-seasonal {
+  background: rgba(110, 168, 172, 0.2);
+  color: var(--rarity-seasonal-highlight);
+  border: 1px solid rgba(110, 168, 172, 0.5);
+}
+
+/* Card Rarity Accents & Glows */
+.craft-card.rarity-card-0 {
+  border-left: 3px solid var(--rarity-common);
+}
+.craft-card.rarity-card-1 {
+  border-left: 3px solid var(--rarity-uncommon);
+}
+.craft-card.rarity-card-2 {
+  border-left: 3px solid var(--rarity-rare);
+}
+.craft-card.rarity-card-3 {
+  border-left: 3px solid var(--rarity-epic);
+}
+.craft-card.rarity-card-3:hover {
+  border-color: rgba(161, 101, 232, 0.6);
+  box-shadow: 0 4px 20px rgba(161, 101, 232, 0.25);
+}
+.craft-card.rarity-card-4 {
+  border-left: 3px solid var(--rarity-legendary);
+}
+.craft-card.rarity-card-4:hover {
+  border-color: rgba(226, 190, 111, 0.6);
+  box-shadow: 0 4px 20px rgba(226, 190, 111, 0.28);
+}
+.craft-card.rarity-card-5 {
+  border-left: 3px solid var(--rarity-mythic);
+}
+.craft-card.rarity-card-5:hover {
+  border-color: rgba(255, 115, 115, 0.6);
+  box-shadow: 0 4px 20px rgba(255, 115, 115, 0.3);
+}
+.craft-card.rarity-card-100, .craft-card.rarity-card-102 {
+  border-left: 3px solid var(--rarity-unique);
+}
+.craft-card.rarity-card-100:hover, .craft-card.rarity-card-102:hover {
+  border-color: rgba(255, 163, 209, 0.6);
+  box-shadow: 0 4px 20px rgba(255, 163, 209, 0.25);
+}
+.craft-card.rarity-card-101 {
+  border-left: 3px solid var(--rarity-seasonal);
+}
+.craft-card.rarity-card-101:hover {
+  border-color: rgba(110, 168, 172, 0.6);
+  box-shadow: 0 4px 20px rgba(110, 168, 172, 0.25);
+}
+
+/* Filter Dot for UI buttons */
+.filter-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
