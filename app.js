@@ -78,6 +78,10 @@
     bloodshapesSearchTerm: '',
     bloodshapesPage: 1,
     bloodshapesPerPage: 24,
+    mountsRarityFilter: 'all',
+    mountsSearchTerm: '',
+    mountsPage: 1,
+    mountsPerPage: 24,
     modesFilter: 'all',
     pvpTab: 'arena',
     enchantTab: 'scrolls',
@@ -135,11 +139,12 @@
         fetch('data/refinement.json').then(r => r.json()),
         fetch('data/lifetree.json').then(r => r.json()),
         fetch('data/bloodshapes.json').then(r => r.json()),
+        fetch('data/mounts.json').then(r => r.json()),
         fetch('data/faq.json').then(r => r.json()),
         fetch('data/constants.json').then(r => r.json())
       ]);
 
-      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, bloodrealm, refinement, lifetree, bloodshapes, faq, constants };
+      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, bloodrealm, refinement, lifetree, bloodshapes, mounts, faq, constants };
       initApp();
     } catch (e) {
       console.error('Failed to load JSON data asynchronously:', e);
@@ -181,6 +186,7 @@
     if (tabId === 'refinement') renderRefinement();
     if (tabId === 'lifetree') renderLifeTree();
     if (tabId === 'bloodshapes') renderBloodshapes();
+    if (tabId === 'mounts') renderMounts();
   }
 
   window.navTo = function(tabId) {
@@ -1218,6 +1224,65 @@
           `).join('')}
         </div>
 
+        <!-- Authentic Ranking Benefits Table (Netmarble Guide #102) -->
+        <div style="background: rgba(15,20,30,0.7); border: 1px solid rgba(56,189,248,0.3); border-radius: var(--radius-md); padding: 20px; margin-bottom: 28px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+            <h4 style="font-size: 1.15rem; color: #38bdf8; margin: 0; display: flex; align-items: center; gap: 8px;">
+              <span>⚔️ Benefícios Oficiais do Ranking Geral (Nível & Poder de Combate)</span>
+            </h4>
+            <span style="font-size: 0.75rem; background: rgba(56,189,248,0.15); color: #7dd3fc; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(56,189,248,0.3);">
+              Fonte: Guia Oficial Netmarble #102 • RankingReward.csv
+            </span>
+          </div>
+          <p style="font-size: 0.84rem; color: #cbd5e1; margin-bottom: 14px; line-height: 1.5;">
+            Os <strong>Top 100 jogadores</strong> de cada servidor recebem bônus diretos e cumulativos de combate PvP calculados na virada dos ciclos de ranking:
+          </p>
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
+              <thead>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.15); color: #94a3b8; font-size: 0.76rem; text-transform: uppercase;">
+                  <th style="padding: 10px 12px;">Posição / Rank</th>
+                  <th style="padding: 10px 12px;">Categoria Aplicada</th>
+                  <th style="padding: 10px 12px;">Bônus de Atributos PvP</th>
+                  <th style="padding: 10px 12px;">Status</th>
+                </tr>
+              </thead>
+              <tbody style="color: #cbd5e1;">
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(226,190,111,0.08);">
+                  <td style="padding: 10px 12px; font-weight: 700; color: #fbbf24;">🥇 Rank 1</td>
+                  <td style="padding: 10px 12px;">Nível & Poder de Combate</td>
+                  <td style="padding: 10px 12px;"><strong style="color: #fff;">Dano PvP +25</strong> • <strong style="color: #7dd3fc;">Resiliência a Dano PvP +10</strong> • <strong style="color: #6ee7b7;">Precisão PvP +9</strong></td>
+                  <td style="padding: 10px 12px;"><span class="entity-badge badge-gold">Supremo</span></td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02);">
+                  <td style="padding: 10px 12px; font-weight: 700; color: #cbd5e1;">🥈 Rank 2</td>
+                  <td style="padding: 10px 12px;">Nível & Poder de Combate</td>
+                  <td style="padding: 10px 12px;"><strong style="color: #fff;">Dano PvP +20</strong> • <strong style="color: #7dd3fc;">Resiliência a Dano PvP +8</strong> • <strong style="color: #6ee7b7;">Precisão PvP +6</strong></td>
+                  <td style="padding: 10px 12px;"><span class="entity-badge badge-blue">Elite</span></td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                  <td style="padding: 10px 12px; font-weight: 700; color: #f97316;">🥉 Rank 3</td>
+                  <td style="padding: 10px 12px;">Nível & Poder de Combate</td>
+                  <td style="padding: 10px 12px;"><strong style="color: #fff;">Dano PvP +15</strong> • <strong style="color: #7dd3fc;">Resiliência a Dano PvP +6</strong> • <strong style="color: #6ee7b7;">Precisão PvP +3</strong></td>
+                  <td style="padding: 10px 12px;"><span class="entity-badge badge-crimson">Avançado</span></td>
+                </tr>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02);">
+                  <td style="padding: 10px 12px; font-weight: 600;">Rank 4 ~ 10</td>
+                  <td style="padding: 10px 12px;">Nível & Poder de Combate</td>
+                  <td style="padding: 10px 12px;"><strong style="color: #fff;">Dano PvP +10</strong> • <strong style="color: #7dd3fc;">Resiliência a Dano PvP +4</strong></td>
+                  <td style="padding: 10px 12px;"><span class="entity-badge badge-purple">Top 10</span></td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 12px; font-weight: 600;">Rank 11 ~ 100</td>
+                  <td style="padding: 10px 12px;">Nível & Poder de Combate</td>
+                  <td style="padding: 10px 12px;"><strong style="color: #fff;">Dano PvP +5</strong> • <strong style="color: #7dd3fc;">Resiliência a Dano PvP +2</strong></td>
+                  <td style="padding: 10px 12px;"><span class="entity-badge" style="background: rgba(255,255,255,0.08); color: #cbd5e1;">Top 100</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.25); border-radius: var(--radius-md); padding: 20px;">
           <h4 style="font-size: 1.05rem; color: var(--gold-primary); margin-bottom: 12px;">📜 Regras de Concessão, Renovação e Desempate</h4>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; font-size: 0.84rem; color: #cbd5e1; line-height: 1.6;">
@@ -1545,6 +1610,185 @@
               }).join('')}
             </tbody>
           </table>
+        </div>
+      `;
+    } else if (state.enchantTab === 'blessing') {
+      container.innerHTML = `
+        <!-- Summary Metric Badges -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px;">
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Taxa Fixa Universal</div>
+            <div style="font-size: 1.6rem; font-weight: 700; color: #34d399; font-family: monospace;">20,00%</div>
+            <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">SuccessRate = 2.000 fixo</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Risco de Destruição</div>
+            <div style="font-size: 1.6rem; font-weight: 700; color: #38bdf8; font-family: monospace;">0% Quebra</div>
+            <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">Item protegido em falhas</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Moeda Requerida</div>
+            <div style="font-size: 1.6rem; font-weight: 700; color: var(--gold-primary); font-family: monospace;">Trindade</div>
+            <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">MaterialItemType = 50</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Raridades Elegíveis</div>
+            <div style="font-size: 1.6rem; font-weight: 700; color: #a78bfa; font-family: monospace;">Raro a Lendário</div>
+            <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">Tiers 1, 2, 3 e 4</div>
+          </div>
+        </div>
+
+        <div style="background: rgba(15,20,30,0.7); border: 1px solid rgba(212,175,55,0.3); border-radius: 12px; padding: 22px; margin-bottom: 24px; position: relative; overflow: hidden;">
+          <div style="position: absolute; right: -20px; top: -20px; font-size: 8rem; opacity: 0.05; pointer-events: none;">✨</div>
+          <h3 style="font-size: 1.3rem; color: #fff; margin: 0 0 8px 0; display: flex; align-items: center; gap: 8px;">
+            <span>✨ Mecânica Oficial de Bênção com Trindade</span>
+            <span style="font-size: 0.75rem; color: var(--gold-primary); font-weight: normal;">(Guia Netmarble 103 & ItemBlessing.csv)</span>
+          </h3>
+          <p style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.6; margin: 0 0 16px 0;">
+            A <strong>Bênção de Equipamento</strong> é um sistema complementar de aprimoramento que permite imbuir armas, armaduras e acessórios com o poder sagrado da <strong>Trindade</strong>. A bênção confere linhas bônus adicionais de estatísticas (como Dano Adicional, Redução de Dano em PvP e Defesas Avançadas) sem arriscar a integridade do equipamento.
+          </p>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; font-size: 0.85rem; color: #cbd5e1;">
+            <div style="background: rgba(0,0,0,0.35); border-left: 3px solid #34d399; padding: 12px 16px; border-radius: 6px;">
+              <strong style="color: #34d399; display: block; margin-bottom: 4px;">🛡️ 100% de Proteção contra Quebra</strong>
+              Diferente dos pergaminhos convencionais que quebram o item a partir de +6, o ritual de bênção <strong>nunca quebra ou degrada</strong> o equipamento. Em caso de falha, apenas os pontos de Trindade investidos são consumidos.
+            </div>
+            <div style="background: rgba(0,0,0,0.35); border-left: 3px solid #38bdf8; padding: 12px 16px; border-radius: 6px;">
+              <strong style="color: #38bdf8; display: block; margin-bottom: 4px;">⚖️ Probabilidade Matemática Estrita (20%)</strong>
+              Em todos os 2.048 registros cadastrados no cliente (<code style="color: #fbbf24;">ItemBlessing.csv</code>), a taxa é invariavelmente calibrada em <strong>2.000 / 10.000 (20,00%)</strong>, independentemente da raridade ou tier da peça.
+            </div>
+            <div style="background: rgba(0,0,0,0.35); border-left: 3px solid var(--gold-primary); padding: 12px 16px; border-radius: 6px;">
+              <strong style="color: var(--gold-primary); display: block; margin-bottom: 4px;">💎 Escalonamento por Nível de Encantamento</strong>
+              O custo de Trindade por tentativa aumenta de acordo com o nível atual do item (+0 até +15). Ao abençoar uma peça já com alto refinamento (+7 ou +10), os atributos sagrados despertados são proporcionalmente mais potentes.
+            </div>
+          </div>
+        </div>
+
+        <h3 style="font-size: 1.2rem; color: #fff; margin-bottom: 6px;">💎 Matriz de Custos de Trindade por Tentativa (20% de Sucesso)</h3>
+        <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 18px;">
+          Consumo exato de Trindade (<code style="color: #fbbf24;">MaterialItemType = 50</code>) nos marcos de aprimoramento (+0, +5, +7, +10, +12, +15) extraído do cliente do jogo:
+        </p>
+
+        <div style="overflow-x: auto; margin-bottom: 24px;">
+          <table class="skills-table" style="background: rgba(15,20,30,0.6); border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08);">
+            <thead>
+              <tr style="background: rgba(0,0,0,0.5);">
+                <th style="padding: 12px 14px;">Raridade</th>
+                <th style="padding: 12px 14px;">Tier</th>
+                <th style="padding: 12px 14px;">Taxa</th>
+                <th style="padding: 12px 14px;">Custo (+0)</th>
+                <th style="padding: 12px 14px;">Custo (+5)</th>
+                <th style="padding: 12px 14px;">Custo (+7)</th>
+                <th style="padding: 12px 14px;">Custo (+10)</th>
+                <th style="padding: 12px 14px;">Custo (+12)</th>
+                <th style="padding: 12px 14px;">Custo (+15)</th>
+                <th style="padding: 12px 14px;">Falha / Quebra</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 12px 14px;"><span class="entity-badge badge-blue">Raro</span></td>
+                <td style="padding: 12px 14px; font-weight: 600; color: #fff;">Tier 1</td>
+                <td style="padding: 12px 14px; color: #34d399; font-weight: 700;">20,00%</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">200</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">200</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">500</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">1.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">1.500</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace; font-weight: 700;">3.000</td>
+                <td style="padding: 12px 14px; color: #34d399; font-weight: 600;">0% Quebra</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 14px;"><span class="entity-badge badge-blue">Raro</span></td>
+                <td style="padding: 12px 14px; font-weight: 600; color: #fff;">Tier 2</td>
+                <td style="padding: 12px 14px; color: #34d399; font-weight: 700;">20,00%</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">400</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">400</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">1.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">2.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">3.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace; font-weight: 700;">6.000</td>
+                <td style="padding: 12px 14px; color: #34d399; font-weight: 600;">0% Quebra</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 14px;"><span class="entity-badge badge-blue">Raro</span></td>
+                <td style="padding: 12px 14px; font-weight: 600; color: #fff;">Tier 3</td>
+                <td style="padding: 12px 14px; color: #34d399; font-weight: 700;">20,00%</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">800</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">800</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">2.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">4.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">6.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace; font-weight: 700;">12.000</td>
+                <td style="padding: 12px 14px; color: #34d399; font-weight: 600;">0% Quebra</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 14px;"><span class="entity-badge badge-blue">Raro</span></td>
+                <td style="padding: 12px 14px; font-weight: 600; color: #fff;">Tier 4</td>
+                <td style="padding: 12px 14px; color: #34d399; font-weight: 700;">20,00%</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">1.200</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">1.200</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">3.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">6.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">9.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace; font-weight: 700;">18.000</td>
+                <td style="padding: 12px 14px; color: #34d399; font-weight: 600;">0% Quebra</td>
+              </tr>
+              <tr style="background: rgba(168, 85, 247, 0.05);">
+                <td style="padding: 12px 14px;"><span class="entity-badge badge-purple">Heroico</span></td>
+                <td style="padding: 12px 14px; font-weight: 600; color: #fff;">Tier 1</td>
+                <td style="padding: 12px 14px; color: #34d399; font-weight: 700;">20,00%</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">6.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">6.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">15.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">30.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">45.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace; font-weight: 700;">90.000</td>
+                <td style="padding: 12px 14px; color: #34d399; font-weight: 600;">0% Quebra</td>
+              </tr>
+              <tr style="background: rgba(168, 85, 247, 0.05);">
+                <td style="padding: 12px 14px;"><span class="entity-badge badge-purple">Heroico</span></td>
+                <td style="padding: 12px 14px; font-weight: 600; color: #fff;">Tier 2</td>
+                <td style="padding: 12px 14px; color: #34d399; font-weight: 700;">20,00%</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">12.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">12.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">30.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">60.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">90.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace; font-weight: 700;">180.000</td>
+                <td style="padding: 12px 14px; color: #34d399; font-weight: 600;">0% Quebra</td>
+              </tr>
+              <tr style="background: rgba(168, 85, 247, 0.05);">
+                <td style="padding: 12px 14px;"><span class="entity-badge badge-purple">Heroico</span></td>
+                <td style="padding: 12px 14px; font-weight: 600; color: #fff;">Tier 3</td>
+                <td style="padding: 12px 14px; color: #34d399; font-weight: 700;">20,00%</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">24.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">24.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">60.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">120.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">180.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace; font-weight: 700;">360.000</td>
+                <td style="padding: 12px 14px; color: #34d399; font-weight: 600;">0% Quebra</td>
+              </tr>
+              <tr style="background: rgba(245, 158, 11, 0.08);">
+                <td style="padding: 12px 14px;"><span class="entity-badge badge-gold">Lendário</span></td>
+                <td style="padding: 12px 14px; font-weight: 600; color: #fff;">Tier 1</td>
+                <td style="padding: 12px 14px; color: #34d399; font-weight: 700;">20,00%</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">120.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">120.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">300.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">600.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace;">900.000</td>
+                <td style="padding: 12px 14px; color: #fbbf24; font-family: monospace; font-weight: 700;">1.800.000</td>
+                <td style="padding: 12px 14px; color: #34d399; font-weight: 600;">0% Quebra</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="background: rgba(0,0,0,0.25); border-left: 3px solid #38bdf8; padding: 14px 18px; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1; line-height: 1.5;">
+          <strong style="color: #38bdf8; display: block; margin-bottom: 4px;">💡 Dica de Ouro de Sobrevivência e Progressão:</strong>
+          Como a Bênção de Equipamento <strong>nunca destrói o item</strong> e possui 20% de sucesso fixo, é a melhor maneira de fortalecer peças Raras e Heroicas que já alcançaram marcos seguros (+5 a +7) antes de se arriscar nos pergaminhos com risco de perda permanente.
         </div>
       `;
     }
@@ -4654,6 +4898,314 @@
     detailModal.classList.add('active');
   };
 
+  // ==========================================
+  // 23. MOUNTS (VEHICLES / MONTARIAS)
+  // ==========================================
+  function renderMounts() {
+    const container = document.getElementById('mountsContainer');
+    const pagination = document.getElementById('mountsPagination');
+    const countLabel = document.getElementById('mountsCountLabel');
+    if (!container || !state.data.mounts) return;
+
+    let items = state.data.mounts.items || [];
+
+    // Filter by rarity
+    if (state.mountsRarityFilter && state.mountsRarityFilter !== 'all') {
+      items = items.filter(m => String(m.rarity) === state.mountsRarityFilter);
+    }
+
+    // Filter by search
+    if (state.mountsSearchTerm && state.mountsSearchTerm.trim()) {
+      const q = state.mountsSearchTerm.toLowerCase().trim();
+      items = items.filter(m => {
+        if (m.name && m.name.toLowerCase().includes(q)) return true;
+        if (String(m.id).includes(q)) return true;
+        if (String(m.move_speed).includes(q)) return true;
+        if (m.all_stats && m.all_stats.some(s => s.stat_name && s.stat_name.toLowerCase().includes(q))) return true;
+        return false;
+      });
+    }
+
+    if (countLabel) {
+      countLabel.textContent = `Exibindo ${items.length} de ${state.data.mounts.stats?.total || 112} Montarias`;
+    }
+
+    const total = items.length;
+    const perPage = state.mountsPerPage || 24;
+    const totalPages = Math.ceil(total / perPage) || 1;
+    if (state.mountsPage > totalPages) state.mountsPage = 1;
+    const start = (state.mountsPage - 1) * perPage;
+    const paged = items.slice(start, start + perPage);
+
+    if (paged.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; padding: 48px; text-align: center; color: #94a3b8; background: rgba(15,20,30,0.6); border-radius: 12px; border: 1px dashed rgba(255,255,255,0.15);">
+          <div style="font-size: 2.2rem; margin-bottom: 12px;">🐎</div>
+          <div style="font-size: 1.1rem; color: #fff; font-weight: 600;">Nenhuma montaria encontrada</div>
+          <div style="font-size: 0.85rem; margin-top: 6px;">Tente ajustar o filtro de Raridade ou o termo de busca.</div>
+        </div>
+      `;
+      if (pagination) pagination.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = paged.map(m => {
+      const rMeta = m.rarity_info || { name: 'Comum', color: '#979694', highlight: '#CCCBC8', badge_class: 'badge-rarity-common' };
+      const hasLb = m.max_limit_break > 0 || (m.limit_breaks && m.limit_breaks.length > 0);
+
+      // Group 1 Speed & EXP / Weight stats
+      const spdBadge = `
+        <span style="display: inline-flex; align-items: center; gap: 4px; background: rgba(52, 211, 153, 0.15); color: #6ee7b7; border: 1px solid rgba(52, 211, 153, 0.35); border-radius: 4px; padding: 2px 7px; font-size: 0.74rem; font-weight: 700;">
+          🐎 Velocidade: <strong style="color: #fff;">${m.move_speed}</strong>
+        </span>
+      `;
+
+      const g1Preview = (m.stats_group_1 || []).map(s => `
+        <span style="display: inline-flex; align-items: center; gap: 4px; background: rgba(56, 189, 248, 0.12); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 4px; padding: 2px 7px; font-size: 0.72rem; font-weight: 600;">
+          ${s.stat_name}: <strong style="color: #fff;">${s.value_str}</strong>
+        </span>
+      `).join('');
+
+      // Group 2 Main stats preview (top 3)
+      const g2Preview = (m.stats_group_2 || []).slice(0, 3).map(s => `
+        <span style="font-size: 0.74rem; color: #cbd5e1; background: rgba(0,0,0,0.35); padding: 2px 6px; border-radius: 4px;">
+          ${s.stat_name} <strong style="color: ${rMeta.highlight || '#fff'};">${s.value_str}</strong>
+        </span>
+      `).join('');
+
+      return `
+        <div class="entity-card" onclick="window.inspectMount('${m.id}')" style="cursor: pointer; position: relative; display: flex; flex-direction: column; justify-content: space-between; border-color: ${rMeta.color}40; transition: transform 0.15s ease, border-color 0.15s ease;">
+          <div>
+            <!-- Header Badges -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 6px; flex-wrap: wrap;">
+              <span class="entity-badge ${rMeta.badge_class || 'badge-rarity-common'}" style="font-size: 0.72rem; font-weight: 700;">
+                ● ${rMeta.name}
+              </span>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                ${hasLb ? `<span class="entity-badge" style="background: rgba(226,190,111,0.18); color: #fcf2d6; border: 1px solid rgba(226,190,111,0.4); font-size: 0.68rem; font-weight: 600;">✨ Nv. ${m.max_limit_break}</span>` : ''}
+                <span class="entity-badge" style="background: rgba(255,255,255,0.08); color: #94a3b8; font-size: 0.7rem;">ID #${m.id}</span>
+              </div>
+            </div>
+
+            <!-- Icon & Title -->
+            <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 12px;">
+              <div style="position: relative; width: 68px; height: 68px; border-radius: 10px; background: radial-gradient(circle, ${rMeta.color}22 0%, rgba(10,12,20,0.8) 100%); border: 1px solid ${rMeta.color}60; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4);">
+                <img src="${m.icon}" alt="${m.name}" style="width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));" onerror="this.src='assets/items/vehicleitemicon_mountaingoat_01.png'">
+              </div>
+              <div style="flex: 1; min-width: 0;">
+                <h4 style="margin: 0 0 4px; font-size: 0.96rem; font-weight: 700; color: ${rMeta.highlight || '#fff'}; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${m.name}">
+                  ${m.name}
+                </h4>
+                <div style="font-size: 0.72rem; color: #64748b; font-family: monospace;">
+                  ${m.tile_collection_group_id ? `Códex Coleção #${m.tile_collection_group_id}` : 'Sem Códex Direto'}
+                </div>
+              </div>
+            </div>
+
+            <!-- Speed & Group 1 Stats -->
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;">
+              ${spdBadge}
+              ${g1Preview}
+            </div>
+
+            <!-- Group 2 Combat Stats -->
+            ${g2Preview ? `
+              <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
+                ${g2Preview}
+                ${(m.stats_group_2 || []).length > 3 ? `<span style="font-size: 0.72rem; color: #64748b; align-self: center;">+${(m.stats_group_2 || []).length - 3} mais</span>` : ''}
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Footer Action -->
+          <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem;">
+            <span style="color: #64748b;">${m.only_skin ? '🎨 Apenas Aparência' : '🐎 Montaria Ativa'}</span>
+            <span style="color: var(--gold-primary); font-weight: 600;">Inspecionar Montaria →</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    renderPagination(pagination, state.mountsPage, totalPages, 'window.changeMountsPage');
+  }
+
+  window.changeMountsPage = function(page) {
+    state.mountsPage = page;
+    renderMounts();
+    document.getElementById('mounts')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  window.inspectMount = function(id) {
+    if (!state.data.mounts || !state.data.mounts.items) return;
+    const m = state.data.mounts.items.find(x => String(x.id) === String(id));
+    if (!m) return;
+
+    const rMeta = m.rarity_info || { name: 'Comum', color: '#979694', highlight: '#CCCBC8', badge_class: 'badge-rarity-common' };
+
+    modalTitle.innerText = m.name;
+    modalSubtitle.innerText = `Montaria #${m.id} • ${rMeta.name} • Velocidade ${m.move_speed}${m.tile_collection_group_id ? ' • Códex Coleção #' + m.tile_collection_group_id : ''}`;
+
+    // Speed & Locomotion Panel
+    const g1Html = (m.stats_group_1 && m.stats_group_1.length > 0) ? `
+      <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid #38bdf8; background: rgba(56, 189, 248, 0.06);">
+        <div class="panel-title" style="color: #38bdf8; display: flex; justify-content: space-between; align-items: center;">
+          <span>⚡ Efeitos de Locomoção & Capacidade (Grupo 1)</span>
+          <span style="font-size: 0.75rem; color: #7dd3fc; font-weight: normal;">Velocidade, Carga e EXP</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 10px;">
+          <div style="background: rgba(0,0,0,0.35); padding: 10px 14px; border-radius: 6px; border: 1px solid rgba(52, 211, 153, 0.3);">
+            <div style="font-size: 0.76rem; color: #94a3b8; text-transform: uppercase;">Velocidade de Movimento</div>
+            <div style="font-size: 1.3rem; font-weight: 700; color: #34d399; margin-top: 2px;">${m.move_speed}</div>
+          </div>
+          ${m.stats_group_1.map(s => `
+            <div style="background: rgba(0,0,0,0.35); padding: 10px 14px; border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.25);">
+              <div style="font-size: 0.76rem; color: #94a3b8; text-transform: uppercase;">${s.stat_name}</div>
+              <div style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-top: 2px;">${s.value_str}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : `
+      <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid #38bdf8; background: rgba(56, 189, 248, 0.06);">
+        <div class="panel-title" style="color: #38bdf8;">⚡ Velocidade de Movimento</div>
+        <div style="font-size: 1.3rem; font-weight: 700; color: #34d399; margin-top: 6px;">${m.move_speed}</div>
+      </div>
+    `;
+
+    // Group 2 Main Combat Stats
+    const g2Html = (m.stats_group_2 && m.stats_group_2.length > 0) ? `
+      <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid #34d399; background: rgba(52, 211, 153, 0.06);">
+        <div class="panel-title" style="color: #34d399; display: flex; justify-content: space-between; align-items: center;">
+          <span>⚔️ Atributos Principais de Combate (Grupo 2)</span>
+          <span style="font-size: 0.75rem; color: #6ee7b7; font-weight: normal;">Bônus ao equipar a montaria</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 10px;">
+          ${m.stats_group_2.map(s => `
+            <div style="background: rgba(0,0,0,0.35); padding: 10px 14px; border-radius: 6px; border: 1px solid rgba(52, 211, 153, 0.2);">
+              <div style="font-size: 0.76rem; color: #94a3b8; text-transform: uppercase;">${s.stat_name}</div>
+              <div style="font-size: 1.25rem; font-weight: 700; color: ${rMeta.highlight || '#fff'}; margin-top: 2px;">${s.value_str}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : '';
+
+    // Group 3 Special Stats
+    const g3Html = (m.stats_group_3 && m.stats_group_3.length > 0) ? `
+      <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid #a855f7; background: rgba(168, 85, 247, 0.06);">
+        <div class="panel-title" style="color: #c084fc; display: flex; justify-content: space-between; align-items: center;">
+          <span>🛡️ Atributos Especiais & Defesas (Grupo 3)</span>
+          <span style="font-size: 0.75rem; color: #d8b4fe; font-weight: normal;">Resiliências e bônus críticos</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 10px;">
+          ${m.stats_group_3.map(s => `
+            <div style="background: rgba(0,0,0,0.35); padding: 10px 14px; border-radius: 6px; border: 1px solid rgba(168, 85, 247, 0.2);">
+              <div style="font-size: 0.76rem; color: #94a3b8; text-transform: uppercase;">${s.stat_name}</div>
+              <div style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-top: 2px;">${s.value_str}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : '';
+
+    // Transcendence / Limit Break
+    const lbHtml = (m.limit_breaks && m.limit_breaks.length > 0) ? `
+      <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid #e2be6f; background: rgba(226, 190, 111, 0.08);">
+        <div class="panel-title" style="color: #e2be6f; display: flex; justify-content: space-between; align-items: center;">
+          <span>🌟 Transcendência da Montaria (Até Nv. ${m.max_limit_break})</span>
+          <span style="font-size: 0.75rem; color: #fcf2d6; font-weight: normal;">VehicleLimitBreak.csv</span>
+        </div>
+        <p style="font-size: 0.84rem; color: #cbd5e1; margin: 6px 0 12px; line-height: 1.5;">
+          Esta montaria suporta <strong>transcendência de atributos e velocidade</strong> até o Nível ${m.max_limit_break}, acelerando o deslocamento no mapa e reforçando os bônus passivos.
+        </p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+          ${m.limit_breaks.map(lb => `
+            <div style="background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; border: 1px solid rgba(226, 190, 111, 0.3);">
+              <div style="font-size: 0.92rem; font-weight: 700; color: #e2be6f; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                <span>✨ Nível de Transcendência ${lb.level}</span>
+                <span style="font-size: 0.78rem; color: #34d399; font-weight: 700;">🐎 Velocidade: ${lb.move_speed}</span>
+              </div>
+              <div style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.6;">
+                ${lb.stats_group_1 && lb.stats_group_1.length > 0 ? `
+                  <div style="margin-bottom: 6px;">
+                    <strong style="color: #7dd3fc;">Locomoção:</strong>
+                    ${lb.stats_group_1.map(s => `${s.stat_name} <strong style="color: #fff;">${s.value_str}</strong>`).join(', ')}
+                  </div>
+                ` : ''}
+                ${lb.stats_group_2 && lb.stats_group_2.length > 0 ? `
+                  <div style="margin-bottom: 6px;">
+                    <strong style="color: #6ee7b7;">Combate:</strong>
+                    ${lb.stats_group_2.map(s => `${s.stat_name} <strong style="color: #fff;">${s.value_str}</strong>`).join(', ')}
+                  </div>
+                ` : ''}
+                ${lb.stats_group_3 && lb.stats_group_3.length > 0 ? `
+                  <div>
+                    <strong style="color: #d8b4fe;">Especial:</strong>
+                    ${lb.stats_group_3.map(s => `${s.stat_name} <strong style="color: #fff;">${s.value_str}</strong>`).join(', ')}
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : '';
+
+    // Codex Integration
+    const codexHtml = m.tile_collection_group_id ? `
+      <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 12px 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <div style="font-size: 0.82rem; font-weight: 700; color: #e2be6f;">🏛️ Registro no Códex de Montarias</div>
+          <div style="font-size: 0.78rem; color: #cbd5e1; margin-top: 2px;">Vinculada ao Grupo de Coleção #${m.tile_collection_group_id}. Desbloqueia bônus permanentes de Elo e Aquisição por espécie.</div>
+        </div>
+        <button class="filter-btn" onclick="detailModal.classList.remove('open'); window.navTo('codex');" style="font-size: 0.78rem; padding: 4px 10px;">
+          Abrir Códex →
+        </button>
+      </div>
+    ` : '';
+
+    modalBody.innerHTML = `
+      <!-- Hero Top Section -->
+      <div style="display: flex; gap: 18px; align-items: center; margin-bottom: 20px; padding: 16px; background: radial-gradient(circle, ${rMeta.color}15 0%, rgba(10,12,20,0.7) 100%); border-radius: 10px; border: 1px solid ${rMeta.color}40;">
+        <div style="width: 84px; height: 84px; border-radius: 12px; background: rgba(0,0,0,0.5); border: 2px solid ${rMeta.color}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 15px ${rMeta.color}30;">
+          <img src="${m.icon}" alt="${m.name}" style="width: 76px; height: 76px; object-fit: contain;" onerror="this.src='assets/items/vehicleitemicon_mountaingoat_01.png'">
+        </div>
+        <div style="flex: 1; min-width: 0;">
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 6px;">
+            <span class="entity-badge ${rMeta.badge_class || 'badge-rarity-common'}" style="font-size: 0.78rem; font-weight: 700;">
+              ● ${rMeta.name}
+            </span>
+            <span class="entity-badge" style="background: rgba(52,211,153,0.15); color: #6ee7b7; font-size: 0.75rem; border: 1px solid rgba(52,211,153,0.3);">
+              🐎 Velocidade ${m.move_speed}
+            </span>
+            ${m.only_skin ? `<span class="entity-badge" style="background: rgba(148,163,184,0.15); color: #cbd5e1; font-size: 0.72rem;">🎨 Apenas Aparência</span>` : ''}
+          </div>
+          <h3 style="margin: 0 0 4px; font-size: 1.25rem; font-weight: 700; color: ${rMeta.highlight || '#fff'};">
+            ${m.name}
+          </h3>
+          <div style="font-size: 0.8rem; color: #94a3b8; display: flex; gap: 12px; flex-wrap: wrap;">
+            <span>ID do Veículo: <strong>#${m.id}</strong></span>
+            ${m.item_info_id ? `<span>ID do Item: <strong>#${m.item_info_id}</strong></span>` : ''}
+            ${m.max_limit_break ? `<span>Limite Transcendência: <strong>Nv. ${m.max_limit_break}</strong></span>` : ''}
+          </div>
+        </div>
+      </div>
+
+      ${g1Html}
+      ${g2Html}
+      ${g3Html}
+      ${lbHtml}
+      ${codexHtml}
+
+      <div style="font-size: 0.74rem; color: #64748b; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px; margin-top: 16px;">
+        Registro extraído de Vehicle.csv, VehicleLimitBreak.csv e StaticOperation.csv (Versão 1.13.22 • Netmarble Corporation).
+      </div>
+    `;
+
+    detailModal.classList.add('open');
+    detailModal.classList.add('active');
+  };
+
   // Render FAQ
   function renderFaq() {
     const container = document.getElementById('faqContainer');
@@ -5495,6 +6047,10 @@
         state.bloodshapesSearchTerm = q;
         state.bloodshapesPage = 1;
         renderBloodshapes();
+      } else if (state.currentTab === 'mounts') {
+        state.mountsSearchTerm = q;
+        state.mountsPage = 1;
+        renderMounts();
       }
     });
 
@@ -5820,6 +6376,23 @@
       state.bloodshapesPage = 1;
       renderBloodshapes();
     });
+
+    document.getElementById('mountsRarityFilterBar')?.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (btn && btn.dataset.mrarity) {
+        document.querySelectorAll('#mountsRarityFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.mountsRarityFilter = btn.dataset.mrarity;
+        state.mountsPage = 1;
+        renderMounts();
+      }
+    });
+
+    document.getElementById('mountsSearchInput')?.addEventListener('input', e => {
+      state.mountsSearchTerm = e.target.value;
+      state.mountsPage = 1;
+      renderMounts();
+    });
   }
 
   function initApp() {
@@ -5844,6 +6417,7 @@
     renderRefinement();
     renderLifeTree();
     renderBloodshapes();
+    renderMounts();
     renderFaq();
     setupListeners();
   }

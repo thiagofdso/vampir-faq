@@ -16,8 +16,12 @@ Este projeto é uma aplicação web estática, leve e responsiva contendo dados 
 - **Habilidades (Skills):** Consulta a mais de 1.300 habilidades com tempos de recarga, custos, alvos e efeitos detalhados.
 - **Inimigos & Chefes:** Base de dados com mais de 550 chefes e monstros, incluindo níveis, raças e status de combate.
 - **Masmorras:** Informações sobre masmorras, requisitos de entrada e recompensas.
-- **Itens & Forja:** Catálogo de equipamentos, materiais de forja e consumíveis.
-- **Perguntas Frequentes (FAQ):** Dúvidas comuns e elucidação de mecânicas obscuras do jogo.
+- **Itens & Forja:** Catálogo de equipamentos, receitas de forja por raridade/cor e tier, materiais de artesanato e modal com "Como Obter".
+- **Montarias & Veículos de Sangue:** 112 montarias com atributos de deslocamento, bônus de combate, transcendência e elos no Códex.
+- **Hemorformas (Bloodshapes):** 185 transformações com efeitos de ataque e velocidade, conjuntos de habilidades e quebra de limites.
+- **Refinamento & Bênção com Trindade:** 71 regras de refinamento e sistema de bênção (20% fixo sem quebra de item).
+- **Árvore da Vida (Sefira) & Reino de Sangue:** Matriz de 72 Sefiras e progressão de esferas de sangue.
+- **Perguntas Frequentes (FAQ):** 20 dúvidas aprofundadas integrando mecânicas oficiais dos 40 guias da Netmarble (Drenagem, Modo Suporte, Geena, Clãs, Bênção, Ranking).
 
 ---
 
@@ -50,6 +54,7 @@ vampir-faq/
 │   ├── bosses.json
 │   ├── dungeons.json
 │   ├── items.json
+│   ├── mounts.json
 │   ├── faq.json
 │   └── constants.json
 ├── scripts/         # Scripts de extração e processamento de dados (Python)

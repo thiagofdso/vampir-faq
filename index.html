@@ -135,10 +135,15 @@
           <span>Hemorformas</span>
           <span class="nav-count" id="countBloodshapes">185</span>
         </a>
+        <a class="nav-item" data-target="mounts">
+          <span class="nav-icon"><img src="assets/items/vehicleitemicon_mountaingoat_01.png" style="width: 18px; height: 18px; vertical-align: middle; object-fit: contain;" onerror="this.outerHTML='🐎'"></span>
+          <span>Montarias</span>
+          <span class="nav-count" id="countMounts">112</span>
+        </a>
         <a class="nav-item" data-target="faq">
           <span class="nav-icon">❓</span>
           <span>FAQ & Sistemas</span>
-          <span class="nav-count" id="countFaq">10</span>
+          <span class="nav-count" id="countFaq">20</span>
         </a>
       </nav>
 
@@ -224,6 +229,11 @@
               <div class="metric-label">Hemorformas (Bloodshape)</div>
               <div class="metric-value" style="color: #e2be6f;">185</div>
               <div class="metric-desc">Metamorfoses canônicas com buffs de velocidade, atributos e transcendência</div>
+            </div>
+            <div class="metric-card" onclick="window.navTo('mounts')" style="cursor: pointer;">
+              <div class="metric-label">Montarias (Mounts)</div>
+              <div class="metric-value" style="color: #34d399;">112</div>
+              <div class="metric-desc">Veículos de sangue com velocidade de até 1.250 e transcendência</div>
             </div>
           </div>
 
@@ -601,6 +611,9 @@
             <button class="pvp-subnav-btn" data-enchtab="artifacts">
               <img src="assets/items/materials_artifactenchantmaterial_04.png" style="width: 16px; height: 16px;" onerror="this.outerHTML='🏺'">
               <span>🏺 Artefato de Transformação (Novo)</span>
+            </button>
+            <button class="pvp-subnav-btn" data-enchtab="blessing">
+              <span>✨ Bênção com Trindade (20% Fixo)</span>
             </button>
           </div>
 
@@ -1450,7 +1463,81 @@
         </section>
 
         <!-- ==============================================
-             23. FAQ SECTION
+             23. MOUNTS (MONTARIAS) SECTION
+             ============================================== -->
+        <section id="mounts" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <img src="assets/items/vehicleitemicon_mountaingoat_01.png" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 8px; object-fit: contain;" onerror="this.outerHTML='🐎'">
+              Montarias & Veículos de Sangue (Mounts)
+            </h2>
+            <p class="section-subtitle">
+              Catálogo canônico das 112 montarias e veículos de locomoção com bônus de velocidade, capacidade de carga, atributos de combate e transcendência.
+            </p>
+          </div>
+
+          <!-- Technical Mechanics Banner -->
+          <div class="card" style="margin-bottom: 24px; position: relative; overflow: hidden; border: 1px solid rgba(52, 211, 153, 0.35); background: linear-gradient(135deg, rgba(15, 30, 25, 0.9), rgba(15, 20, 35, 0.95)); padding: 24px;">
+            <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+              <img src="assets/items/vehicleitemicon_ancientbat_06.png" style="width: 100px; height: 100px; object-fit: contain; border-radius: 12px; border: 2px solid rgba(52, 211, 153, 0.5); background: rgba(0,0,0,0.5); box-shadow: 0 0 15px rgba(52, 211, 153, 0.25);" alt="Montaria Mítica">
+              <div style="flex: 1; min-width: 280px;">
+                <h3 style="color: #34d399; margin-top: 0; margin-bottom: 8px; font-size: 1.25rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <span>Locomoção, Bônus de Atributos & Transcendência</span>
+                  <span style="font-size: 0.75rem; background: rgba(52, 211, 153, 0.2); color: #6ee7b7; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(52, 211, 153, 0.4);">112 Montarias • 7 Raridades • Velocidade 750 a 1.250</span>
+                </h3>
+                <div style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.55;">
+                  <ul style="margin: 0; padding-left: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 8px;">
+                    <li><strong>Velocidade de Movimento:</strong> Escala de 750 (Comum) a 1.250 (Mítico), acelerando a travessia entre províncias e rotas de caça.</li>
+                    <li><strong>Efeitos de Locomoção (Grupo 1):</strong> Multiplicador de <strong>EXP Adicional</strong> (até +40%) e expansão de <strong>Capacidade Máxima de Peso</strong> (até +350.000).</li>
+                    <li><strong>Atributos de Combate (Grupo 2):</strong> Amplificadores de ATQ Básico, ATQ de Habilidade, HP Máximo e Recuperação de MP.</li>
+                    <li><strong>Atributos Especiais (Grupo 3):</strong> Resiliências a Dano de Monstros, Amplificadores de Dano Básico e Dano Crítico.</li>
+                    <li><strong>Códex de Montarias:</strong> Efeitos de Aquisição (por grau), Efeitos de Elo/Link (combinação de espécies) e Efeitos de Transcendência.</li>
+                    <li><strong>Transcendência de Montaria:</strong> As montarias Lendárias e Míticas suportam progressão até Nv. 2 (`VehicleLimitBreak.csv`) com novos visuais e picos de velocidade.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rarity Filter Bar -->
+          <div style="margin-bottom: 16px;">
+            <div style="font-size: 0.82rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">
+              Filtrar por Raridade:
+            </div>
+            <div class="filter-bar" id="mountsRarityFilterBar">
+              <button class="filter-btn active" data-mrarity="all">Todas as Raridades (112)</button>
+              <button class="filter-btn" data-mrarity="0" style="border-left: 3px solid #979694;">Comum (16)</button>
+              <button class="filter-btn" data-mrarity="1" style="border-left: 3px solid #64935E;">Incomum (16)</button>
+              <button class="filter-btn" data-mrarity="2" style="border-left: 3px solid #5E84CD;">Raro (28)</button>
+              <button class="filter-btn" data-mrarity="3" style="border-left: 3px solid #A165E8;">Heroico (27)</button>
+              <button class="filter-btn" data-mrarity="4" style="border-left: 3px solid #E2BE6F;">Lendário (20)</button>
+              <button class="filter-btn" data-mrarity="5" style="border-left: 3px solid #FF7373;">Mítico (3)</button>
+              <button class="filter-btn" data-mrarity="101" style="border-left: 3px solid #6EA8AC;">Sazonal (2)</button>
+            </div>
+          </div>
+
+          <!-- Search Bar -->
+          <div style="margin-bottom: 20px;">
+            <input type="text" id="mountsSearchInput" class="search-input" placeholder="🔍 Buscar por nome da montaria, espécie (ex: Lobo, Cabra, Baphomet, Corcel), stat ou velocidade..." style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(15,20,30,0.8); color: #fff; font-size: 0.9rem;">
+          </div>
+
+          <!-- Count & Info Bar -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; color: #94a3b8; font-size: 0.88rem;">
+            <span id="mountsCountLabel">Exibindo 112 Montarias</span>
+            <span style="font-size: 0.8rem; color: #64748b;">Clique no card para inspecionar atributos completos e transcendência</span>
+          </div>
+
+          <!-- Cards Grid -->
+          <div class="cards-grid" id="mountsContainer">
+            <!-- Dynamically populated -->
+          </div>
+
+          <!-- Pagination -->
+          <div id="mountsPagination" style="margin-top: 24px; text-align: center;"></div>
+        </section>
+
+        <!-- ==============================================
+             24. FAQ SECTION
              ============================================== -->
         <section id="faq" class="view-section">
           <div class="section-header">

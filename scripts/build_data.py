@@ -2283,6 +2283,56 @@ faq_catalog = [
         "category": "Arquitetura & Engenharia",
         "question": "Qual motor gráfico e arquitetura de segurança o jogo utiliza?",
         "answer": "O VAMPIR foi desenvolvido na Unreal Engine 5.5.4 em ARM64 (libUnreal.so), utilizando o Gameplay Ability System (GAS), MetaSound para áudio espacial, e FluidNinja para simulação volumétrica de sangue e magia negra. Toda a lógica de combate é Server-Authoritative: cálculos de vida, recarga e dano são validados no servidor, impedindo modificações ilegais de memória de cliente."
+    },
+    {
+        "category": "Mecânicas Vampíricas",
+        "question": "Como funciona a Drenagem de Sangue (Drain) em combate e o Medidor de Adrenalina?",
+        "answer": "Ao atacar monstros em campo, surge um ícone contextual de Drenar (Drain) com base em taxas probabilísticas calibradas (Guia Oficial Netmarble #129). Pressionar o ícone executa a habilidade especial Drain Skill, que causa morte instantânea (Instant Kill) no monstro-alvo e absorve essência vital. O ato da drenagem preenche o Medidor de Adrenalina (à esquerda dos Quick Slots). Quando a barra atinge 100%, o personagem entra no estado de Adrenalina, recebendo amplificadores severos de dano bruto (DamageMultiplier), taxa crítica (CriticalRate) e velocidades de ataque e conjuração (Adrenaline.csv)."
+    },
+    {
+        "category": "PvP & Mundo Aberto",
+        "question": "Quais são os bônus permanentes de combate concedidos aos líderes do Ranking de Nível e Poder de Combate (CP)?",
+        "answer": "O VAMPIR recompensa os Top 100 jogadores de cada servidor com bônus de combate maciços aplicados diretamente no personagem (Guia Oficial Netmarble #102 e RankingReward.csv): 1) Top 1: Dano PvP +25, Resiliência a Dano PvP +10 e Precisão PvP +9; 2) Top 2: Dano PvP +20, Resiliência a Dano PvP +8 e Precisão PvP +6; 3) Top 3: Dano PvP +15, Resiliência a Dano PvP +6 e Precisão PvP +3; 4) Top 4 a 10: Dano PvP +10 e Resiliência a Dano PvP +4; 5) Top 11 a 100: Dano PvP +5 e Resiliência a Dano PvP +2. Os bônus são recalculados a cada ciclo periódico de ranking."
+    },
+    {
+        "category": "Equipamentos & Forja",
+        "question": "Como funciona a Bênção de Equipamentos (Blessing) com Trindade e quais são as chances?",
+        "answer": "O sistema de Bênção (Guia Oficial Netmarble #96 e ItemBlessing.csv) consome Trindade (MaterialItemType #50) para despertar subatributos adicionais em equipamentos de grau Raro, Heroico e Lendário. A taxa de sucesso é rigorosamente fixada em 20,00% (SuccessRate: 2000). Caso a tentativa falhe, o equipamento NÃO é destruído e seu nível de aprimoramento não sofre perda. Ao obter sucesso, o item recebe o prefixo 'Abençoado' no nome e ganha atributos adicionais exibidos em destaque."
+    },
+    {
+        "category": "Automação & Suporte",
+        "question": "Quais são as 4 travas de segurança do Modo Suporte (Support Mode / Autoplay)?",
+        "answer": "O Modo Suporte (Guia Oficial Netmarble #72) opera caça autônoma mesmo com o jogo fechado ou em segundo plano, protegido por 4 travas de segurança: 1) Reabastecimento Automático: Ao atingir o limite mínimo de poções, retorna à cidade mais próxima, compra suprimentos configurados e usa teleporte de volta à caçada; 2) Fuga PvP: Ao sofrer agressão hostil de outro jogador em área de conflito, executa teleporte de emergência imediato para a vila; 3) Proteção de Sobrecarga: Suspende a caça ao atingir 100% de capacidade de peso no inventário; 4) Alerta Remoto: Notifica o jogador no launcher de PC ou aplicativo caso o personagem seja derrotado acidentalmente."
+    },
+    {
+        "category": "Comunidade & Clãs",
+        "question": "Como funcionam as Patentes de Clã, Sucessão por Inatividade e a Cripta de Clã?",
+        "answer": "Os Clãs (Guild.csv e Guias Oficiais #48 e #110) possuem 6 patentes: Mestre (Master), Vice-Mestre (Vice Master), Líder (Leader), Elite, Geral (General) e Aprendiz (Apprentice). Se o Mestre permanecer sem efetuar login por 5 dias consecutivos, a autoridade máxima de liderança é delegada automaticamente pelo servidor para outro membro ativo. Ao sair ou desbandar um clã, o jogador sofre um bloqueio de 5 minutos antes de poder ingressar em outro. A Cripta do Clã (GuildCrypt.csv) atua como cofre de espólios raros obtidos em raides, permitindo distribuição direta pelo líder ou realização de leilões internos."
+    },
+    {
+        "category": "Economia & Lojas",
+        "question": "Como funcionam o Mercado entre Jogadores (Marketplace) e o Mercado Negro?",
+        "answer": "O Mercado (Marketplace, Guia Oficial #45) opera leilões com Diamantes entre jogadores para equipamentos negociáveis, gemas e insumos raros. Cada venda concluída recolhe uma taxa de transação oficial, sendo também possível realizar Comércio Privado (Private Trade) direto. O Mercado Negro (Black Market, Guia Oficial #46) é um balcão de câmbio dinâmico no qual materiais específicos e Moedas do Mercado Negro são trocados por consumíveis arcanos, chaves de masmorra e baús selados com cotas de estoque limitadas por servidor."
+    },
+    {
+        "category": "PvP & Mundo Aberto",
+        "question": "O que é o Campo de Batalha de Geena (Gehenna) e como funcionam os Pontos de Geena?",
+        "answer": "Geena (Guia Oficial Netmarble #112) é um território aberto de PvP e caça de alta intensidade, com capacidade máxima limitada a 200 jogadores por instância. A entrada exige um Bilhete de Entrada de Geena e a região é subdividida em zonas com monstros de elite e chefes mundiais exclusivos. Abater ameaças em Geena concede a moeda especial Pontos de Geena (Gehenna Points), que pode ser trocada com o Mercador de Geena na vila por itens épicos e fórmulas de progressão."
+    },
+    {
+        "category": "Mundo & Exploração",
+        "question": "Como funcionam os Portões de Sangue (Blood Gate) e a expansão do Mapa Mundial?",
+        "answer": "Os Portões de Sangue (Guia Oficial Netmarble #111) são marcos arcanos espalhados pelas províncias do jogo. Em estado inativo, exibem luz cinzenta e a região circundante no Mapa Mundial permanece encoberta por névoa. Ao se aproximar e ativar o portão, ele projeta um feixe de luz vermelha no campo e ícone branco no mapa, dissipando o nevoeiro territorial, revelando a lista completa de espólios dos pontos de caça próximos e liberando rota de teleporte instantâneo."
+    },
+    {
+        "category": "Mundo & Exploração",
+        "question": "O que são os Anais (Annals) e a Saga do Servidor no sistema de Arquivo?",
+        "answer": "O sistema de Arquivo (Archive.csv e Guia Oficial #52) documenta a história do servidor em duas frentes: 1) Anais (Annals): Conquistas comunitárias cooperativas (ex: total acumulado de monstros e masmorras limpas por todos os jogadores). Ao completar a meta, todos os personagens do servidor recebem recompensas; 2) Saga: Conquistas competitivas de Primeiro do Servidor (First Clear/First Kill). O nome do jogador ou do clã pioneiro é imortalizado na crônica do servidor e uma recompensa comemorativa é distribuída para a comunidade."
+    },
+    {
+        "category": "Progressão & Personagem",
+        "question": "Como funciona o sistema de Disciplina (Engraving) e travas de compartimento com Trindade?",
+        "answer": "A Disciplina (Engraving.csv, EngravingSlot.csv e Guia Oficial #47) permite gravar atributos permanentes em 3 compartimentos por capítulo mediante o consumo de Trindade (20 unidades base). O jogador pode utilizar o recurso de Trava (Slot Lock) para congelar atributos desejados: travar 1 slot eleva o custo para 30 Trindades, e travar 2 slots eleva para 150 Trindades por tentativa. Quando os atributos máximos são atingidos em todos os 3 slots do capítulo, um bônus adicional de sinergia é ativado."
     }
 ]
 
@@ -4045,6 +4095,104 @@ with open(os.path.join(OUT_DIR, "bloodshapes.json"), "w", encoding="utf-8") as f
 print(f"  ✓ Processed Bloodshapes catalog ({len(bloodshapes_list)} bloodshapes across {len(bloodshapes_catalog['stats']['by_class'])} classes).")
 
 # ==========================================
+# 23. MOUNTS (VEHICLES / MONTARIAS) CATALOG
+# ==========================================
+print("Processing Mounts (Montarias / Veículos) catalog...")
+
+vehicle_names_map = {}
+vehicle_name_csv = os.path.join(L10N_DIR, "Vehicle_Name.csv")
+if os.path.exists(vehicle_name_csv):
+    with open(vehicle_name_csv, encoding="utf-8-sig") as f:
+        for row in csv.DictReader(f):
+            vehicle_names_map[row["Id"]] = row.get("Name", "")
+
+vehicle_limit_breaks = defaultdict(list)
+vehicle_lb_csv = os.path.join(CSV_DIR, "VehicleLimitBreak.csv")
+if os.path.exists(vehicle_lb_csv):
+    with open(vehicle_lb_csv, encoding="utf-8-sig") as f:
+        for row in csv.DictReader(f):
+            vehicle_limit_breaks[row["VehicleId"]].append(row)
+
+vehicle_rows = load_csv_list(os.path.join(CSV_DIR, "Vehicle.csv"))
+
+def find_vehicle_icon(v):
+    vid = v["Id"]
+    img = v.get("Img", "").lower().replace("img_vehicleicon_", "")
+    bp = v.get("Blueprint", "").lower()
+    candidates = [
+        f"vehicleitemicon_{img}.png",
+        f"vehicleitemicon_{bp}.png",
+        f"vehicleicon_{img}.png",
+        f"vehicleicon_{bp}.png",
+        f"vehicle_{img}.png",
+        f"vehicleitemicon_{vid}.png"
+    ]
+    for cand in candidates:
+        if cand in item_pngs:
+            return f"assets/items/{cand}"
+    return "assets/items/vehicleitemicon_mountaingoat_01.png"
+
+mounts_list = []
+for v in vehicle_rows:
+    vid = v["Id"]
+    r_code = int(v.get("Rarity", 0))
+    r_meta = get_rarity_info(r_code)
+    
+    g1 = format_costume_ops(v.get("StaticOperationGroupId1"))
+    g2 = format_costume_ops(v.get("StaticOperationGroupId2"))
+    g3 = format_costume_ops(v.get("StaticOperationGroupId3"))
+    acq = format_costume_ops(v.get("AcquireOperationGroupId"))
+    
+    lb_steps = []
+    for lb in vehicle_limit_breaks.get(vid, []):
+        lb_steps.append({
+            "level": int(lb.get("LimitBreakLevel", 1)),
+            "move_speed": int(lb.get("MoveSpeed") or v.get("MoveSpeed") or 0),
+            "stats_group_1": format_costume_ops(lb.get("StaticOperationGroupId1")),
+            "stats_group_2": format_costume_ops(lb.get("StaticOperationGroupId2")),
+            "stats_group_3": format_costume_ops(lb.get("StaticOperationGroupId3"))
+        })
+    lb_steps.sort(key=lambda x: x["level"])
+    
+    mounts_list.append({
+        "id": vid,
+        "name": vehicle_names_map.get(vid, f"Montaria {vid}"),
+        "rarity": r_code,
+        "rarity_info": r_meta,
+        "move_speed": int(v.get("MoveSpeed") or 0),
+        "icon": find_vehicle_icon(v),
+        "tile_collection_group_id": v.get("TileCollectionGroupId", ""),
+        "item_info_id": v.get("ItemInfoId", ""),
+        "max_limit_break": int(v.get("MaxLimitBreak") or 0),
+        "only_skin": v.get("OnlySkin", "0") == "1",
+        "stats_group_1": g1,
+        "stats_group_2": g2,
+        "stats_group_3": g3,
+        "acquire_stats": acq,
+        "all_stats": g1 + g2 + g3,
+        "limit_breaks": lb_steps
+    })
+
+mounts_list.sort(key=lambda x: (-x["rarity"] if x["rarity"] != 101 else -3.5, int(x["id"])))
+
+mounts_catalog = {
+    "stats": {
+        "total": len(mounts_list),
+        "by_rarity": dict(Counter(m["rarity_info"]["name"] for m in mounts_list)),
+        "speed_range": {
+            "min": min(m["move_speed"] for m in mounts_list),
+            "max": max(m["move_speed"] for m in mounts_list)
+        },
+        "rarities_order": ["Todas as Raridades", "Comum", "Incomum", "Raro", "Heroico", "Lendário", "Mítico", "Sazonal"]
+    },
+    "items": mounts_list
+}
+
+with open(os.path.join(OUT_DIR, "mounts.json"), "w", encoding="utf-8") as f:
+    json.dump(mounts_catalog, f, ensure_ascii=False)
+print(f"  ✓ Processed Mounts catalog ({len(mounts_list)} mounts across {len(mounts_catalog['stats']['by_rarity'])} rarities).")
+
+# ==========================================
 # 8. BUNDLE GENERATION
 # ==========================================
 print("Writing bundle.js...")
@@ -4072,6 +4220,7 @@ bundle_data = {
     "refinement": refinement_catalog,
     "lifetree": lifetree_catalog,
     "bloodshapes": bloodshapes_catalog,
+    "mounts": mounts_catalog,
     "constants": constants_dict,
     "faq": faq_catalog
 }
