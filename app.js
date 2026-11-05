@@ -83,6 +83,9 @@
     mountsSearchTerm: '',
     mountsPage: 1,
     mountsPerPage: 24,
+    disciplineCategory: '1',
+    disciplineChapter: 'all',
+    disciplineSearchTerm: '',
     modesFilter: 'all',
     pvpTab: 'arena',
     enchantTab: 'scrolls',
@@ -188,6 +191,7 @@
     if (tabId === 'lifetree') renderLifeTree();
     if (tabId === 'bloodshapes') renderBloodshapes();
     if (tabId === 'mounts') renderMounts();
+    if (tabId === 'discipline') renderDiscipline();
   }
 
   window.navTo = function(tabId) {
@@ -5248,6 +5252,344 @@
     detailModal.classList.add('active');
   };
 
+  // ==========================================
+  // DISCIPLINE (DISCIPLINA & ENTALHE) LOGIC
+  // ==========================================
+  function renderDiscipline() {
+    const container = document.getElementById('disciplineContainer');
+    const countLabel = document.getElementById('disciplineCountLabel');
+    if (!container || !state.data.discipline) return;
+
+    let phases = state.data.discipline.phases || [];
+
+    // Filter by Category ('1' standard, '2' absolute, or 'all')
+    if (state.disciplineCategory && state.disciplineCategory !== 'all') {
+      phases = phases.filter(p => String(p.category_id) === state.disciplineCategory);
+    }
+
+    // Filter by Chapter ('all', 'Capítulo 1', etc.)
+    if (state.disciplineChapter && state.disciplineChapter !== 'all') {
+      phases = phases.filter(p => p.chapter_name === state.disciplineChapter);
+    }
+
+    // Filter by Search Query
+    if (state.disciplineSearchTerm && state.disciplineSearchTerm.trim()) {
+      const q = state.disciplineSearchTerm.toLowerCase().trim();
+      phases = phases.filter(p => {
+        if (p.full_title && p.full_title.toLowerCase().includes(q)) return true;
+        if (p.phase_name && p.phase_name.toLowerCase().includes(q)) return true;
+        if (p.chapter_name && p.chapter_name.toLowerCase().includes(q)) return true;
+        if (p.unlock_text && p.unlock_text.toLowerCase().includes(q)) return true;
+        if (p.material_name && p.material_name.toLowerCase().includes(q)) return true;
+        if (String(p.id).includes(q)) return true;
+        if (p.slots && p.slots.some(s => s.effects && s.effects.some(e => e.name && e.name.toLowerCase().includes(q)))) return true;
+        if (p.mastery_bonus && p.mastery_bonus.effects && p.mastery_bonus.effects.some(e => e.name && e.name.toLowerCase().includes(q))) return true;
+        return false;
+      });
+    }
+
+    if (countLabel) {
+      countLabel.textContent = `Exibindo ${phases.length} de ${state.data.discipline.stats?.total_phases || 44} Fases`;
+    }
+
+    if (phases.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; padding: 48px; text-align: center; color: #94a3b8; background: rgba(15,20,30,0.6); border-radius: 12px; border: 1px dashed rgba(255,255,255,0.15);">
+          <div style="font-size: 2.2rem; margin-bottom: 12px;">📜</div>
+          <div style="font-size: 1.1rem; color: #fff; font-weight: 600;">Nenhuma fase encontrada</div>
+          <div style="font-size: 0.85rem; margin-top: 6px;">Tente ajustar os filtros de Categoria, Capítulo ou termo de busca.</div>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = phases.map(p => {
+      const isStandard = p.category_id === '1';
+      const catColor = isStandard ? '#38bdf8' : '#c084fc';
+      const catLabel = isStandard ? 'Padrão' : 'Absoluta';
+
+      // Slots preview
+      const slotsHtml = (p.slots || []).map(s => {
+        const maxEffect = (s.effects || []).find(e => e.rarity === 2) || (s.effects || [])[0];
+        const effectNames = Array.from(new Set((s.effects || []).map(e => e.name))).slice(0, 2).join(' / ');
+        const maxValStr = maxEffect ? `Max +${maxEffect.value}` : '';
+
+        return `
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 8px 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; color: #94a3b8; margin-bottom: 3px;">
+              <span style="font-weight: 700; color: #cbd5e1;">Espaço ${s.slot_index}</span>
+              ${maxValStr ? `<span style="color: #e2be6f; font-weight: 600;">${maxValStr}</span>` : ''}
+            </div>
+            <div style="font-size: 0.78rem; color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(s.effects || []).map(e => e.name).join(', ')}">
+              ${effectNames || 'Atributo'}
+            </div>
+            <div style="font-size: 0.68rem; color: #64748b; margin-top: 2px;">
+              ${s.effects?.length || 0} variações de atributos
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Mastery bonus preview
+      const masteryEffects = p.mastery_bonus?.effects || [];
+      const masteryText = masteryEffects.map(e => `${e.name} +${e.value}`).join(', ');
+
+      return `
+        <div class="entity-card" onclick="window.inspectDisciplinePhase('${p.id}')" style="cursor: pointer; position: relative; display: flex; flex-direction: column; justify-content: space-between; border-color: ${catColor}40; transition: transform 0.15s ease, border-color 0.15s ease;">
+          <div>
+            <!-- Header Bar -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 44px; height: 44px; border-radius: 8px; background: rgba(0,0,0,0.5); border: 1px solid ${catColor}50; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <img src="assets/items/flat_engraving.png" style="width: 30px; height: 30px; object-fit: contain;" alt="Disciplina">
+                </div>
+                <div>
+                  <h4 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #fff;">${p.full_title}</h4>
+                  <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 2px;">
+                    Fase #${p.id} • ${p.chapter_name}
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                <span class="entity-badge" style="background: ${catColor}20; color: ${catColor}; border: 1px solid ${catColor}50; font-size: 0.72rem; font-weight: 700;">
+                  ${catLabel}
+                </span>
+                ${p.server_group_id ? `<span class="entity-badge" style="background: rgba(234, 179, 8, 0.15); color: #facc15; font-size: 0.68rem; border: 1px solid rgba(234, 179, 8, 0.3);">Server 10000</span>` : ''}
+              </div>
+            </div>
+
+            <!-- Unlock Badge -->
+            <div style="margin-bottom: 12px; background: rgba(255,255,255,0.04); border-radius: 6px; padding: 6px 10px; font-size: 0.75rem; color: #93c5fd; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(147, 197, 253, 0.2);">
+              <span>🔓</span>
+              <span style="font-weight: 600;">${p.unlock_text || 'Desbloqueio Progressivo'}</span>
+            </div>
+
+            <!-- Material & Lock Costs -->
+            <div style="background: rgba(0,0,0,0.25); border-radius: 6px; padding: 8px 10px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.06); font-size: 0.76rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="color: #94a3b8;">Gravação:</span>
+                <span style="display: inline-flex; align-items: center; gap: 4px; color: #fff; font-weight: 700;">
+                  <img src="${p.material_icon}" style="width: 16px; height: 16px; object-fit: contain;">
+                  ${p.material_count}x ${p.material_name}
+                </span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; color: #94a3b8; font-size: 0.72rem;">
+                <span>Travas:</span>
+                <span>🔒 1x: <strong style="color: #e2be6f;">${p.slot_lock_1_cost}</strong> | 🔒 2x: <strong style="color: #e2be6f;">${p.slot_lock_2_cost}</strong></span>
+              </div>
+            </div>
+
+            <!-- 3 Slots Grid -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px;">
+              ${slotsHtml}
+            </div>
+
+            <!-- Mastery Bonus Slot 4 -->
+            <div style="background: linear-gradient(135deg, rgba(234, 179, 8, 0.12), rgba(168, 85, 247, 0.1)); border: 1px solid rgba(234, 179, 8, 0.35); border-radius: 6px; padding: 8px 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; margin-bottom: 2px;">
+                <span style="font-weight: 700; color: #facc15;">⭐ Maestria (Espaço 4)</span>
+                <span style="font-size: 0.66rem; color: #cbd5e1;">Todos no Máximo</span>
+              </div>
+              <div style="font-size: 0.8rem; font-weight: 700; color: #fff;">
+                ${masteryText || 'Bônus Especial'}
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer Action -->
+          <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #64748b;">
+            <span>Ver tabela de probabilidades</span>
+            <span style="color: ${catColor}; font-weight: 600;">Inspecionar →</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.inspectDisciplinePhase = function(id) {
+    if (!state.data.discipline || !state.data.discipline.phases) return;
+    const p = state.data.discipline.phases.find(x => String(x.id) === String(id));
+    if (!p) return;
+
+    const isStandard = p.category_id === '1';
+    const catColor = isStandard ? '#38bdf8' : '#c084fc';
+    const catLabel = isStandard ? 'Disciplina Padrão (Normal)' : 'Disciplina Absoluta (Absolute)';
+
+    modalTitle.innerText = `${p.full_title} • ${catLabel}`;
+    modalSubtitle.innerText = `Fase #${p.id} • ${p.unlock_text} • Material: ${p.material_count}x ${p.material_name}`;
+
+    // Header Summary Box
+    const headerHtml = `
+      <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 20px; padding: 16px; background: radial-gradient(circle, ${catColor}15 0%, rgba(10,12,20,0.7) 100%); border-radius: 10px; border: 1px solid ${catColor}40;">
+        <div style="width: 72px; height: 72px; border-radius: 12px; background: rgba(0,0,0,0.5); border: 2px solid ${catColor}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 15px ${catColor}30;">
+          <img src="assets/items/flat_engraving.png" alt="Disciplina" style="width: 52px; height: 52px; object-fit: contain;">
+        </div>
+        <div style="flex: 1; min-width: 0;">
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 6px;">
+            <span class="entity-badge" style="background: ${catColor}20; color: ${catColor}; border: 1px solid ${catColor}50; font-size: 0.75rem; font-weight: 700;">
+              ● ${catLabel}
+            </span>
+            <span class="entity-badge" style="background: rgba(56, 189, 248, 0.15); color: #7dd3fc; font-size: 0.72rem; border: 1px solid rgba(56, 189, 248, 0.3);">
+              🔓 ${p.unlock_text || 'Desbloqueio Progressivo'}
+            </span>
+            ${p.server_group_id ? `<span class="entity-badge" style="background: rgba(234, 179, 8, 0.15); color: #facc15; font-size: 0.72rem; border: 1px solid rgba(234, 179, 8, 0.3);">Server 10000</span>` : ''}
+          </div>
+          <h3 style="margin: 0 0 4px; font-size: 1.25rem; font-weight: 700; color: #fff;">
+            ${p.full_title}
+          </h3>
+          <div style="font-size: 0.8rem; color: #94a3b8; display: flex; gap: 14px; flex-wrap: wrap;">
+            <span>ID da Fase: <strong>#${p.id}</strong></span>
+            <span>Capítulo: <strong>${p.chapter_name}</strong></span>
+            <span>Fase Numérica: <strong>${p.phase_name}</strong></span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Costs & Locking Rules Panel
+    const costsHtml = `
+      <div class="panel-box" style="margin-bottom: 20px; border-left: 3px solid ${catColor}; background: rgba(0,0,0,0.3);">
+        <div class="panel-title" style="color: ${catColor}; display: flex; justify-content: space-between; align-items: center;">
+          <span>⚙️ Custos de Gravação & Travamento de Compartimentos</span>
+          <span style="font-size: 0.75rem; color: #94a3b8; font-weight: normal;">Regras Canônicas</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 12px;">
+          <div style="background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+            <div style="font-size: 0.74rem; color: #94a3b8; text-transform: uppercase;">Custo por Gravação Base</div>
+            <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+              <img src="${p.material_icon}" style="width: 20px; height: 20px; object-fit: contain;">
+              <span style="font-size: 1.15rem; font-weight: 700; color: #fff;">${p.material_count}x</span>
+              <span style="font-size: 0.85rem; color: #cbd5e1;">${p.material_name}</span>
+            </div>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+            <div style="font-size: 0.74rem; color: #94a3b8; text-transform: uppercase;">Trava de 1 Compartimento</div>
+            <div style="font-size: 1.15rem; font-weight: 700; color: #e2be6f; margin-top: 4px;">
+              ${p.slot_lock_1_cost}x <span style="font-size: 0.85rem; color: #cbd5e1;">${p.material_name}</span>
+            </div>
+            <div style="font-size: 0.7rem; color: #64748b;">${p.slot_lock_dia_use ? '+ Consumo de Diamantes' : ''}</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+            <div style="font-size: 0.74rem; color: #94a3b8; text-transform: uppercase;">Trava de 2 Compartimentos</div>
+            <div style="font-size: 1.15rem; font-weight: 700; color: #e2be6f; margin-top: 4px;">
+              ${p.slot_lock_2_cost}x <span style="font-size: 0.85rem; color: #cbd5e1;">${p.material_name}</span>
+            </div>
+            <div style="font-size: 0.7rem; color: #64748b;">${p.slot_lock_dia_use ? '+ Consumo de Diamantes' : ''}</div>
+          </div>
+        </div>
+        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 10px; line-height: 1.5; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 8px;">
+          💡 <strong>Princípio de Evolução (UpgradeRate):</strong> Uma vez que um compartimento atinge um determinado grau (Intermediário ou Máximo), seu nível <strong>nunca diminui</strong> nas próximas gravações. Bloquear compartimentos maximizados garante que o material seja investido exclusivamente nos espaços restantes.
+        </div>
+      </div>
+    `;
+
+    // 3 Slots Detailed Tables
+    const slotsDetailHtml = (p.slots || []).map(s => {
+      const rowsHtml = (s.effects || []).map(e => {
+        let rColor = '#979694';
+        let rBg = 'rgba(151,150,148,0.15)';
+        if (e.rarity === 1) {
+          rColor = '#5E84CD';
+          rBg = 'rgba(94,132,205,0.15)';
+        } else if (e.rarity === 2) {
+          rColor = '#E2BE6F';
+          rBg = 'rgba(226,190,111,0.18)';
+        }
+
+        return `
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <td style="padding: 8px 10px;">
+              <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; background: ${rBg}; color: ${rColor}; border: 1px solid ${rColor}40;">
+                ${e.rarity_label}
+              </span>
+            </td>
+            <td style="padding: 8px 10px; font-weight: 600; color: #fff; font-size: 0.82rem;">
+              ${e.name}
+            </td>
+            <td style="padding: 8px 10px; font-weight: 700; color: ${rColor}; font-size: 0.85rem;">
+              +${e.value}
+            </td>
+            <td style="padding: 8px 10px; text-align: right; color: #cbd5e1; font-weight: 600; font-size: 0.82rem;">
+              ${e.rate_pct}
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      return `
+        <div style="background: rgba(15,20,30,0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; margin-bottom: 16px; overflow: hidden;">
+          <div style="background: rgba(255,255,255,0.04); padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-weight: 700; color: #fff; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+              <span style="width: 20px; height: 20px; border-radius: 50%; background: ${catColor}; color: #000; font-size: 0.72rem; display: inline-flex; align-items: center; justify-content: center; font-weight: 800;">${s.slot_index}</span>
+              <span>Espaço ${s.slot_index}</span>
+            </div>
+            <span style="font-size: 0.74rem; color: #94a3b8;">Grupo de Sorteio #${s.group_id}</span>
+          </div>
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.8rem;">
+              <thead>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: #94a3b8; font-size: 0.72rem; text-transform: uppercase;">
+                  <th style="padding: 8px 10px;">Grau / Nível</th>
+                  <th style="padding: 8px 10px;">Atributo</th>
+                  <th style="padding: 8px 10px;">Valor</th>
+                  <th style="padding: 8px 10px; text-align: right;">Probabilidade</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Mastery Bonus Panel
+    const masteryPanelHtml = `
+      <div style="background: linear-gradient(135deg, rgba(234, 179, 8, 0.15), rgba(168, 85, 247, 0.15)); border: 2px solid rgba(234, 179, 8, 0.5); border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 0 20px rgba(234, 179, 8, 0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.3rem;">⭐</span>
+            <h4 style="margin: 0; font-size: 1.05rem; color: #facc15; font-weight: 700;">Espaço 4 • Bônus de Maestria Adicional</h4>
+          </div>
+          <span style="font-size: 0.72rem; background: rgba(234, 179, 8, 0.2); color: #fef08a; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(234, 179, 8, 0.4);">
+            Ativação Condicional
+          </span>
+        </div>
+        <p style="font-size: 0.8rem; color: #cbd5e1; margin: 0 0 12px; line-height: 1.5;">
+          <strong>Condição de Ativação:</strong> Quando todos os 3 compartimentos atingem a raridade <strong>Máxima</strong>, este efeito adicional de maestria é concedido de forma automática e garantida ao personagem.
+        </p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+          ${(p.mastery_bonus?.effects || []).map(e => `
+            <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(234, 179, 8, 0.3); border-radius: 6px; padding: 10px 14px;">
+              <div style="font-size: 0.74rem; color: #94a3b8; text-transform: uppercase;">Atributo Garantido</div>
+              <div style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-top: 2px;">
+                ${e.name} <span style="color: #facc15;">+${e.value}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+    modalBody.innerHTML = `
+      ${headerHtml}
+      ${costsHtml}
+      <div style="font-size: 0.84rem; font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+        <span>🎯</span>
+        <span>Compartimentos de Atributos & Probabilidades Canônicas:</span>
+      </div>
+      ${slotsDetailHtml}
+      ${masteryPanelHtml}
+      <div style="font-size: 0.74rem; color: #64748b; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px; margin-top: 16px;">
+        Dados extraídos de EngravingSlot.csv, EngravingPhase.csv, RandomOperation.csv e StaticOperation.csv (Versão 1.13.22 • Netmarble Corporation).
+      </div>
+    `;
+
+    detailModal.classList.add('open');
+    detailModal.classList.add('active');
+  };
+
   // Render FAQ
   function renderFaq() {
     const container = document.getElementById('faqContainer');
@@ -6547,6 +6889,46 @@
       state.mountsPage = 1;
       renderMounts();
     });
+
+    document.getElementById('disciplineCategoryFilterBar')?.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (btn && btn.dataset.dcat) {
+        document.querySelectorAll('#disciplineCategoryFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.disciplineCategory = btn.dataset.dcat;
+
+        const chap6Btn = document.getElementById('btnDisciplineChap6');
+        if (chap6Btn) {
+          if (state.disciplineCategory === '2') {
+            chap6Btn.style.display = 'none';
+            if (state.disciplineChapter === 'Capítulo 6') {
+              state.disciplineChapter = 'all';
+              document.querySelectorAll('#disciplineChapterFilterBar .filter-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.dchap === 'all');
+              });
+            }
+          } else {
+            chap6Btn.style.display = '';
+          }
+        }
+        renderDiscipline();
+      }
+    });
+
+    document.getElementById('disciplineChapterFilterBar')?.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (btn && btn.dataset.dchap) {
+        document.querySelectorAll('#disciplineChapterFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.disciplineChapter = btn.dataset.dchap;
+        renderDiscipline();
+      }
+    });
+
+    document.getElementById('disciplineSearchInput')?.addEventListener('input', e => {
+      state.disciplineSearchTerm = e.target.value;
+      renderDiscipline();
+    });
   }
 
   function initApp() {
@@ -6572,6 +6954,7 @@
     renderLifeTree();
     renderBloodshapes();
     renderMounts();
+    renderDiscipline();
     renderFaq();
     setupListeners();
   }

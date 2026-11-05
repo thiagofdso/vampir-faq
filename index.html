@@ -140,6 +140,11 @@
           <span>Montarias</span>
           <span class="nav-count" id="countMounts">112</span>
         </a>
+        <a class="nav-item" data-target="discipline">
+          <span class="nav-icon"><img src="assets/items/flat_engraving.png" style="width: 18px; height: 18px; vertical-align: middle; object-fit: contain;" onerror="this.outerHTML='📜'"></span>
+          <span>Disciplina</span>
+          <span class="nav-count" id="countDiscipline">44</span>
+        </a>
         <a class="nav-item" data-target="faq">
           <span class="nav-icon">❓</span>
           <span>FAQ & Sistemas</span>
@@ -234,6 +239,11 @@
               <div class="metric-label">Montarias (Mounts)</div>
               <div class="metric-value" style="color: #34d399;">112</div>
               <div class="metric-desc">Veículos de sangue com velocidade de até 1.250 e transcendência</div>
+            </div>
+            <div class="metric-card" onclick="window.navTo('discipline')" style="cursor: pointer;">
+              <div class="metric-label">Disciplina & Entalhe</div>
+              <div class="metric-value" style="color: #60a5fa;">44 Fases</div>
+              <div class="metric-desc">11 Capítulos (Padrão & Absoluto) com 3 espaços e bônus de maestria</div>
             </div>
           </div>
 
@@ -1546,7 +1556,89 @@
         </section>
 
         <!-- ==============================================
-             24. FAQ SECTION
+             24. DISCIPLINE (DISCIPLINA & ENTALHE) SECTION
+             ============================================== -->
+        <section id="discipline" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <img src="assets/items/flat_engraving.png" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 8px; object-fit: contain;" onerror="this.outerHTML='📜'">
+              Disciplina & Entalhe de Sangue (Engraving)
+            </h2>
+            <p class="section-subtitle">
+              Progressão canônica de atributos permanentes em 44 fases e 11 capítulos via Trindade e Livro de Entalhe.
+            </p>
+          </div>
+
+          <!-- Technical Mechanics Banner -->
+          <div class="card" style="margin-bottom: 24px; position: relative; overflow: hidden; border: 1px solid rgba(96, 165, 250, 0.35); background: linear-gradient(135deg, rgba(15, 25, 45, 0.9), rgba(15, 20, 35, 0.95)); padding: 24px;">
+            <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+              <img src="assets/items/engraving_main_01.png" style="width: 100px; height: 100px; object-fit: contain; border-radius: 12px; border: 2px solid rgba(96, 165, 250, 0.5); background: rgba(0,0,0,0.5); box-shadow: 0 0 15px rgba(96, 165, 250, 0.25);" alt="Entalhe de Sangue">
+              <div style="flex: 1; min-width: 280px;">
+                <h3 style="color: #60a5fa; margin-top: 0; margin-bottom: 8px; font-size: 1.25rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <span>Mecânica de Entalhe, Travas de Espaço & Bônus de Maestria</span>
+                  <span style="font-size: 0.75rem; background: rgba(96, 165, 250, 0.2); color: #93c5fd; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(96, 165, 250, 0.4);">44 Fases • 11 Capítulos • Trindade & Livro de Entalhe</span>
+                </h3>
+                <div style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.55;">
+                  <ul style="margin: 0; padding-left: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 8px;">
+                    <li><strong>Categorias de Disciplina:</strong> <strong>Padrão</strong> (Capítulos 1 a 6 / 24 fases, desbloqueia no Nv. 27 com Trindade) e <strong>Absoluta</strong> (Capítulos 1 a 5 / 20 fases, consome Livro de Entalhe).</li>
+                    <li><strong>3 Espaços por Fase:</strong> Cada espaço rola atributos permanentes em 3 níveis: <em>Comum</em>, <em>Intermediário</em> e <em>Máximo</em> (ex: ATQ Básico +5/+10/+15).</li>
+                    <li><strong>Preservação de Grau (UpgradeRate):</strong> Uma vez elevado com sucesso a um nível superior, o grau do compartimento nunca diminui ao regravar.</li>
+                    <li><strong>Travamento de Compartimentos:</strong> Bloqueie até 2 espaços já maximizados para continuar regravando apenas o restante (custo proporcional em material e diamantes).</li>
+                    <li><strong>Espaço 4 • Bônus de Maestria Adicional:</strong> Ativado automaticamente quando os 3 espaços anteriores atingem o grau Máximo, concedendo atributos expressivos garantidos.</li>
+                    <li><strong>Condições de Desbloqueio:</strong> Escalonamento por nível de conta (Nv. 27 a Nv. 99), exigindo a conclusão da fase anterior para liberar a subsequente.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category Filter Bar -->
+          <div style="margin-bottom: 16px;">
+            <div style="font-size: 0.82rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">
+              Categoria de Disciplina:
+            </div>
+            <div class="filter-bar" id="disciplineCategoryFilterBar">
+              <button class="filter-btn active" data-dcat="1" style="border-left: 3px solid #38bdf8;">Disciplina Padrão (24 Fases • Trindade)</button>
+              <button class="filter-btn" data-dcat="2" style="border-left: 3px solid #a855f7;">Disciplina Absoluta (20 Fases • Livro de Entalhe)</button>
+              <button class="filter-btn" data-dcat="all">Todas as Fases (44)</button>
+            </div>
+          </div>
+
+          <!-- Chapter Filter Bar -->
+          <div style="margin-bottom: 16px;">
+            <div style="font-size: 0.82rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">
+              Filtrar por Capítulo:
+            </div>
+            <div class="filter-bar" id="disciplineChapterFilterBar">
+              <button class="filter-btn active" data-dchap="all">Todos os Capítulos</button>
+              <button class="filter-btn" data-dchap="Capítulo 1">Capítulo 1</button>
+              <button class="filter-btn" data-dchap="Capítulo 2">Capítulo 2</button>
+              <button class="filter-btn" data-dchap="Capítulo 3">Capítulo 3</button>
+              <button class="filter-btn" data-dchap="Capítulo 4">Capítulo 4</button>
+              <button class="filter-btn" data-dchap="Capítulo 5">Capítulo 5</button>
+              <button class="filter-btn" data-dchap="Capítulo 6" id="btnDisciplineChap6">Capítulo 6</button>
+            </div>
+          </div>
+
+          <!-- Search Bar -->
+          <div style="margin-bottom: 20px;">
+            <input type="text" id="disciplineSearchInput" class="search-input" placeholder="🔍 Buscar por fase, capítulo, stat (ex: ATQ Básico, Precisão, DEF, Resil. a Dano) ou requisito de nível..." style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(15,20,30,0.8); color: #fff; font-size: 0.9rem;">
+          </div>
+
+          <!-- Count & Info Bar -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; color: #94a3b8; font-size: 0.88rem;">
+            <span id="disciplineCountLabel">Exibindo 24 de 44 Fases</span>
+            <span style="font-size: 0.8rem; color: #64748b;">Clique no card para abrir a tabela completa de probabilidades e atributos</span>
+          </div>
+
+          <!-- Cards Grid -->
+          <div class="cards-grid" id="disciplineContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+
+        <!-- ==============================================
+             25. FAQ SECTION
              ============================================== -->
         <section id="faq" class="view-section">
           <div class="section-header">

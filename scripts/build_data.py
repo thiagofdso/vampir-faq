@@ -4304,6 +4304,154 @@ with open(os.path.join(OUT_DIR, "mounts.json"), "w", encoding="utf-8") as f:
 print(f"  ✓ Processed Mounts catalog ({len(mounts_list)} mounts across {len(mounts_catalog['stats']['by_rarity'])} rarities).")
 
 # ==========================================
+# 24. DISCIPLINE (ENGRAVING / DISCIPLINA) CATALOG
+# ==========================================
+print("Processing Discipline (Engraving / Disciplina) catalog...")
+
+fases_csv_path = os.path.join(BASE_DIR, "analysis/versions/2026-10-31/reports/disciplina/fases.csv")
+op_names_csv_path = os.path.join(CSV_DIR, "L10N/pt/OperationType_Name.csv")
+
+op_names_dict = {}
+if os.path.exists(op_names_csv_path):
+    with open(op_names_csv_path, "r", encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            op_names_dict[r["OperationType"]] = r.get("Name", "")
+
+discipline_phases = []
+if os.path.exists(fases_csv_path):
+    with open(fases_csv_path, "r", encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            cid = r["CategoryId"]
+            pid = r["Id"]
+            cname = r["capitulo_nome"]
+            pname = r["fase_nome"]
+            mname = r["material_nome"]
+            mcount = int(r["EngravingNeedItemCount"] or 0)
+            lock1 = int(r["SlotLock1NeedItemCount"] or 0)
+            lock2 = int(r["SlotLock2NeedItemCount"] or 0)
+            dia_use = r.get("SlotLockDiaUse") == "1"
+            unlock = r.get("desbloqueio_texto", "").strip()
+            if not unlock and pid == "101":
+                unlock = "Desbloqueio de Disciplina (Nv. 27)"
+            elif not unlock and cid == "2":
+                unlock = "Servidor 10000 (Avançado)"
+
+            # Material icon
+            if cid == "1":
+                mat_icon = "assets/items/materials_craftmaterial_01.png"
+            else:
+                mat_icon = "assets/items/matrixenchantmaterial_02.png"
+
+            raw_slots = json.loads(r.get("espacos_json", "[]"))
+            parsed_slots = []
+            mastery_bonus = None
+
+            for s in raw_slots:
+                s_idx = int(s.get("SlotIndex", 1))
+                is_add = s.get("Additional") == "1"
+                s_rarity = int(s.get("SlotRarity", 0) or 0)
+                group_id = s.get("SlotOperationGroupId", "")
+                up_rate = s.get("UpgradeRate", "")
+
+                raw_effs = json.loads(s.get("efeitos_possiveis_json", "[]"))
+                eff_list = []
+                for e in raw_effs:
+                    t_enum = e.get("tipo_nome", "")
+                    t_label = op_names_dict.get(t_enum, t_enum)
+                    r_num = int(e.get("OperationRarity", 0) or 0)
+                    min_v = e.get("Min", "0")
+                    max_v = e.get("Max", "0")
+                    rate_raw = int(e.get("SelectedRate", 0) or 0)
+                    rate_pct = f"{rate_raw / 100.0:.1f}%" if rate_raw > 0 else "—"
+
+                    r_label = "Comum" if r_num == 0 else ("Intermediário" if r_num == 1 else ("Máximo" if r_num == 2 else "Especial"))
+                    eff_list.append({
+                        "enum": t_enum,
+                        "name": t_label,
+                        "rarity": r_num,
+                        "rarity_label": r_label,
+                        "value": min_v if min_v == max_v else f"{min_v}~{max_v}",
+                        "rate_raw": rate_raw,
+                        "rate_pct": rate_pct
+                    })
+
+                slot_obj = {
+                    "slot_index": s_idx,
+                    "is_mastery": is_add,
+                    "group_id": group_id,
+                    "upgrade_rate": up_rate,
+                    "effects": eff_list
+                }
+
+                if is_add:
+                    mastery_bonus = slot_obj
+                else:
+                    parsed_slots.append(slot_obj)
+
+            discipline_phases.append({
+                "id": pid,
+                "category_id": cid,
+                "category_name": "Padrão (Normal)" if cid == "1" else "Absoluto (Absolute)",
+                "chapter_name": cname,
+                "phase_name": pname,
+                "full_title": f"{cname} • Fase {pname}",
+                "material_id": r.get("EngravingNeedItemId"),
+                "material_name": mname,
+                "material_count": mcount,
+                "material_icon": mat_icon,
+                "slot_lock_1_cost": lock1,
+                "slot_lock_2_cost": lock2,
+                "slot_lock_dia_use": dia_use,
+                "unlock_text": unlock,
+                "server_group_id": r.get("ServerServiceGroupId", ""),
+                "slots": parsed_slots,
+                "mastery_bonus": mastery_bonus
+            })
+
+discipline_catalog = {
+    "stats": {
+        "total_phases": len(discipline_phases),
+        "total_chapters": 11,
+        "standard_phases": len([p for p in discipline_phases if p["category_id"] == "1"]),
+        "absolute_phases": len([p for p in discipline_phases if p["category_id"] == "2"]),
+        "categories": [
+            {
+                "id": "1",
+                "key": "standard",
+                "name": "Disciplina Padrão (Normal)",
+                "description": "Progressão primária em 6 capítulos e 24 fases, consumindo Trindades. Desbloqueia no Nível 27.",
+                "material": "Trindade (Item 100000000)",
+                "material_icon": "assets/items/materials_craftmaterial_01.png",
+                "chapters_count": 6,
+                "phases_count": 24
+            },
+            {
+                "id": "2",
+                "key": "absolute",
+                "name": "Disciplina Absoluta (Absolute)",
+                "description": "Progressão avançada em 5 capítulos e 20 fases, consumindo Livros de Entalhe. Exclusiva do Servidor 10000.",
+                "material": "Livro de Entalhe (Item 60000017)",
+                "material_icon": "assets/items/matrixenchantmaterial_02.png",
+                "chapters_count": 5,
+                "phases_count": 20
+            }
+        ],
+        "rules": [
+            "Cada nível/fase possui 3 compartimentos com sorteio de atributos permanentes (EOperationType em RandomOperation.csv).",
+            "É possível bloquear até 2 compartimentos antes de sortear para preservar atributos já maximizados (consumo de Trindade / Livro de Entalhe + Diamantes).",
+            "Quando todos os 3 compartimentos atingem seus atributos máximos, o 4º espaço (Bônus de Maestria Adicional) é ativado automaticamente.",
+            "O bônus adicional tem como base o menor grau entre os 3 espaços; se todos tiverem o mesmo grau sem atingir o máximo, aplica-se o efeito do grau inferior.",
+            "O grau de evolução (UpgradeRate) de cada espaço nunca diminui após ser elevado com sucesso."
+        ]
+    },
+    "phases": discipline_phases
+}
+
+with open(os.path.join(OUT_DIR, "discipline.json"), "w", encoding="utf-8") as f:
+    json.dump(discipline_catalog, f, ensure_ascii=False)
+print(f"  ✓ Processed Discipline catalog ({len(discipline_phases)} phases in 11 chapters).")
+
+# ==========================================
 # 8. BUNDLE GENERATION
 # ==========================================
 print("Writing bundle.js...")
@@ -4332,6 +4480,7 @@ bundle_data = {
     "lifetree": lifetree_catalog,
     "bloodshapes": bloodshapes_catalog,
     "mounts": mounts_catalog,
+    "discipline": discipline_catalog,
     "constants": constants_dict,
     "faq": faq_catalog
 }
