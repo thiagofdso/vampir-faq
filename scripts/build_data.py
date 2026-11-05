@@ -992,6 +992,18 @@ for iid, dlist in item_droppers_raw.items():
 items_by_cat = defaultdict(list)
 all_processed_items = {}
 
+# Pre-gather recipe materials from receitas.csv to tag pure crafting materials
+recipe_mat_ids = set()
+receitas_path_preview = os.path.join(BASE_DIR, "analysis/reports/jogo/receitas.csv")
+if os.path.exists(receitas_path_preview):
+    with open(receitas_path_preview, encoding='utf-8-sig') as f:
+        for r in csv.DictReader(f):
+            mats = json.loads(r['materiais_json']) if r.get('materiais_json') else []
+            for m in mats:
+                p = m.get('CostParam')
+                if p and p != 'Gold':
+                    recipe_mat_ids.add(p)
+
 for iid, irow in item_raw.items():
     iname_row = item_names.get(iid)
     if not iname_row:
@@ -1061,6 +1073,13 @@ for iid, irow in item_raw.items():
         type_label = "Material de Aprimoramento"
         clean_name = re.sub(r'\{[^}]+\}', '', name).strip()
         clean_desc = re.sub(r'\{[^}]+\}', '', desc).strip()
+    elif (iid in recipe_mat_ids and itype not in ['1', '2', '4', '25', '26', '31', '32', '33', '34', '35', '42', '53', '54', '70', '75', '8', '9']) \
+         or 'materials_craftmaterial' in raw_img.lower() \
+         or (itype == '0' and any(k in name.lower() for k in ['fragmento de arma', 'fragmento de armadura', 'fragmento de acessório', 'cristal cinzento', 'peridoto', 'safira gélida', 'manual de arma', 'manual de armadura', 'manual de acessório', 'página do manual', 'página do livro de habilidade', 'indícios de grandeza', 'energia mágica lazúli', 'energia mágica eterna', 'diagrama de criação'])):
+        cat = "crafting_materials"
+        type_label = "Material de Criação & Forja"
+        clean_name = re.sub(r'\{[^}]+\}', '', name).strip()
+        clean_desc = re.sub(r'\{[^}]+\}', '', desc).strip()
     elif itype in ["2", "54"] or any(k in raw_img.lower() for k in ["costume", "seal"]) or any(k in name.lower() for k in ["traje", "chapéu", "medalha", "selo"]):
         cat = "costumes"
         type_label = "Traje, Cosmético & Selo"
@@ -1088,6 +1107,11 @@ for iid, irow in item_raw.items():
         for m in ["materials_artifactenchantmaterial_04.png", "materials_artifactenchantmaterial_01.png", "weaponenchantmaterial_01.png"]:
             if m in item_pngs:
                 item_img = f"assets/items/{m}"
+                break
+    elif cat == "crafting_materials":
+        for cm in ["materials_craftmaterial_01.png", "materials_craftmaterial_02.png", "flat_itemcraft.png"]:
+            if cm in item_pngs:
+                item_img = f"assets/items/{cm}"
                 break
     elif cat == "costumes":
         for c in ["costumeitemicon_alle011armor.png", "costumeitemicon_alle011hair.png", "costumeicon_alle011armor.png"]:
@@ -1191,7 +1215,10 @@ curated_items.extend(items_by_cat["relic"][:60])
 # 8. Materiais de Aprimoramento e Forja
 curated_items.extend(items_by_cat["materials"])
 
-# 9. Trajes, Cosméticos & Medalhas Comemorativas
+# 9. Materiais de Criação & Forja (Pure Crafting Materials)
+curated_items.extend(items_by_cat["crafting_materials"])
+
+# 10. Trajes, Cosméticos & Medalhas Comemorativas
 curated_items.extend(items_by_cat["costumes"])
 
 # 10. Todos os Itens com Drop Confirmado de Monstros (Garantia de 100% de cobertura e cross-linking)
@@ -1306,6 +1333,10 @@ if os.path.exists(receitas_path):
 
         # Target Icon & Rarity matching directly from Item.csv
         target_row = item_raw.get(target_param, {})
+        rep_str = target_row.get("ReplaceString1", "").strip()
+        if rep_str:
+            target_name = target_name.replace("{ReplaceString1}", rep_str).strip()
+
         raw_rarity = target_row.get("Rarity", "").strip()
         if not raw_rarity and succ_list:
             raw_rarity = succ_list[0].get('RewardRank', '0')
@@ -1342,15 +1373,18 @@ if os.path.exists(receitas_path):
             mat_raw_rarity = mat_row.get("Rarity", "").strip()
             mat_rarity_num = int(mat_raw_rarity) if mat_raw_rarity.isdigit() else 0
             mat_rarity_info = get_rarity_info(mat_rarity_num)
+            mat_desc = item_names.get(param, {}).get("Desc", "").strip()
 
             clean_mats.append({
+                "id": param,
                 "name": mname,
                 "amount": m.get('CostValue', '1'),
                 "type": m.get('custo_tipo_nome_enum', 'Item'),
                 "icon": mat_icon,
                 "rarity": mat_rarity_num,
                 "rarity_name": mat_rarity_info["name"],
-                "rarity_color": mat_rarity_info["color"]
+                "rarity_color": mat_rarity_info["color"],
+                "desc": mat_desc
             })
 
         succ_rate = (int(r.get('SuccessRate') or 0)) // 10000
@@ -1379,6 +1413,23 @@ if os.path.exists(receitas_path):
             recipe_category = "events"
             cat_label = "Eventos / Emblemas"
 
+        # Skill Book enrichment
+        sk_id = None
+        sk_name = None
+        sk_desc = None
+        sk_effect = None
+        it_desc = None
+        class_name = None
+        if recipe_category == "books":
+            class_name = tab_name
+            eff_param = target_row.get("EffectParams", "").strip()
+            sk = skill_names.get(eff_param, {})
+            sk_name = sk.get("Name", "").strip() or None
+            sk_id = eff_param or None
+            sk_desc = re.sub(r'<[^>]+>', '', sk.get("Description", "")).strip() or None
+            sk_effect = re.sub(r'<[^>]+>', '', sk.get("EffectDescription", "")).strip() or None
+            it_desc = re.sub(r'<[^>]+>', '', item_names.get(target_param, {}).get("Desc", "")).strip() or None
+
         raw_tier = target_row.get("Tier", "").strip()
         tier_val = int(raw_tier) if raw_tier.isdigit() else None
 
@@ -1397,6 +1448,12 @@ if os.path.exists(receitas_path):
             "tab_name": tab_name,
             "category": recipe_category,
             "category_label": cat_label,
+            "class_name": class_name,
+            "skill_id": sk_id,
+            "skill_name": sk_name,
+            "skill_desc": sk_desc,
+            "skill_effect": sk_effect,
+            "item_desc": it_desc,
             "success_rate": f"{succ_rate}%",
             "big_success_rate": f"{big_rate}%",
             "materials": clean_mats,

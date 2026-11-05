@@ -385,14 +385,15 @@
             <p class="section-subtitle">Equipamentos, armas de sangue, livros de habilidades e relíquias de caixão</p>
           </div>
           <div class="filter-bar" id="itemsFilterBar">
-            <button class="filter-btn active" data-itype="all">Todos os Itens (588)</button>
-            <button class="filter-btn" data-itype="1">Armas & Equipamentos (120)</button>
-            <button class="filter-btn" data-itype="31">Livros de Habilidade (80)</button>
-            <button class="filter-btn" data-itype="potion">Poções & Consumíveis (56)</button>
+            <button class="filter-btn active" data-itype="all">Todos os Itens (1.731)</button>
+            <button class="filter-btn" data-itype="1">Armas & Equipamentos (467)</button>
+            <button class="filter-btn" data-itype="crafting_materials">Materiais de Criação & Forja (152)</button>
+            <button class="filter-btn" data-itype="31">Livros de Habilidade (192)</button>
+            <button class="filter-btn" data-itype="potion">Poções & Consumíveis (58)</button>
             <button class="filter-btn" data-itype="70">Cartas de Habilidade (120)</button>
-            <button class="filter-btn" data-itype="4">Baús de Tesouro (80)</button>
-            <button class="filter-btn" data-itype="32">Sefiras Místicas (72)</button>
-            <button class="filter-btn" data-itype="relic">Relíquias & Sepultamento (60)</button>
+            <button class="filter-btn" data-itype="4">Baús de Tesouro (118)</button>
+            <button class="filter-btn" data-itype="32">Sefiras Místicas (73)</button>
+            <button class="filter-btn" data-itype="relic">Relíquias & Sepultamento (61)</button>
           </div>
           <div class="cards-grid" id="itemsContainer">
             <!-- Dynamically populated -->
@@ -435,14 +436,13 @@
             <strong>ℹ️ Relatório de Engenharia Reversa & Padrão Cromático:</strong> As 603 receitas de criação integram a paleta cromática oficial de 8 raridades da Unreal Engine 5 (<code>DT_CommonColor</code>: Comum <span style="color:#979694;">● #979694</span>, Incomum <span style="color:#64935E;">● #64935E</span>, Raro <span style="color:#5E84CD;">● #5E84CD</span>, Heroico <span style="color:#A165E8;">● #A165E8</span>, Lendário <span style="color:#E2BE6F;">● #E2BE6F</span>, Único <span style="color:#FFA3D1;">● #FFA3D1</span>, Sazonal <span style="color:#6EA8AC;">● #6EA8AC</span>) e escalonamento em 4 Tiers de Poder (T1 a T4). Todos os 1.800 materiais de criação possuem correspondência em <code>ItemCraft.csv</code>.
           </div>
           <div class="filter-bar" id="craftingFilterBar">
-            <button class="filter-btn active" data-ccat="all">Todas as Receitas</button>
-            <button class="filter-btn" data-ccat="weapons">Armas de Classe</button>
-            <button class="filter-btn" data-ccat="books">Livros de Habilidade</button>
-            <button class="filter-btn" data-ccat="armors">Armaduras & Peças</button>
-            <button class="filter-btn" data-ccat="accessories">Acessórios & Joias</button>
-            <button class="filter-btn" data-ccat="materials">Materiais & Forja</button>
-            <button class="filter-btn" data-ccat="consumables">Consumíveis & Poções</button>
-            <button class="filter-btn" data-ccat="events">Eventos & Emblemas</button>
+            <button class="filter-btn active" data-ccat="weapons">Armas de Classe (140)</button>
+            <button class="filter-btn" data-ccat="books">Livros de Habilidade (50)</button>
+            <button class="filter-btn" data-ccat="armors">Armaduras & Peças (128)</button>
+            <button class="filter-btn" data-ccat="accessories">Acessórios & Joias (104)</button>
+            <button class="filter-btn" data-ccat="materials">Materiais & Forja (56)</button>
+            <button class="filter-btn" data-ccat="consumables">Consumíveis & Poções (13)</button>
+            <button class="filter-btn" data-ccat="events">Eventos & Emblemas (112)</button>
           </div>
           <div class="filter-bar" id="craftingTierFilterBar" style="margin-top: -8px; margin-bottom: 20px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
             <span style="font-size: 0.78rem; color: #94a3b8; font-weight: 700; margin-right: 4px; display: inline-flex; align-items: center; gap: 4px;">
@@ -454,6 +454,18 @@
             <button class="filter-btn" data-ctier="2" style="font-size: 0.75rem; padding: 4px 10px;">T2 (Tier 2 • 55)</button>
             <button class="filter-btn" data-ctier="3" style="font-size: 0.75rem; padding: 4px 10px;">T3 (Tier 3 • 44)</button>
             <button class="filter-btn" data-ctier="4" style="font-size: 0.75rem; padding: 4px 10px;">T4 (Tier 4 • 14)</button>
+          </div>
+          <div class="filter-bar" id="craftingClassFilterBar" style="margin-top: -8px; margin-bottom: 20px; display: none; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <span style="font-size: 0.78rem; color: #94a3b8; font-weight: 700; margin-right: 4px; display: inline-flex; align-items: center; gap: 4px;">
+              <span>⚔️</span>
+              <span>Classe da Habilidade:</span>
+            </span>
+            <button class="filter-btn active" data-cclass="all" style="font-size: 0.75rem; padding: 4px 10px;">Todas as Classes</button>
+            <button class="filter-btn" data-cclass="Víbora" style="font-size: 0.75rem; padding: 4px 10px;">Víbora (10)</button>
+            <button class="filter-btn" data-cclass="Ceifador" style="font-size: 0.75rem; padding: 4px 10px;">Ceifador (10)</button>
+            <button class="filter-btn" data-cclass="Carnificina" style="font-size: 0.75rem; padding: 4px 10px;">Carnificina (10)</button>
+            <button class="filter-btn" data-cclass="Manchado de Sangue" style="font-size: 0.75rem; padding: 4px 10px;">Manchado de Sangue (10)</button>
+            <button class="filter-btn" data-cclass="Akasha" style="font-size: 0.75rem; padding: 4px 10px;">Akasha (10)</button>
           </div>
           <div class="filter-bar" id="craftingRarityFilterBar" style="margin-top: -12px; margin-bottom: 20px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
             <span style="font-size: 0.78rem; color: #94a3b8; font-weight: 700; margin-right: 4px; display: inline-flex; align-items: center; gap: 4px;">

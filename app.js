@@ -28,7 +28,8 @@
     questsSearchTerm: '',
     questsPage: 1,
     questsPerPage: 24,
-    craftingFilter: 'all',
+    craftingFilter: 'weapons',
+    craftingClassFilter: 'all',
     craftingTierFilter: 'all',
     craftingRarityFilter: 'all',
     craftingSearchTerm: '',
@@ -799,9 +800,25 @@
       filtered = filtered.filter(c => c.category === state.craftingFilter);
     }
 
-    if (state.craftingTierFilter && state.craftingTierFilter !== 'all') {
-      const targetTier = parseInt(state.craftingTierFilter);
-      filtered = filtered.filter(c => c.tier === targetTier);
+    const tierBar = document.getElementById('craftingTierFilterBar');
+    const classBar = document.getElementById('craftingClassFilterBar');
+
+    if (state.craftingFilter === 'books') {
+      if (tierBar) tierBar.style.display = 'none';
+      if (classBar) classBar.style.display = 'flex';
+      if (state.craftingClassFilter && state.craftingClassFilter !== 'all') {
+        filtered = filtered.filter(c => c.tab_name === state.craftingClassFilter || c.class_name === state.craftingClassFilter);
+      }
+    } else if (['weapons', 'armors', 'accessories'].includes(state.craftingFilter)) {
+      if (tierBar) tierBar.style.display = 'flex';
+      if (classBar) classBar.style.display = 'none';
+      if (state.craftingTierFilter && state.craftingTierFilter !== 'all') {
+        const targetTier = parseInt(state.craftingTierFilter);
+        filtered = filtered.filter(c => c.tier === targetTier);
+      }
+    } else {
+      if (tierBar) tierBar.style.display = 'none';
+      if (classBar) classBar.style.display = 'none';
     }
 
     if (state.craftingRarityFilter && state.craftingRarityFilter !== 'all') {
@@ -814,6 +831,8 @@
       filtered = filtered.filter(c =>
         c.target_name.toLowerCase().includes(s) ||
         c.tab_name.toLowerCase().includes(s) ||
+        (c.class_name && c.class_name.toLowerCase().includes(s)) ||
+        (c.skill_name && c.skill_name.toLowerCase().includes(s)) ||
         (c.rarity_name && c.rarity_name.toLowerCase().includes(s)) ||
         c.id.includes(s) ||
         (c.tier && (`t${c.tier}`.includes(s) || `tier ${c.tier}`.includes(s))) ||
@@ -836,6 +855,11 @@
           </div>
           <div style="flex: 1; margin-left: 12px;">
             <div class="entity-title" style="font-size: 1rem; color: ${c.rarity_color || '#fff'}; font-weight: 700;">${c.target_name}</div>
+            ${c.skill_name ? `
+              <div style="font-size: 0.74rem; color: #38bdf8; margin-top: 2px; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+                <span>📖 Ensina:</span> <strong>${c.skill_name}</strong>
+              </div>
+            ` : ''}
             <div style="display: flex; gap: 6px; margin-top: 3px; align-items: center; flex-wrap: wrap;">
               <span class="entity-badge ${c.rarity_badge_class || 'badge-rarity-common'}" style="font-size: 0.68rem; font-weight: 700;">
                 ● ${c.rarity_name || 'Comum'}
@@ -855,11 +879,11 @@
         <div style="margin: 12px 0 8px; font-size: 0.82rem; color: #94a3b8;">
           <div style="font-weight: 700; color: #cbd5e1; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
             <span>Materiais Necessários:</span>
-            <span style="font-size: 0.72rem; color: #94a3b8;">${c.materials.length} insumos</span>
+            <span style="font-size: 0.72rem; color: #38bdf8;" title="Clique em um material para ver como obter">🔍 Ver Como Obter</span>
           </div>
           <div style="display: flex; flex-direction: column; gap: 4px;">
             ${c.materials.slice(0, 3).map(m => `
-              <div style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.25); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.04); border-left: 2px solid ${m.rarity_color || 'transparent'};">
+              <div style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.25); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.04); border-left: 2px solid ${m.rarity_color || 'transparent'}; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(0,0,0,0.25)'" onclick="event.stopPropagation(); window.inspectMaterialSource('${m.id}', '${c.id}')" title="Clique para ver como obter ${m.name}">
                 <img src="${m.icon || 'assets/items/flat_itemcraft.png'}" alt="${m.name}" style="width: 20px; height: 20px; border-radius: 3px; object-fit: contain; background: rgba(0,0,0,0.3); border: 1px solid ${m.rarity_color ? m.rarity_color + '44' : 'transparent'};" onerror="this.src='assets/logo.png'">
                 <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: ${m.rarity_color || '#cbd5e1'}; font-size: 0.78rem; font-weight: 500;">${m.name}</span>
                 <span style="font-weight: 700; color: #f59e0b; font-family: monospace; font-size: 0.8rem;">×${Number(m.amount).toLocaleString('pt-BR')}</span>
@@ -4551,12 +4575,51 @@
     }, 120);
   };
 
+  window.openRecipeFromItem = function(recipeId) {
+    detailModal.classList.remove('open');
+    switchTab('crafting');
+    setTimeout(() => {
+      window.inspectRecipe(recipeId);
+    }, 120);
+  };
+
   window.inspectItem = function(id) {
     const item = state.data.items.find(x => x.id === id);
     if (!item) return;
 
     modalTitle.innerHTML = `<span style="color: ${item.rarity_color || '#fff'}; font-weight: 700;">${item.name}</span>`;
     modalSubtitle.innerText = `${item.type_name} • ${item.rarity_name || 'Comum'} • Tier ${item.tier} (ID #${item.id})`;
+
+    let craftableHtml = '';
+    const craftingRecipes = state.data.crafting ? state.data.crafting.filter(c => String(c.target_item_id) === String(item.id)) : [];
+    if (craftingRecipes.length > 0) {
+      craftableHtml = `
+        <div class="panel-box" style="margin-top: 16px; border-left: 3px solid #f59e0b;">
+          <div class="panel-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>🔨 Receita de Criação & Forja (${craftingRecipes.length} receita(s))</span>
+            <span style="font-size: 0.72rem; color: #94a3b8; font-weight: normal;">Fonte: ItemCraft.csv</span>
+          </div>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin: 4px 0 10px; line-height: 1.4;">
+            Este item pode ser criado através da Forja e Criação. Clique para visualizar os custos e materiais exigidos.
+          </p>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            ${craftingRecipes.map(cr => `
+              <div style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                <div>
+                  <div style="font-size: 0.85rem; font-weight: 600; color: #f59e0b;">
+                    ${cr.tab_name} ${cr.tier ? `• Tier ${cr.tier}` : ''}
+                  </div>
+                  <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px;">
+                    Sucesso: <strong>${cr.success_rate}</strong> ${cr.big_success_rate !== '0%' ? '• Gr. Sucesso: ' + cr.big_success_rate : ''} • ${cr.materials.length} materiais exigidos
+                  </div>
+                </div>
+                <button class="filter-btn" style="padding: 4px 10px; font-size: 0.75rem; flex-shrink: 0; background: rgba(245,158,11,0.2); border-color: rgba(245,158,11,0.5); color: #fbbf24; cursor: pointer;" onclick="window.openRecipeFromItem('${cr.id}')">Ver Receita 🔨</button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
 
     let droppersHtml = '';
     if (item.droppers && item.droppers.length > 0) {
@@ -4644,6 +4707,7 @@
           ${item.max_enchant}
         </div>
       </div>
+      ${craftableHtml}
       ${droppersHtml}
       ${collectionsHtml}
     `;
@@ -4719,17 +4783,48 @@
           Tiers superiores oferecem maior ATQ/DEF base, bônus adicionais de subatributos e utilizam as tabelas avançadas de desmontagem e quebra em encantamento (<code>ItemEnchant Tier ${c.tier}</code>).
         </div>
       ` : ''}
+      ${(c.category === 'books' || c.skill_name) ? `
+        <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid #38bdf8;">
+          <div class="panel-title" style="display: flex; align-items: center; justify-content: space-between;">
+            <span style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 1.1rem;">📖</span>
+              <span>Habilidade Ensinada: ${c.skill_name || c.target_name.replace('Livro de Habilidade: ', '')}</span>
+            </span>
+            <span class="entity-badge badge-gold" style="font-size: 0.72rem;">${c.tab_name || c.class_name || 'Livro de Habilidade'}</span>
+          </div>
+          <div style="font-size: 0.9rem; color: #f1f5f9; font-weight: 500; margin-top: 8px; line-height: 1.5;">
+            ${c.skill_desc || c.item_desc || 'Ensina esta técnica fundamental de combate ao personagem.'}
+          </div>
+          ${c.item_desc && c.item_desc !== c.skill_desc ? `
+            <div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 8px; padding: 6px 10px; background: rgba(0,0,0,0.3); border-radius: 4px; white-space: pre-line; border-left: 2px solid #38bdf8;">
+              <strong style="color: #38bdf8;">🎯 Ativação & Alvo:</strong> ${c.item_desc}
+            </div>
+          ` : ''}
+          ${c.skill_effect ? `
+            <div style="background: rgba(0, 0, 0, 0.35); border-radius: 6px; padding: 10px 12px; margin-top: 10px; font-size: 0.82rem; color: #38bdf8; line-height: 1.5; white-space: pre-line; border: 1px solid rgba(56, 189, 248, 0.2);">
+              <strong style="color: #bae6fd; display: block; margin-bottom: 4px;">⚡ Efeitos de Combate da Habilidade:</strong>
+              ${c.skill_effect}
+            </div>
+          ` : ''}
+        </div>
+      ` : ''}
       <div class="panel-box">
-        <div class="panel-title" style="display: flex; align-items: center; gap: 8px;">
-          <img src="assets/items/flat_itemcraft.png" style="width: 18px; height: 18px; vertical-align: middle;" onerror="this.src='assets/logo.png'">
-          Materiais e Recursos Exigidos
+        <div class="panel-title" style="display: flex; align-items: center; justify-content: space-between;">
+          <span style="display: flex; align-items: center; gap: 8px;">
+            <img src="assets/items/flat_itemcraft.png" style="width: 18px; height: 18px; vertical-align: middle;" onerror="this.src='assets/logo.png'">
+            <span>Materiais e Recursos Exigidos</span>
+          </span>
+          <span style="font-size: 0.72rem; color: #38bdf8; font-weight: normal;">Clique em um material para ver como obter 🔍</span>
         </div>
         <div style="display: flex; flex-direction: column; gap: 8px; margin: 12px 0;">
           ${c.materials.map(m => `
-            <div style="display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); border-left: 2px solid ${m.rarity_color || 'transparent'};">
+            <div style="display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); border-left: 2px solid ${m.rarity_color || 'transparent'}; cursor: pointer; transition: all 0.15s ease;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(0,0,0,0.3)'" onclick="window.inspectMaterialSource('${m.id}', '${c.id}')" title="Clique para ver fontes de obtenção (Forja / Drop) de ${m.name}">
               <img src="${m.icon || 'assets/items/flat_itemcraft.png'}" style="width: 32px; height: 32px; border-radius: 6px; object-fit: contain; background: rgba(0,0,0,0.4); border: 1px solid ${m.rarity_color ? m.rarity_color + '44' : 'transparent'};" onerror="this.src='assets/logo.png'">
               <div style="flex: 1;">
-                <div style="font-weight: 600; color: ${m.rarity_color || '#f1f5f9'};">${m.name}</div>
+                <div style="font-weight: 600; color: ${m.rarity_color || '#f1f5f9'}; display: flex; align-items: center; gap: 6px;">
+                  <span>${m.name}</span>
+                  <span style="font-size: 0.7rem; color: #38bdf8; font-weight: normal;">🔍 Ver Origem</span>
+                </div>
                 <div style="font-size: 0.75rem; color: #94a3b8;">${m.type} ${m.rarity_name ? '• ' + m.rarity_name : ''}</div>
               </div>
               <div style="font-weight: 700; color: #fbbf24; font-size: 1rem; font-family: monospace;">
@@ -4741,6 +4836,166 @@
         <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.08);">
           ${c.tradeable_on_big ? '💎 Em caso de Grande Sucesso, o item gerado possui FreeTradeRate=10000 e pode ser vendido livremente no Mercado de Leilões.' : '🔒 O item forjado é vinculado à conta do personagem.'}
         </div>
+      </div>
+    `;
+
+    detailModal.classList.add('open');
+  };
+
+  window.inspectMaterialSource = function(materialId, parentRecipeId) {
+    if (!materialId || materialId === 'Gold') {
+      modalTitle.innerHTML = `<span style="color: #f59e0b; font-weight: 700;">🪙 Ouro (Gold)</span>`;
+      modalSubtitle.innerText = `Ativo Econômico Primário`;
+      modalBody.innerHTML = `
+        ${parentRecipeId ? `
+          <button class="filter-btn" onclick="window.inspectRecipe('${parentRecipeId}')" style="margin-bottom: 14px; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.06); cursor: pointer;">
+            ← Voltar para Receita
+          </button>
+        ` : ''}
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+          <div class="item-slot-frame" style="width: 56px; height: 56px; border-color: var(--border-gold);">
+            <img src="assets/items/asset_gold.png" alt="Ouro" class="item-slot-img" onerror="this.src='assets/logo.png'">
+          </div>
+          <div>
+            <div style="font-size: 1.15rem; font-weight: 700; color: #fbbf24;">Ouro (Moeda Corrente)</div>
+            <div style="font-size: 0.8rem; color: #94a3b8;">Recurso universal de forja, aprimoramento e comércio.</div>
+          </div>
+        </div>
+        <div class="panel-box" style="border-left: 3px solid #f59e0b;">
+          <div class="panel-title">Como Obter Ouro</div>
+          <div style="font-size: 0.86rem; color: #cbd5e1; line-height: 1.6; margin-top: 6px;">
+            <p>● <strong>Eliminação de Monstros:</strong> Todos os monstros normais, de elite e chefes mundiais concedem ouro ao serem derrotados.</p>
+            <p>● <strong>Masmorras Diárias & em Grupo:</strong> Recompensas diretas de ouro na conclusão de níveis e instâncias de masmorra.</p>
+            <p>● <strong>Missões Narrativas e de Caça:</strong> As 1.353 missões distribuem bolsas volumosas de ouro como recompensa básica.</p>
+            <p>● <strong>Venda de Itens:</strong> Venda de equipamentos e itens excedentes a comerciantes locais ou leilão.</p>
+          </div>
+        </div>
+      `;
+      detailModal.classList.add('open');
+      return;
+    }
+
+    const item = state.data.items ? state.data.items.find(x => String(x.id) === String(materialId)) : null;
+    const craftRecipes = state.data.crafting ? state.data.crafting.filter(x => String(x.target_item_id) === String(materialId)) : [];
+    const droppers = (item && item.droppers) || [];
+
+    let matName = item ? item.name : `Material #${materialId}`;
+    let matIcon = item ? item.icon_img : 'assets/items/flat_itemcraft.png';
+    let matRarityColor = item ? item.rarity_color : '#979694';
+    let matRarityName = item ? item.rarity_name : 'Comum';
+    let matDesc = item ? item.desc : 'Material essencial para forja e processos vampíricos.';
+
+    if (!item && craftRecipes.length > 0) {
+      matName = craftRecipes[0].target_name;
+      matIcon = craftRecipes[0].icon_img;
+      matRarityColor = craftRecipes[0].rarity_color;
+      matRarityName = craftRecipes[0].rarity_name;
+    }
+
+    modalTitle.innerHTML = `<span style="color: ${matRarityColor || '#fff'}; font-weight: 700;">Como Obter: ${matName}</span>`;
+    modalSubtitle.innerText = `${matRarityName} • Material de Criação (ID #${materialId})`;
+
+    modalBody.innerHTML = `
+      ${parentRecipeId ? `
+        <button class="filter-btn" onclick="window.inspectRecipe('${parentRecipeId}')" style="margin-bottom: 14px; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.06); cursor: pointer;">
+          ← Voltar para Receita Anterior
+        </button>
+      ` : ''}
+
+      <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+        <div class="item-slot-frame" style="width: 56px; height: 56px; border-color: ${matRarityColor ? matRarityColor + '99' : 'var(--border-gold)'}; box-shadow: 0 0 12px ${matRarityColor ? matRarityColor + '33' : 'transparent'};">
+          <img src="${matIcon}" alt="${matName}" class="item-slot-img" onerror="this.src='assets/logo.png'">
+        </div>
+        <div style="flex: 1;">
+          <div style="font-size: 1.15rem; font-weight: 700; color: ${matRarityColor || '#fff'}; margin-bottom: 4px;">
+            ${matName}
+          </div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+            <span class="entity-badge" style="background: rgba(255,255,255,0.08); color: ${matRarityColor}; font-weight: 700; font-size: 0.75rem; border: 1px solid ${matRarityColor}44;">
+              ● ${matRarityName}
+            </span>
+            <span class="entity-badge badge-gold" style="font-size: 0.72rem;">Material de Criação</span>
+            ${craftRecipes.length > 0 ? `<span class="entity-badge badge-blue" style="font-size: 0.72rem;">🔨 Forjável (${craftRecipes.length} receita(s))</span>` : ''}
+            ${droppers.length > 0 ? `<span class="entity-badge badge-crimson" style="font-size: 0.72rem;">💀 Drop de ${droppers.length} Monstro(s)</span>` : ''}
+          </div>
+        </div>
+      </div>
+
+      <div style="background: rgba(0,0,0,0.3); border-left: 3px solid ${matRarityColor || '#94a3b8'}; border-radius: 0 6px 6px 0; padding: 10px 14px; margin-bottom: 16px; font-size: 0.84rem; color: #cbd5e1; line-height: 1.5;">
+        ${matDesc}
+      </div>
+
+      <!-- 1. Forja / Criação -->
+      <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid #f59e0b;">
+        <div class="panel-title" style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="display: flex; align-items: center; gap: 8px;">
+            <span>🔨</span>
+            <span>Obtenção via Forja & Criação</span>
+          </span>
+          <span style="font-size: 0.72rem; color: #94a3b8;">${craftRecipes.length} receita(s) disponível(is)</span>
+        </div>
+        ${craftRecipes.length > 0 ? `
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+            ${craftRecipes.map(cr => `
+              <div style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                <div>
+                  <div style="font-size: 0.9rem; font-weight: 700; color: #f59e0b;">
+                    ${cr.tab_name} ${cr.tier ? `• Tier ${cr.tier}` : ''}
+                  </div>
+                  <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 3px;">
+                    Taxa: <strong style="color: #38bdf8;">${cr.success_rate}</strong> ${cr.big_success_rate !== '0%' ? '• Gr. Sucesso: <strong style="color: #a78bfa;">' + cr.big_success_rate + '</strong>' : ''}
+                    • Materiais: ${cr.materials.map(m => `<span style="color: ${m.rarity_color || '#cbd5e1'};">${m.amount}x ${m.name}</span>`).join(', ')}
+                  </div>
+                </div>
+                <button class="filter-btn" style="padding: 5px 12px; font-size: 0.78rem; background: rgba(245,158,11,0.2); border-color: rgba(245,158,11,0.5); color: #fbbf24; cursor: pointer;" onclick="window.inspectRecipe('${cr.id}')">
+                  🔨 Abrir Esta Receita
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        ` : `
+          <div style="font-size: 0.82rem; color: #94a3b8; margin-top: 8px; font-style: italic;">
+            Este material não pode ser fabricado diretamente na Forja. Deve ser obtido por meio de drops de monstros, baús, missões ou recompensas de masmorras.
+          </div>
+        `}
+      </div>
+
+      <!-- 2. Drops de Monstros -->
+      <div class="panel-box" style="border-left: 3px solid #38bdf8;">
+        <div class="panel-title" style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="display: flex; align-items: center; gap: 8px;">
+            <span>💀</span>
+            <span>Obtenção via Drop de Monstros & Chefes</span>
+          </span>
+          <span style="font-size: 0.72rem; color: #94a3b8;">${droppers.length} monstro(s)</span>
+        </div>
+        ${droppers.length > 0 ? `
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px; max-height: 280px; overflow-y: auto; padding-right: 4px;">
+            ${droppers.map(dr => {
+              const gradeClass = dr.grade_code === '3' ? 'badge-crimson' : (dr.grade_code === '2' ? 'badge-gold' : (dr.grade_code === '1' ? 'badge-blue' : 'badge-gray'));
+              return `
+                <div style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                  <div>
+                    <div style="font-size: 0.85rem; font-weight: 600; color: #fff;">
+                      ${dr.name} <span class="entity-badge ${gradeClass}" style="font-size: 0.68rem; margin-left: 4px;">${dr.grade}</span>
+                      ${dr.lvl ? `<span style="font-size: 0.75rem; color: #38bdf8; margin-left: 4px;">(Nv. ${dr.lvl})</span>` : ''}
+                    </div>
+                    <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px;">
+                      <strong>Região:</strong> ${dr.world || 'Campo / Masmorra'} • <strong>Qtd de Drop:</strong> ${dr.qty}
+                    </div>
+                  </div>
+                  <button class="filter-btn" style="padding: 4px 10px; font-size: 0.75rem; flex-shrink: 0; cursor: pointer;" onclick="window.openBossFromItem('${dr.id}')">
+                    Ver Monstro 💀
+                  </button>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        ` : `
+          <div style="font-size: 0.82rem; color: #94a3b8; margin-top: 8px; font-style: italic;">
+            Nenhum monstro de campo registrado com drop direto em <code>recompensas_por_npc.csv</code>. Pode ser obtido através de baús, recompensas de instâncias ou missões.
+          </div>
+        `}
       </div>
     `;
 
@@ -4950,6 +5205,17 @@
         document.querySelectorAll('#craftingTierFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         state.craftingTierFilter = btn.dataset.ctier;
+        state.craftingPage = 1;
+        renderCrafting();
+      }
+    });
+
+    document.getElementById('craftingClassFilterBar')?.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (btn && btn.dataset.cclass) {
+        document.querySelectorAll('#craftingClassFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.craftingClassFilter = btn.dataset.cclass;
         state.craftingPage = 1;
         renderCrafting();
       }
