@@ -130,6 +130,11 @@
           <span>Árvore da Vida</span>
           <span class="nav-count" id="countLifeTree">72</span>
         </a>
+        <a class="nav-item" data-target="bloodshapes">
+          <span class="nav-icon"><img src="assets/items/skill_bg_costume.png" style="width: 18px; height: 18px; vertical-align: middle;" onerror="this.outerHTML='🦇'"></span>
+          <span>Hemorformas</span>
+          <span class="nav-count" id="countBloodshapes">185</span>
+        </a>
         <a class="nav-item" data-target="faq">
           <span class="nav-icon">❓</span>
           <span>FAQ & Sistemas</span>
@@ -214,6 +219,11 @@
               <div class="metric-label">Forja & Criação</div>
               <div class="metric-value">603</div>
               <div class="metric-desc">Receitas de armas, armaduras, consumíveis e taxas de sucesso</div>
+            </div>
+            <div class="metric-card" onclick="window.navTo('bloodshapes')" style="cursor: pointer;">
+              <div class="metric-label">Hemorformas (Bloodshape)</div>
+              <div class="metric-value" style="color: #e2be6f;">185</div>
+              <div class="metric-desc">Metamorfoses canônicas com buffs de velocidade, atributos e transcendência</div>
             </div>
           </div>
 
@@ -1350,7 +1360,97 @@
         </section>
 
         <!-- ==============================================
-             22. FAQ SECTION
+             22. BLOODSHAPES (HEMORFORMAS) SECTION
+             ============================================== -->
+        <section id="bloodshapes" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <img src="assets/items/skill_bg_costume.png" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 8px;" onerror="this.outerHTML='🦇'">
+              Hemorformas & Metamorfoses Sanguíneas (Bloodshape)
+            </h2>
+            <p class="section-subtitle">
+              Catálogo canônico dos 185 Bloodshapes extraídos da versão 1.13.22, com bônus de velocidade, atributos de combate, habilidades exclusivas e transcendência.
+            </p>
+          </div>
+
+          <!-- Technical Mechanics Banner -->
+          <div class="card" style="margin-bottom: 24px; position: relative; overflow: hidden; border: 1px solid rgba(226, 190, 111, 0.35); background: linear-gradient(135deg, rgba(30, 20, 15, 0.9), rgba(15, 20, 35, 0.95)); padding: 24px;">
+            <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+              <img src="assets/items/costumeitemicon_all410_m.png" style="width: 100px; height: 100px; object-fit: contain; border-radius: 12px; border: 2px solid rgba(226, 190, 111, 0.5); background: rgba(0,0,0,0.5); box-shadow: 0 0 15px rgba(226, 190, 111, 0.25);" alt="Bloodshape">
+              <div style="flex: 1; min-width: 280px;">
+                <h3 style="color: #e2be6f; margin-top: 0; margin-bottom: 8px; font-size: 1.25rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <span>Mecânica de Metamorfose, Atributos & Transcendência</span>
+                  <span style="font-size: 0.75rem; background: rgba(226, 190, 111, 0.2); color: #fcf2d6; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(226, 190, 111, 0.4);">185 Formas • 6 Classes • 7 Raridades • 24 com Transcendência</span>
+                </h3>
+                <div style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.55;">
+                  <ul style="margin: 0; padding-left: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 8px;">
+                    <li><strong>Efeitos Básicos (Grupo 1):</strong> Multiplicadores percentuais diretos de <strong>VEL de ATQ</strong> e <strong>VEL de Conjuração</strong> (escalonados até +102% e +56%).</li>
+                    <li><strong>Atributos Principais (Grupo 2):</strong> Bônus brutos fixos de combate como ATQ, DEF, PRE (Precisão) e ESQ (Esquiva).</li>
+                    <li><strong>Atributos Especiais (Grupo 3):</strong> Resiliência a Dano PvP, Taxas de Resistência e Acerto de Efeitos de Status, e bônus de dano contra monstros.</li>
+                    <li><strong>Habilidades Exclusivas:</strong> Passivas poderosas concedidas diretamente pela forma sanguínea quando equipada (163 formas possuem habilidades ativas/passivas).</li>
+                    <li><strong>Habilidade de Classe Especializada:</strong> Bônus otimizados específicos quando a forma coincide com a classe do personagem (Víbora, Ceifador, Carnificina, Manchado ou Akasha).</li>
+                    <li><strong>Transcendência (Limite de Quebra):</strong> 24 formas Lendárias e Míticas suportam progressão até Nv. 2 (LimitBreak) com escalonamento de atributos e novos efeitos visuais.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Class Filter Bar -->
+          <div style="margin-bottom: 12px;">
+            <div style="font-size: 0.82rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">
+              Filtrar por Classe:
+            </div>
+            <div class="filter-bar" id="bloodshapesClassFilterBar">
+              <button class="filter-btn active" data-bclass="all">Todas as Classes (185)</button>
+              <button class="filter-btn" data-bclass="Víbora">Víbora (31)</button>
+              <button class="filter-btn" data-bclass="Ceifador">Ceifador (31)</button>
+              <button class="filter-btn" data-bclass="Carnificina">Carnificina (31)</button>
+              <button class="filter-btn" data-bclass="Manchado de Sangue">Manchado de Sangue (31)</button>
+              <button class="filter-btn" data-bclass="Akasha">Akasha (31)</button>
+              <button class="filter-btn" data-bclass="Universal">Universal (30)</button>
+            </div>
+          </div>
+
+          <!-- Rarity Filter Bar -->
+          <div style="margin-bottom: 16px;">
+            <div style="font-size: 0.82rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">
+              Filtrar por Raridade:
+            </div>
+            <div class="filter-bar" id="bloodshapesRarityFilterBar">
+              <button class="filter-btn active" data-brarity="all">Todas as Raridades (185)</button>
+              <button class="filter-btn" data-brarity="0" style="border-left: 3px solid #979694;">Comum (20)</button>
+              <button class="filter-btn" data-brarity="1" style="border-left: 3px solid #64935E;">Incomum (25)</button>
+              <button class="filter-btn" data-brarity="2" style="border-left: 3px solid #5E84CD;">Raro (40)</button>
+              <button class="filter-btn" data-brarity="3" style="border-left: 3px solid #A165E8;">Heroico (47)</button>
+              <button class="filter-btn" data-brarity="4" style="border-left: 3px solid #E2BE6F;">Lendário (24)</button>
+              <button class="filter-btn" data-brarity="5" style="border-left: 3px solid #FF7373;">Mítico (7)</button>
+              <button class="filter-btn" data-brarity="101" style="border-left: 3px solid #6EA8AC;">Sazonal (22)</button>
+            </div>
+          </div>
+
+          <!-- Search Bar -->
+          <div style="margin-bottom: 20px;">
+            <input type="text" id="bloodshapesSearchInput" class="search-input" placeholder="🔍 Buscar por nome da Hemorforma, classe, habilidade ou stat (ex: Marcas, Furtivo, VEL de ATQ)..." style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(15,20,30,0.8); color: #fff; font-size: 0.9rem;">
+          </div>
+
+          <!-- Count & Info Bar -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; color: #94a3b8; font-size: 0.88rem;">
+            <span id="bloodshapesCountLabel">Exibindo 185 Hemorformas</span>
+            <span style="font-size: 0.8rem; color: #64748b;">Clique no card para inspecionar atributos completos e transcendência</span>
+          </div>
+
+          <!-- Cards Grid -->
+          <div class="cards-grid" id="bloodshapesContainer">
+            <!-- Dynamically populated -->
+          </div>
+
+          <!-- Pagination -->
+          <div id="bloodshapesPagination" style="margin-top: 24px; text-align: center;"></div>
+        </section>
+
+        <!-- ==============================================
+             23. FAQ SECTION
              ============================================== -->
         <section id="faq" class="view-section">
           <div class="section-header">

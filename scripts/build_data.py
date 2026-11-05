@@ -9,7 +9,7 @@ import csv
 import json
 import os
 import re
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 BASE_DIR = "/home/thiagofdso/vampir"
 CSV_DIR = os.path.join(BASE_DIR, "analysis/versions/2026-10-31/patch_extracted/ProjectRED/Content/RED/Data/CSV")
@@ -3825,6 +3825,226 @@ with open(os.path.join(OUT_DIR, "lifetree.json"), "w", encoding="utf-8") as f:
 print(f"  ✓ Processed Life Tree & Sephiras catalog ({len(sephiras_list)} sephiras, {len(bonuses_list)} elos/conjuntos, {len(fusions_list)} fusions).")
 
 # ==========================================
+# 22. BLOODSHAPES (HEMORFORMAS & METAMORFOSES) CATALOG
+# ==========================================
+print("Processing Bloodshapes (Hemorformas) catalog...")
+ENUMS_PATH = os.path.join(BASE_DIR, "analysis/reports/builds/enums_binario.csv")
+
+# 1. Enums
+eop_map = {}
+if os.path.exists(ENUMS_PATH):
+    with open(ENUMS_PATH, encoding="utf-8-sig") as f:
+        for row in csv.DictReader(f):
+            if row.get("enum") == "EOperationType":
+                eop_map[row["valor"]] = row["nome"]
+
+# 2. Operation Names
+op_pt_map = {}
+op_name_csv = os.path.join(L10N_DIR, "OperationType_Name.csv")
+if os.path.exists(op_name_csv):
+    with open(op_name_csv, encoding="utf-8-sig") as f:
+        for row in csv.DictReader(f):
+            op_pt_map[row["OperationType"]] = row.get("Name", "")
+
+# 3. Operation is percentage
+op_is_percentage = {}
+op_type_csv = os.path.join(CSV_DIR, "OperationType.csv")
+if os.path.exists(op_type_csv):
+    with open(op_type_csv, encoding="utf-8-sig") as f:
+        for row in csv.DictReader(f):
+            op_is_percentage[row["OperationType"]] = (row.get("IsPercentage") == "1")
+
+# 4. Static operations
+static_ops = defaultdict(list)
+static_ops_csv = os.path.join(CSV_DIR, "StaticOperation.csv")
+if os.path.exists(static_ops_csv):
+    with open(static_ops_csv, encoding="utf-8-sig") as f:
+        for row in csv.DictReader(f):
+            static_ops[row["GroupId"]].append(row)
+
+# 5. Skills & Skill Sets
+skill_sets = defaultdict(list)
+skill_set_csv = os.path.join(CSV_DIR, "SkillSet.csv")
+if os.path.exists(skill_set_csv):
+    with open(skill_set_csv, encoding="utf-8-sig") as f:
+        for row in csv.DictReader(f):
+            skill_sets[row["GroupId"]].append(row["SkillInfoId"])
+
+# 6. Costume limit break
+costume_limit_breaks = defaultdict(list)
+costume_lb_csv = os.path.join(CSV_DIR, "CostumeLimitBreak.csv")
+if os.path.exists(costume_lb_csv):
+    with open(costume_lb_csv, encoding="utf-8-sig") as f:
+        for row in csv.DictReader(f):
+            costume_limit_breaks[row["CostumeId"]].append(row)
+
+# 7. Costume & names
+costume_names_map = {}
+costume_name_csv = os.path.join(L10N_DIR, "Costume_Name.csv")
+if os.path.exists(costume_name_csv):
+    with open(costume_name_csv, encoding="utf-8-sig") as f:
+        for row in csv.DictReader(f):
+            costume_names_map[row["Id"]] = row.get("Name", "")
+
+costume_rows = load_csv_list(os.path.join(CSV_DIR, "Costume.csv"))
+
+BLOODSHAPE_CLASSES = {
+    "1": {"name": "Víbora", "icon": "assets/classes/darkmage_icon.png"},
+    "2": {"name": "Ceifador", "icon": "assets/classes/reaper_icon.png"},
+    "3": {"name": "Carnificina", "icon": "assets/classes/gunner_icon.png"},
+    "4": {"name": "Manchado de Sangue", "icon": "assets/classes/swordman_icon.png"},
+    "5": {"name": "Akasha", "icon": "assets/classes/fighter_icon.png"},
+    "": {"name": "Universal", "icon": "assets/items/skill_bg_costume.png"}
+}
+
+def clean_skill_text(text):
+    if not text:
+        return ""
+    cleaned = re.sub(r"<[^>]+>", "", text)
+    cleaned = re.sub(r"\{[0-9.]+%?\}%?", "", cleaned)
+    return cleaned.strip()
+
+def format_costume_ops(gid):
+    if not gid or gid not in static_ops:
+        return []
+    res = []
+    for op in static_ops[gid]:
+        code = op["Type"]
+        enum_name = eop_map.get(code, "")
+        pt_name = op_pt_map.get(enum_name, enum_name or f"Stat_{code}")
+        is_pct = op_is_percentage.get(code, False)
+        val = float(op["Min"])
+        if is_pct:
+            val_str = f"+{val/100:.2f}%".replace(".00%", "%").replace(".0%", "%")
+            val_num = val / 100.0
+        else:
+            val_str = f"+{int(val)}" if val.is_integer() else f"+{val}"
+            val_num = val
+        res.append({
+            "code": code,
+            "stat_name": pt_name,
+            "enum_name": enum_name,
+            "value_str": val_str,
+            "value": val_num,
+            "is_percentage": is_pct
+        })
+    return res
+
+def find_bloodshape_icon(c):
+    cid = c["Id"]
+    res = c.get("Resource", "").lower()
+    img = c.get("Img", "").lower()
+    img_clean = img.replace("img_costumeicon_", "")
+    candidates = [
+        f"costumeitemicon_{res}_m.png",
+        f"costumeitemicon_{res}_f.png",
+        f"costumeitemicon_{res}.png",
+        f"costumeitemicon_{img_clean}_m.png",
+        f"costumeitemicon_{img_clean}_f.png",
+        f"costumeitemicon_{img_clean}.png",
+        f"costumeicon_{img_clean}.png",
+        f"{img}.png",
+        f"costumeitemicon_{cid}.png"
+    ]
+    for cand in candidates:
+        if cand in item_pngs:
+            return f"assets/items/{cand}"
+    return "assets/items/skill_bg_costume.png"
+
+bloodshapes_list = []
+for c in costume_rows:
+    cid = c["Id"]
+    r_code = int(c.get("Rarity", 0))
+    cls_id = c.get("OptimumClassInfoId", "")
+    cls_meta = BLOODSHAPE_CLASSES.get(cls_id, BLOODSHAPE_CLASSES[""])
+    r_meta = get_rarity_info(r_code)
+    
+    g1 = format_costume_ops(c.get("StaticOperationGroupId1"))
+    g2 = format_costume_ops(c.get("StaticOperationGroupId2"))
+    g3 = format_costume_ops(c.get("StaticOperationGroupId3"))
+    
+    # Exclusive skills
+    ex_skills = []
+    for sid in skill_sets.get(c.get("SkillSetGroupId", ""), []):
+        srow = skill_names.get(sid, {})
+        ex_skills.append({
+            "id": sid,
+            "name": srow.get("Name", f"Habilidade {sid}"),
+            "desc": clean_skill_text(srow.get("Description", "")),
+            "effect_desc": clean_skill_text(srow.get("EffectDescription", ""))
+        })
+        
+    # Optimum skills
+    opt_skills = []
+    for sid in skill_sets.get(c.get("OptimumSkillSetGroupId", ""), []):
+        srow = skill_names.get(sid, {})
+        opt_skills.append({
+            "id": sid,
+            "name": srow.get("Name", f"Habilidade {sid}"),
+            "desc": clean_skill_text(srow.get("Description", "")),
+            "effect_desc": clean_skill_text(srow.get("EffectDescription", ""))
+        })
+        
+    # Limit break steps
+    lb_steps = []
+    for lb in costume_limit_breaks.get(cid, []):
+        lb_lvl = int(lb.get("LimitBreakLevel", 1))
+        lb_steps.append({
+            "level": lb_lvl,
+            "resource": lb.get("Resource", ""),
+            "stats_group_1": format_costume_ops(lb.get("StaticOperationGroupId1")),
+            "stats_group_2": format_costume_ops(lb.get("StaticOperationGroupId2")),
+            "stats_group_3": format_costume_ops(lb.get("StaticOperationGroupId3"))
+        })
+    lb_steps.sort(key=lambda x: x["level"])
+    
+    bloodshapes_list.append({
+        "id": cid,
+        "name": costume_names_map.get(cid, f"Hemorforma {cid}"),
+        "rarity": r_code,
+        "rarity_info": r_meta,
+        "class_id": cls_id,
+        "class_name": cls_meta["name"],
+        "class_icon": cls_meta["icon"],
+        "icon": find_bloodshape_icon(c),
+        "item_info_id": c.get("ItemInfoId", ""),
+        "tile_collection_group_id": c.get("TileCollectionGroupId", ""),
+        "only_skin": c.get("OnlySkin", "0") == "1",
+        "max_limit_break": int(c.get("MaxLimitBreak") or 0),
+        "stats_group_1": g1,
+        "stats_group_2": g2,
+        "stats_group_3": g3,
+        "all_stats": g1 + g2 + g3,
+        "exclusive_skills": ex_skills,
+        "optimum_skills": opt_skills,
+        "limit_breaks": lb_steps,
+        "raw": {
+            "Category": c.get("Category"),
+            "Order": c.get("Order"),
+            "VisualEffectInfoId": c.get("VisualEffectInfoId"),
+            "Resource": c.get("Resource")
+        }
+    })
+
+# Sort bloodshapes by Rarity (descending) and Id (ascending)
+bloodshapes_list.sort(key=lambda x: (-x["rarity"] if x["rarity"] != 101 else -3.5, int(x["id"])))
+
+bloodshapes_catalog = {
+    "stats": {
+        "total": len(bloodshapes_list),
+        "by_class": dict(Counter(b["class_name"] for b in bloodshapes_list)),
+        "by_rarity": dict(Counter(b["rarity_info"]["name"] for b in bloodshapes_list)),
+        "classes_order": ["Todas as Classes", "Víbora", "Ceifador", "Carnificina", "Manchado de Sangue", "Akasha", "Universal"],
+        "rarities_order": ["Todas as Raridades", "Comum", "Incomum", "Raro", "Heroico", "Lendário", "Mítico", "Sazonal"]
+    },
+    "items": bloodshapes_list
+}
+
+with open(os.path.join(OUT_DIR, "bloodshapes.json"), "w", encoding="utf-8") as f:
+    json.dump(bloodshapes_catalog, f, ensure_ascii=False)
+print(f"  ✓ Processed Bloodshapes catalog ({len(bloodshapes_list)} bloodshapes across {len(bloodshapes_catalog['stats']['by_class'])} classes).")
+
+# ==========================================
 # 8. BUNDLE GENERATION
 # ==========================================
 print("Writing bundle.js...")
@@ -3851,6 +4071,7 @@ bundle_data = {
     "bloodrealm": bloodrealm_catalog,
     "refinement": refinement_catalog,
     "lifetree": lifetree_catalog,
+    "bloodshapes": bloodshapes_catalog,
     "constants": constants_dict,
     "faq": faq_catalog
 }

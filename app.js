@@ -73,6 +73,11 @@
     lifetreeSymbol: 'all',
     lifetreeRarity: 'all',
     lifetreeSearchTerm: '',
+    bloodshapesClassFilter: 'all',
+    bloodshapesRarityFilter: 'all',
+    bloodshapesSearchTerm: '',
+    bloodshapesPage: 1,
+    bloodshapesPerPage: 24,
     modesFilter: 'all',
     pvpTab: 'arena',
     enchantTab: 'scrolls',
@@ -129,11 +134,12 @@
         fetch('data/bloodrealm.json').then(r => r.json()),
         fetch('data/refinement.json').then(r => r.json()),
         fetch('data/lifetree.json').then(r => r.json()),
+        fetch('data/bloodshapes.json').then(r => r.json()),
         fetch('data/faq.json').then(r => r.json()),
         fetch('data/constants.json').then(r => r.json())
       ]);
 
-      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, bloodrealm, refinement, lifetree, faq, constants };
+      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, bloodrealm, refinement, lifetree, bloodshapes, faq, constants };
       initApp();
     } catch (e) {
       console.error('Failed to load JSON data asynchronously:', e);
@@ -174,6 +180,7 @@
     if (tabId === 'bloodrealm') renderBloodrealm();
     if (tabId === 'refinement') renderRefinement();
     if (tabId === 'lifetree') renderLifeTree();
+    if (tabId === 'bloodshapes') renderBloodshapes();
   }
 
   window.navTo = function(tabId) {
@@ -4287,6 +4294,366 @@
     detailModal.classList.add('active');
   };
 
+  // ==========================================
+  // 22. BLOODSHAPES (HEMORFORMAS & METAMORFOSES)
+  // ==========================================
+  function renderBloodshapes() {
+    const container = document.getElementById('bloodshapesContainer');
+    const pagination = document.getElementById('bloodshapesPagination');
+    const countLabel = document.getElementById('bloodshapesCountLabel');
+    if (!container || !state.data.bloodshapes) return;
+
+    let items = state.data.bloodshapes.items || [];
+
+    // Filter by class
+    if (state.bloodshapesClassFilter && state.bloodshapesClassFilter !== 'all') {
+      items = items.filter(b => b.class_name === state.bloodshapesClassFilter);
+    }
+
+    // Filter by rarity
+    if (state.bloodshapesRarityFilter && state.bloodshapesRarityFilter !== 'all') {
+      items = items.filter(b => String(b.rarity) === state.bloodshapesRarityFilter);
+    }
+
+    // Filter by search
+    if (state.bloodshapesSearchTerm && state.bloodshapesSearchTerm.trim()) {
+      const q = state.bloodshapesSearchTerm.toLowerCase().trim();
+      items = items.filter(b => {
+        if (b.name && b.name.toLowerCase().includes(q)) return true;
+        if (b.class_name && b.class_name.toLowerCase().includes(q)) return true;
+        if (String(b.id).includes(q)) return true;
+        if (b.exclusive_skills && b.exclusive_skills.some(s => (s.name && s.name.toLowerCase().includes(q)) || (s.desc && s.desc.toLowerCase().includes(q)))) return true;
+        if (b.optimum_skills && b.optimum_skills.some(s => (s.name && s.name.toLowerCase().includes(q)) || (s.desc && s.desc.toLowerCase().includes(q)))) return true;
+        if (b.all_stats && b.all_stats.some(s => s.stat_name && s.stat_name.toLowerCase().includes(q))) return true;
+        return false;
+      });
+    }
+
+    if (countLabel) {
+      countLabel.textContent = `Exibindo ${items.length} de ${state.data.bloodshapes.stats?.total || 185} Hemorformas`;
+    }
+
+    const total = items.length;
+    const perPage = state.bloodshapesPerPage || 24;
+    const totalPages = Math.ceil(total / perPage) || 1;
+    if (state.bloodshapesPage > totalPages) state.bloodshapesPage = 1;
+    const start = (state.bloodshapesPage - 1) * perPage;
+    const paged = items.slice(start, start + perPage);
+
+    if (paged.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; padding: 48px; text-align: center; color: #94a3b8; background: rgba(15,20,30,0.6); border-radius: 12px; border: 1px dashed rgba(255,255,255,0.15);">
+          <div style="font-size: 2.2rem; margin-bottom: 12px;">🦇</div>
+          <div style="font-size: 1.1rem; color: #fff; font-weight: 600;">Nenhuma Hemorforma encontrada</div>
+          <div style="font-size: 0.85rem; margin-top: 6px;">Tente ajustar os filtros de Classe, Raridade ou termo de busca.</div>
+        </div>
+      `;
+      if (pagination) pagination.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = paged.map(b => {
+      const rMeta = b.rarity_info || { name: 'Comum', color: '#979694', highlight: '#CCCBC8', badge_class: 'badge-rarity-common' };
+      const hasLb = b.max_limit_break > 0 || (b.limit_breaks && b.limit_breaks.length > 0);
+      const isUniversal = b.class_name === 'Universal';
+
+      // Group 1 Speed stats (Velocidade de Ataque / Velocidade de Conjuração)
+      const spdStats = (b.stats_group_1 || []).map(s => `
+        <span style="display: inline-flex; align-items: center; gap: 4px; background: rgba(56, 189, 248, 0.12); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 4px; padding: 2px 7px; font-size: 0.74rem; font-weight: 600;">
+          ⚡ ${s.stat_name}: <strong style="color: #fff;">${s.value_str}</strong>
+        </span>
+      `).join('');
+
+      // Group 2 Main stats preview (top 3)
+      const mainStats = (b.stats_group_2 || []).slice(0, 3).map(s => `
+        <span style="font-size: 0.74rem; color: #cbd5e1; background: rgba(0,0,0,0.35); padding: 2px 6px; border-radius: 4px;">
+          ${s.stat_name} <strong style="color: ${rMeta.highlight || '#fff'};">${s.value_str}</strong>
+        </span>
+      `).join('');
+
+      // Skills preview badge
+      const totalSkills = (b.exclusive_skills?.length || 0) + (b.optimum_skills?.length || 0);
+
+      return `
+        <div class="entity-card" onclick="window.inspectBloodshape('${b.id}')" style="cursor: pointer; position: relative; display: flex; flex-direction: column; justify-content: space-between; border-color: ${rMeta.color}40; transition: transform 0.15s ease, border-color 0.15s ease;">
+          <div>
+            <!-- Header Badges -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 6px; flex-wrap: wrap;">
+              <span class="entity-badge ${rMeta.badge_class || 'badge-rarity-common'}" style="font-size: 0.72rem; font-weight: 700;">
+                ● ${rMeta.name}
+              </span>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <span class="entity-badge" style="background: rgba(255,255,255,0.08); color: ${isUniversal ? '#94a3b8' : '#cbd5e1'}; font-size: 0.7rem; display: inline-flex; align-items: center; gap: 4px;">
+                  <img src="${b.class_icon}" style="width: 13px; height: 13px; object-fit: contain;" onerror="this.style.display='none'">
+                  ${b.class_name}
+                </span>
+                ${hasLb ? `<span class="entity-badge" style="background: rgba(226,190,111,0.18); color: #fcf2d6; border: 1px solid rgba(226,190,111,0.4); font-size: 0.68rem; font-weight: 600;">✨ Nv. ${b.max_limit_break}</span>` : ''}
+              </div>
+            </div>
+
+            <!-- Icon & Title -->
+            <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 12px;">
+              <div style="position: relative; width: 68px; height: 68px; border-radius: 10px; background: radial-gradient(circle, ${rMeta.color}22 0%, rgba(10,12,20,0.8) 100%); border: 1px solid ${rMeta.color}60; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.4);">
+                <img src="${b.icon}" alt="${b.name}" style="width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));" onerror="this.src='assets/items/skill_bg_costume.png'">
+              </div>
+              <div style="flex: 1; min-width: 0;">
+                <h4 style="margin: 0 0 4px; font-size: 0.96rem; font-weight: 700; color: ${rMeta.highlight || '#fff'}; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${b.name}">
+                  ${b.name}
+                </h4>
+                <div style="font-size: 0.72rem; color: #64748b; font-family: monospace;">
+                  ID #${b.id} ${b.tile_collection_group_id ? `• Códex #${b.tile_collection_group_id}` : ''}
+                </div>
+                ${totalSkills > 0 ? `
+                  <div style="margin-top: 4px; font-size: 0.72rem; color: #a78bfa; display: flex; align-items: center; gap: 3px;">
+                    🔮 ${totalSkills} ${totalSkills === 1 ? 'Habilidade ativa/passiva' : 'Habilidades ativas/passivas'}
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+
+            <!-- Group 1 Speed Buffs -->
+            ${spdStats ? `
+              <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;">
+                ${spdStats}
+              </div>
+            ` : ''}
+
+            <!-- Group 2 Main Stats -->
+            ${mainStats ? `
+              <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
+                ${mainStats}
+                ${(b.stats_group_2 || []).length > 3 ? `<span style="font-size: 0.72rem; color: #64748b; align-self: center;">+${(b.stats_group_2 || []).length - 3} mais</span>` : ''}
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Footer Action -->
+          <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem;">
+            <span style="color: #64748b;">${b.only_skin ? '🎨 Apenas Visual' : '🩸 Metamorfose'}</span>
+            <span style="color: var(--gold-primary); font-weight: 600;">Inspecionar Forma →</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    renderPagination(pagination, state.bloodshapesPage, totalPages, 'window.changeBloodshapesPage');
+  }
+
+  window.changeBloodshapesPage = function(page) {
+    state.bloodshapesPage = page;
+    renderBloodshapes();
+    document.getElementById('bloodshapes')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  window.inspectBloodshape = function(id) {
+    if (!state.data.bloodshapes || !state.data.bloodshapes.items) return;
+    const b = state.data.bloodshapes.items.find(x => String(x.id) === String(id));
+    if (!b) return;
+
+    const rMeta = b.rarity_info || { name: 'Comum', color: '#979694', highlight: '#CCCBC8', badge_class: 'badge-rarity-common' };
+
+    modalTitle.innerText = b.name;
+    modalSubtitle.innerText = `Hemorforma #${b.id} • ${rMeta.name} • ${b.class_name}${b.tile_collection_group_id ? ' • Códex Coleção #' + b.tile_collection_group_id : ''}`;
+
+    // Group 1 Speed Stats
+    const g1Html = (b.stats_group_1 && b.stats_group_1.length > 0) ? `
+      <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid #38bdf8; background: rgba(56, 189, 248, 0.06);">
+        <div class="panel-title" style="color: #38bdf8; display: flex; justify-content: space-between; align-items: center;">
+          <span>⚡ Efeitos Básicos de Velocidade (Grupo 1)</span>
+          <span style="font-size: 0.75rem; color: #7dd3fc; font-weight: normal;">Multiplicadores percentuais diretos</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px;">
+          ${b.stats_group_1.map(s => `
+            <div style="background: rgba(0,0,0,0.35); padding: 10px 14px; border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.25);">
+              <div style="font-size: 0.76rem; color: #94a3b8; text-transform: uppercase;">${s.stat_name}</div>
+              <div style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-top: 2px;">${s.value_str}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : '';
+
+    // Group 2 Main Combat Stats
+    const g2Html = (b.stats_group_2 && b.stats_group_2.length > 0) ? `
+      <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid #34d399; background: rgba(52, 211, 153, 0.06);">
+        <div class="panel-title" style="color: #34d399; display: flex; justify-content: space-between; align-items: center;">
+          <span>⚔️ Atributos Principais de Combate (Grupo 2)</span>
+          <span style="font-size: 0.75rem; color: #6ee7b7; font-weight: normal;">Bônus diretos em combate</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 10px;">
+          ${b.stats_group_2.map(s => `
+            <div style="background: rgba(0,0,0,0.35); padding: 10px 14px; border-radius: 6px; border: 1px solid rgba(52, 211, 153, 0.2);">
+              <div style="font-size: 0.76rem; color: #94a3b8; text-transform: uppercase;">${s.stat_name}</div>
+              <div style="font-size: 1.25rem; font-weight: 700; color: ${rMeta.highlight || '#fff'}; margin-top: 2px;">${s.value_str}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : '';
+
+    // Group 3 Special Stats
+    const g3Html = (b.stats_group_3 && b.stats_group_3.length > 0) ? `
+      <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid #a855f7; background: rgba(168, 85, 247, 0.06);">
+        <div class="panel-title" style="color: #c084fc; display: flex; justify-content: space-between; align-items: center;">
+          <span>🛡️ Atributos Especiais & PvP (Grupo 3)</span>
+          <span style="font-size: 0.75rem; color: #d8b4fe; font-weight: normal;">Resiliência, resistências e caça</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px;">
+          ${b.stats_group_3.map(s => `
+            <div style="background: rgba(0,0,0,0.35); padding: 10px 14px; border-radius: 6px; border: 1px solid rgba(168, 85, 247, 0.2);">
+              <div style="font-size: 0.76rem; color: #94a3b8; text-transform: uppercase;">${s.stat_name}</div>
+              <div style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-top: 2px;">${s.value_str}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : '';
+
+    // Exclusive Skills
+    const exSkillsHtml = (b.exclusive_skills && b.exclusive_skills.length > 0) ? `
+      <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid #f59e0b; background: rgba(245, 158, 11, 0.06);">
+        <div class="panel-title" style="color: #fbbf24; display: flex; justify-content: space-between; align-items: center;">
+          <span>🔮 Habilidades Exclusivas da Forma (${b.exclusive_skills.length})</span>
+          <span style="font-size: 0.75rem; color: #fde68a; font-weight: normal;">Ativas / Passivas concedidas</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+          ${b.exclusive_skills.map(sk => `
+            <div style="background: rgba(0,0,0,0.35); padding: 12px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.25);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-weight: 700; color: #fbbf24; font-size: 0.92rem;">✨ ${sk.name}</span>
+                <span style="font-size: 0.72rem; color: #94a3b8; font-family: monospace;">Skill #${sk.id}</span>
+              </div>
+              <div style="font-size: 0.84rem; color: #cbd5e1; line-height: 1.45;">${sk.desc || sk.effect_desc || 'Efeito passivo contínuo.'}</div>
+              ${sk.effect_desc && sk.effect_desc !== sk.desc ? `<div style="font-size: 0.78rem; color: #94a3b8; margin-top: 4px; font-style: italic;">${sk.effect_desc}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : '';
+
+    // Optimum Class Skills
+    const optSkillsHtml = (b.optimum_skills && b.optimum_skills.length > 0) ? `
+      <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid #ec4899; background: rgba(236, 72, 153, 0.06);">
+        <div class="panel-title" style="color: #f472b6; display: flex; justify-content: space-between; align-items: center;">
+          <span>🎯 Habilidades de Classe Especializada (${b.class_name})</span>
+          <span style="font-size: 0.75rem; color: #fbcfe8; font-weight: normal;">Exclusivo para ${b.class_name}</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+          ${b.optimum_skills.map(sk => `
+            <div style="background: rgba(0,0,0,0.35); padding: 12px; border-radius: 6px; border: 1px solid rgba(236, 72, 153, 0.25);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-weight: 700; color: #f472b6; font-size: 0.92rem;">🏹 ${sk.name}</span>
+                <span style="font-size: 0.72rem; color: #94a3b8; font-family: monospace;">Skill #${sk.id}</span>
+              </div>
+              <div style="font-size: 0.84rem; color: #cbd5e1; line-height: 1.45;">${sk.desc || sk.effect_desc || 'Bônus passivo para a classe.'}</div>
+              ${sk.effect_desc && sk.effect_desc !== sk.desc ? `<div style="font-size: 0.78rem; color: #94a3b8; margin-top: 4px; font-style: italic;">${sk.effect_desc}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : '';
+
+    // Transcendence / Limit Break
+    const lbHtml = (b.limit_breaks && b.limit_breaks.length > 0) ? `
+      <div class="panel-box" style="margin-bottom: 16px; border-left: 3px solid #e2be6f; background: rgba(226, 190, 111, 0.08);">
+        <div class="panel-title" style="color: #e2be6f; display: flex; justify-content: space-between; align-items: center;">
+          <span>🌟 Transcendência & Quebra de Limite (Até Nv. ${b.max_limit_break})</span>
+          <span style="font-size: 0.75rem; color: #fcf2d6; font-weight: normal;">CostumeLimitBreak.csv</span>
+        </div>
+        <p style="font-size: 0.84rem; color: #cbd5e1; margin: 6px 0 12px; line-height: 1.5;">
+          Esta Hemorforma suporta <strong>transcendência de atributos</strong> até o Nível ${b.max_limit_break}, elevando exponencialmente as velocidades de ação, ataque bruto e resiliência a dano.
+        </p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+          ${b.limit_breaks.map(lb => `
+            <div style="background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; border: 1px solid rgba(226, 190, 111, 0.3);">
+              <div style="font-size: 0.92rem; font-weight: 700; color: #e2be6f; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                <span>✨ Transcendência Nível ${lb.level}</span>
+                <span style="font-size: 0.72rem; color: #94a3b8; font-family: monospace;">${lb.resource || ''}</span>
+              </div>
+              <div style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.6;">
+                ${lb.stats_group_1 && lb.stats_group_1.length > 0 ? `
+                  <div style="margin-bottom: 6px;">
+                    <strong style="color: #7dd3fc;">Velocidades:</strong>
+                    ${lb.stats_group_1.map(s => `${s.stat_name} <strong style="color: #fff;">${s.value_str}</strong>`).join(', ')}
+                  </div>
+                ` : ''}
+                ${lb.stats_group_2 && lb.stats_group_2.length > 0 ? `
+                  <div style="margin-bottom: 6px;">
+                    <strong style="color: #6ee7b7;">Combate:</strong>
+                    ${lb.stats_group_2.map(s => `${s.stat_name} <strong style="color: #fff;">${s.value_str}</strong>`).join(', ')}
+                  </div>
+                ` : ''}
+                ${lb.stats_group_3 && lb.stats_group_3.length > 0 ? `
+                  <div>
+                    <strong style="color: #d8b4fe;">Especial:</strong>
+                    ${lb.stats_group_3.map(s => `${s.stat_name} <strong style="color: #fff;">${s.value_str}</strong>`).join(', ')}
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : '';
+
+    // Codex Integration
+    const codexHtml = b.tile_collection_group_id ? `
+      <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 12px 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <div style="font-size: 0.82rem; font-weight: 700; color: #e2be6f;">🏛️ Registro no Códex Ancestral</div>
+          <div style="font-size: 0.78rem; color: #cbd5e1; margin-top: 2px;">Vinculada ao Grupo de Coleção #${b.tile_collection_group_id}. Garante bônus de conta permanentes ao ser desbloqueada.</div>
+        </div>
+        <button class="filter-btn" onclick="detailModal.classList.remove('open'); window.navTo('codex');" style="font-size: 0.78rem; padding: 4px 10px;">
+          Abrir Códex →
+        </button>
+      </div>
+    ` : '';
+
+    modalBody.innerHTML = `
+      <!-- Hero Top Section -->
+      <div style="display: flex; gap: 18px; align-items: center; margin-bottom: 20px; padding: 16px; background: radial-gradient(circle, ${rMeta.color}15 0%, rgba(10,12,20,0.7) 100%); border-radius: 10px; border: 1px solid ${rMeta.color}40;">
+        <div style="width: 84px; height: 84px; border-radius: 12px; background: rgba(0,0,0,0.5); border: 2px solid ${rMeta.color}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 15px ${rMeta.color}30;">
+          <img src="${b.icon}" alt="${b.name}" style="width: 76px; height: 76px; object-fit: contain;" onerror="this.src='assets/items/skill_bg_costume.png'">
+        </div>
+        <div style="flex: 1; min-width: 0;">
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 6px;">
+            <span class="entity-badge ${rMeta.badge_class || 'badge-rarity-common'}" style="font-size: 0.78rem; font-weight: 700;">
+              ● ${rMeta.name}
+            </span>
+            <span class="entity-badge" style="background: rgba(255,255,255,0.08); color: #fff; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
+              <img src="${b.class_icon}" style="width: 14px; height: 14px; object-fit: contain;" onerror="this.style.display='none'">
+              ${b.class_name}
+            </span>
+            ${b.only_skin ? `<span class="entity-badge" style="background: rgba(148,163,184,0.15); color: #cbd5e1; font-size: 0.72rem;">🎨 Apenas Aparência</span>` : ''}
+          </div>
+          <h3 style="margin: 0 0 4px; font-size: 1.25rem; font-weight: 700; color: ${rMeta.highlight || '#fff'};">
+            ${b.name}
+          </h3>
+          <div style="font-size: 0.8rem; color: #94a3b8; display: flex; gap: 12px; flex-wrap: wrap;">
+            <span>ID do Costume: <strong>#${b.id}</strong></span>
+            ${b.item_info_id ? `<span>ID do Item: <strong>#${b.item_info_id}</strong></span>` : ''}
+            ${b.max_limit_break ? `<span>Limite Transcendência: <strong>Nv. ${b.max_limit_break}</strong></span>` : ''}
+          </div>
+        </div>
+      </div>
+
+      ${g1Html}
+      ${g2Html}
+      ${g3Html}
+      ${exSkillsHtml}
+      ${optSkillsHtml}
+      ${lbHtml}
+      ${codexHtml}
+
+      <div style="font-size: 0.74rem; color: #64748b; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px; margin-top: 16px;">
+        Registro extraído de Costume.csv, CostumeLimitBreak.csv, StaticOperation.csv e SkillSet.csv (Versão 1.13.22 • Netmarble Corporation).
+      </div>
+    `;
+
+    detailModal.classList.add('open');
+    detailModal.classList.add('active');
+  };
+
   // Render FAQ
   function renderFaq() {
     const container = document.getElementById('faqContainer');
@@ -5124,6 +5491,10 @@
       } else if (state.currentTab === 'artifacts') {
         state.artifactsSearchTerm = q;
         renderArtifacts();
+      } else if (state.currentTab === 'bloodshapes') {
+        state.bloodshapesSearchTerm = q;
+        state.bloodshapesPage = 1;
+        renderBloodshapes();
       }
     });
 
@@ -5421,6 +5792,34 @@
       state.lifetreeSearchTerm = e.target.value;
       renderLifeTreeSefiras();
     });
+
+    document.getElementById('bloodshapesClassFilterBar')?.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (btn && btn.dataset.bclass) {
+        document.querySelectorAll('#bloodshapesClassFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.bloodshapesClassFilter = btn.dataset.bclass;
+        state.bloodshapesPage = 1;
+        renderBloodshapes();
+      }
+    });
+
+    document.getElementById('bloodshapesRarityFilterBar')?.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (btn && btn.dataset.brarity) {
+        document.querySelectorAll('#bloodshapesRarityFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.bloodshapesRarityFilter = btn.dataset.brarity;
+        state.bloodshapesPage = 1;
+        renderBloodshapes();
+      }
+    });
+
+    document.getElementById('bloodshapesSearchInput')?.addEventListener('input', e => {
+      state.bloodshapesSearchTerm = e.target.value;
+      state.bloodshapesPage = 1;
+      renderBloodshapes();
+    });
   }
 
   function initApp() {
@@ -5444,6 +5843,7 @@
     renderBloodrealm();
     renderRefinement();
     renderLifeTree();
+    renderBloodshapes();
     renderFaq();
     setupListeners();
   }
