@@ -503,9 +503,99 @@ with open(os.path.join(OUT_DIR, "builds.json"), "w", encoding="utf-8") as f:
     json.dump(builds_data, f, indent=2, ensure_ascii=False)
 
 # ==========================================
-# 3. SKILLS DATABASE
+# 3. SKILLS DATABASE (ENRICHED WITH 425 SKILL BOOKS)
 # ==========================================
-print("Processing Skills...")
+print("Processing Skills & Mapping Skill Books...")
+
+# Pre-gather craft targets to check if books are craftable
+recipe_target_map = {}
+receitas_path_early = os.path.join(BASE_DIR, "analysis/reports/jogo/receitas.csv")
+if os.path.exists(receitas_path_early):
+    with open(receitas_path_early, encoding="utf-8-sig") as f:
+        for r in csv.DictReader(f):
+            succ_list = json.loads(r.get("SuccessRewardGroupId_registros_json", "[]")) if r.get("SuccessRewardGroupId_registros_json") else []
+            if succ_list:
+                param = succ_list[0].get("Param", "")
+                if param:
+                    recipe_target_map[param] = r.get("Id", "")
+
+# Load skill books catalog
+skill_books_csv_path = os.path.join(BASE_DIR, "analysis/versions/2026-10-31/reports/habilidades-livros/habilidades-e-livros.csv")
+skills_to_books = defaultdict(list)
+all_linked_book_ids = set()
+
+if os.path.exists(skill_books_csv_path):
+    with open(skill_books_csv_path, mode="r", encoding="utf-8-sig") as f:
+        reader = csv.DictReader(f)
+        for r in reader:
+            sid = r["skill_id"].strip()
+            raw_items = json.loads(r.get("itens_json", "[]"))
+            for it in raw_items:
+                iid = it.get("item_id", "").strip()
+                all_linked_book_ids.add(iid)
+
+                b_name = it.get("nome", "").strip()
+                b_desc = it.get("descricao", "").strip()
+                if "2025-" in b_name or "2026-" in b_name:
+                    m = re.search(r'<SkillEffect>(Livro de Habilidade:[^<]+)</>', b_desc)
+                    if m:
+                        b_name = m.group(1).strip()
+                    else:
+                        b_name = f"Item de Habilidade #{iid}"
+                b_name = re.sub(r'\{[^}]+\}', '', b_name).strip()
+
+                cls_id_str = it.get("classe", "").strip()
+                cls_id = int(cls_id_str) if cls_id_str.isdigit() else 0
+                class_names_map = {1: "Víbora", 2: "Ceifador", 3: "Carnificina", 4: "Manchado de Sangue", 5: "Akasha", 0: "Todas as Classes"}
+                b_class_name = class_names_map.get(cls_id, "Todas as Classes")
+
+                rar_code = int(it.get("raridade", 0)) if str(it.get("raridade", "")).isdigit() else 0
+                r_info = get_rarity_info(rar_code)
+
+                # Icon matching from item_raw
+                i_row = item_raw.get(iid, {})
+                raw_img = i_row.get("Img", "").strip()
+                clean_img = raw_img.replace("IMG_", "").replace("TEX_", "").lower() + ".png"
+                if clean_img in item_pngs:
+                    b_icon = f"assets/items/{clean_img}"
+                elif cls_id == 1:
+                    b_icon = "assets/items/skillbook_darkmage_02.png" if "skillbook_darkmage_02.png" in item_pngs else "assets/items/skillbook_darkmage.png"
+                elif cls_id == 2:
+                    b_icon = "assets/items/skillbook_reaper_02.png" if "skillbook_reaper_02.png" in item_pngs else "assets/items/skillbook_reaper.png"
+                elif cls_id == 3:
+                    b_icon = "assets/items/skillbook_gunner_02.png" if "skillbook_gunner_02.png" in item_pngs else "assets/items/skillbook_gunner.png"
+                elif cls_id == 4:
+                    b_icon = "assets/items/skillbook_swordman_02.png" if "skillbook_swordman_02.png" in item_pngs else "assets/items/skillbook_swordman.png"
+                elif cls_id == 5:
+                    b_icon = "assets/items/skillbook_fighter_02.png" if "skillbook_fighter_02.png" in item_pngs else "assets/items/skillbook_fighter.png"
+                else:
+                    b_icon = "assets/items/skillbook_allclass.png"
+
+                t_code = it.get("tipo", "31")
+                t_name = "Livro de Habilidade" if t_code == "31" else "Item de Aprendizado / Emblema"
+                clean_desc = re.sub(r'<[^>]+>', '', b_desc).strip()
+
+                is_craft = iid in recipe_target_map
+                craft_rec_id = recipe_target_map.get(iid, "")
+
+                skills_to_books[sid].append({
+                    "id": iid,
+                    "name": b_name,
+                    "type_code": t_code,
+                    "type_name": t_name,
+                    "class_id": cls_id,
+                    "class_name": b_class_name,
+                    "rarity": rar_code,
+                    "rarity_name": r_info["name"],
+                    "rarity_color": r_info["color"],
+                    "rarity_highlight": r_info["highlight"],
+                    "rarity_badge_class": r_info["badge_class"],
+                    "icon_img": b_icon,
+                    "desc": clean_desc,
+                    "is_craftable": is_craft,
+                    "craft_recipe_id": craft_rec_id
+                })
+
 skills_catalog = []
 class_type_map = {
     "DarkMage": {"name": "Víbora", "class_id": 1, "icon": "darkmage_icon.png"},
@@ -556,6 +646,15 @@ for sid, srow in skill_raw.items():
     
     target_type = target_type_map.get(srow.get("TargetType", ""), "Alvo")
     
+    b_list = skills_to_books.get(sid, [])
+    has_b = len(b_list) > 0
+    notes = ""
+    if sid == "72":
+        name = "Habilidade 72"
+        notes = "Registro canônico sem nome próprio traduzido no cliente ('2025-05-21 Registered'); efeito explícito reduz 50% da recarga ativa. Sem livro vinculado diretamente nos arquivos do jogo."
+        has_b = False
+        b_list = []
+        
     skills_catalog.append({
         "id": sid,
         "name": name,
@@ -573,11 +672,16 @@ for sid, srow in skill_raw.items():
         "stack_count": srow.get("StackCount", "1"),
         "is_slot_skill": srow.get("UseSkillSlot", "0") == "1",
         "dash_offset": srow.get("DashOffset", "0"),
-        "mobile": srow.get("Mobile", "0") == "1"
+        "mobile": srow.get("Mobile", "0") == "1",
+        "has_books": has_b,
+        "books_count": len(b_list),
+        "books": b_list,
+        "notes": notes
     })
 
 with open(os.path.join(OUT_DIR, "skills.json"), "w", encoding="utf-8") as f:
     json.dump(skills_catalog, f, indent=2, ensure_ascii=False)
+print(f"  ✓ Processed {len(skills_catalog)} skills ({sum(1 for s in skills_catalog if s['has_books'])} with linked skill books).")
 
 # ==========================================
 # 4. BOSSES & ENEMIES (DEDUPLICATED & ENRICHED)
@@ -1011,7 +1115,7 @@ for iid, irow in item_raw.items():
     name = iname_row.get("Name", "").strip()
     desc = iname_row.get("Desc", "").strip()
     
-    if not name or "2025-" in name or "2026-" in name:
+    if not name or (("2025-" in name or "2026-" in name) and iid not in all_linked_book_ids):
         continue
     
     itype = irow.get("Type", "")
@@ -1029,11 +1133,15 @@ for iid, irow in item_raw.items():
             type_label = "Arma & Equipamento"
         clean_name = re.sub(r'\{[^}]+\}', '', name).strip()
         clean_desc = re.sub(r'\{[^}]+\}', '', desc).strip()
-    elif itype == "31":
+    elif itype == "31" or iid in all_linked_book_ids:
         cat = "31"
-        type_label = "Livro de Habilidade"
-        clean_name = re.sub(r'\{[^}]+\}', '', name).strip()
-        clean_desc = re.sub(r'\{[^}]+\}', '', desc).strip()
+        type_label = "Livro de Habilidade" if itype == "31" else "Item de Aprendizado / Emblema"
+        if ("2025-" in name or "2026-" in name) and "<SkillEffect>" in desc:
+            m = re.search(r'<SkillEffect>(Livro de Habilidade:[^<]+)</>', desc)
+            clean_name = m.group(1).strip() if m else re.sub(r'\{[^}]+\}', '', name).strip()
+        else:
+            clean_name = re.sub(r'\{[^}]+\}', '', name).strip()
+        clean_desc = re.sub(r'<[^>]+>', '', desc).strip()
     elif itype in POTION_TYPES:
         cat = "potion"
         type_label = "Poção & Consumível"
@@ -1200,8 +1308,11 @@ curated_items.extend(items_by_cat["70"][:120])
 # 3. Weapons & Gear (120 items)
 curated_items.extend(items_by_cat["1"][:120])
 
-# 4. Skill Books (80 items)
-curated_items.extend(items_by_cat["31"][:80])
+# 4. Todos os 425 Livros de Habilidade e Itens de Aprendizado Catalogados (100% de cobertura)
+curated_items.extend(items_by_cat["31"])
+for bid in all_linked_book_ids:
+    if bid in all_processed_items and all_processed_items[bid] not in curated_items:
+        curated_items.append(all_processed_items[bid])
 
 # 5. Chests & Baús (80 items with authentic icons)
 curated_items.extend(items_by_cat["4"][:80])

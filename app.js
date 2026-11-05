@@ -11,6 +11,7 @@
     currentTab: 'overview',
     data: window.VAMPIR_DATA || {},
     skillsClassFilter: 'all',
+    skillsBookFilter: 'all',
     skillsSearchTerm: '',
     skillsPage: 1,
     skillsPerPage: 36,
@@ -437,38 +438,79 @@
       filtered = filtered.filter(s => s.class_id === cid);
     }
 
+    if (state.skillsBookFilter === 'with_books') {
+      filtered = filtered.filter(s => s.has_books);
+    } else if (state.skillsBookFilter === 'no_books') {
+      filtered = filtered.filter(s => !s.has_books);
+    }
+
     if (state.skillsSearchTerm.trim()) {
       const q = state.skillsSearchTerm.toLowerCase();
       filtered = filtered.filter(s =>
         s.name.toLowerCase().includes(q) ||
         s.description.toLowerCase().includes(q) ||
         s.id.includes(q) ||
-        s.class_name.toLowerCase().includes(q)
+        s.class_name.toLowerCase().includes(q) ||
+        (s.books && s.books.some(b => b.name.toLowerCase().includes(q) || b.id.includes(q) || (b.desc && b.desc.toLowerCase().includes(q))))
       );
     }
 
     const totalFiltered = filtered.length;
     const paginated = filtered.slice(0, state.skillsPage * state.skillsPerPage);
 
-    container.innerHTML = paginated.map(s => `
-      <div class="entity-card" onclick="window.inspectSkill('${s.id}')">
-        <div class="entity-header">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <img src="${s.icon_img || 'assets/logo.png'}" alt="Icon" class="mini-skill-icon" onerror="this.src='assets/logo.png'">
-            <span class="entity-badge badge-purple">${s.class_name}</span>
+    container.innerHTML = paginated.map(s => {
+      let bookTag = '';
+      if (s.has_books && s.books && s.books.length > 0) {
+        const first = s.books[0];
+        const extraCount = s.books.length - 1;
+        bookTag = `
+          <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px; background: rgba(212,175,55,0.08); border: 1px solid rgba(212,175,55,0.25); border-radius: 6px; padding: 5px 8px; font-size: 0.78rem;">
+            <img src="${first.icon_img}" style="width: 20px; height: 20px; object-fit: contain; border-radius: 3px;" onerror="this.src='assets/items/skillbook_allclass.png'">
+            <span style="color: ${first.rarity_color || 'var(--gold-primary)'}; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">
+              ${first.name}${extraCount > 0 ? ` (+${extraCount} variantes)` : ''}
+            </span>
+            <span class="entity-badge ${first.rarity_badge_class}" style="font-size: 0.65rem; padding: 1px 5px;">${first.rarity_name}</span>
           </div>
-          <span class="entity-id">ID ${s.id}</span>
+        `;
+      } else if (s.id === '72') {
+        bookTag = `
+          <div style="margin-top: 10px; display: flex; align-items: center; gap: 6px; font-size: 0.74rem; color: #eab308; background: rgba(234,179,8,0.1); border: 1px solid rgba(234,179,8,0.3); border-radius: 4px; padding: 4px 8px;">
+            <span>⚠️ Sem Livro Direto Registrado</span>
+          </div>
+        `;
+      } else {
+        bookTag = `
+          <div style="margin-top: 10px; font-size: 0.74rem; color: #64748b; display: flex; align-items: center; gap: 4px;">
+            <span>🛡️ Habilidade Inata de Classe</span>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="entity-card" onclick="window.inspectSkill('${s.id}')">
+          <div class="entity-header">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <img src="${s.icon_img || 'assets/logo.png'}" alt="Icon" class="mini-skill-icon" onerror="this.src='assets/logo.png'">
+              <span class="entity-badge badge-purple">${s.class_name}</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              ${s.has_books ? `<span class="entity-badge badge-gold" style="font-size: 0.68rem; padding: 1px 5px;">📖 ${s.books.length} Livro${s.books.length > 1 ? 's' : ''}</span>` : ''}
+              <span class="entity-id">ID ${s.id}</span>
+            </div>
+          </div>
+          <div class="entity-title">${s.name}</div>
+          <p class="entity-desc">${s.description || s.effect_description || 'Habilidade de combate vampírica.'}</p>
+          
+          <div class="entity-meta-row">
+            <span>⏱️ ${s.cooldown}</span>
+            <span>💧 MP: ${s.mp_cost}</span>
+            <span>🎯 ${s.range}</span>
+          </div>
+
+          ${bookTag}
         </div>
-        <div class="entity-title">${s.name}</div>
-        <p class="entity-desc">${s.description || s.effect_description || 'Habilidade de combate vampírica.'}</p>
-        
-        <div class="entity-meta-row">
-          <span>⏱️ ${s.cooldown}</span>
-          <span>💧 MP: ${s.mp_cost}</span>
-          <span>🎯 ${s.range}</span>
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
     if (paginated.length < totalFiltered) {
       pagination.innerHTML = `
@@ -5242,6 +5284,78 @@
     modalTitle.innerText = s.name;
     modalSubtitle.innerText = `${s.class_name} • Habilidade ID #${s.id}`;
 
+    let booksSection = '';
+    if (s.has_books && s.books && s.books.length > 0) {
+      booksSection = `
+        <div class="panel-box" style="margin-top: 20px; border-left: 3px solid var(--gold-primary);">
+          <div class="panel-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span>📖 Livro(s) de Habilidade Associado(s) (${s.books.length})</span>
+            <span style="font-size: 0.72rem; color: #94a3b8; font-weight: normal;">Fonte: EffectType=4 (Item.csv)</span>
+          </div>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin: 0 0 12px; line-height: 1.45;">
+            Esta habilidade é desbloqueada ou aprimorada consumindo o(s) respectivo(s) livro(s) de habilidade:
+          </p>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            ${s.books.map(b => `
+              <div style="background: rgba(15,20,30,0.6); border: 1px solid rgba(255,255,255,0.08); border-left: 3px solid ${b.rarity_color || 'var(--gold-primary)'}; border-radius: 6px; padding: 12px; display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap;">
+                <div style="display: flex; gap: 12px; align-items: flex-start; flex: 1; min-width: 220px;">
+                  <img src="${b.icon_img}" alt="${b.name}" style="width: 44px; height: 44px; object-fit: contain; border-radius: 6px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); padding: 2px;" onerror="this.src='assets/items/skillbook_allclass.png'">
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap;">
+                      <span style="font-weight: 700; color: ${b.rarity_color || '#fff'}; font-size: 0.95rem;">${b.name}</span>
+                      <span class="entity-badge ${b.rarity_badge_class}" style="font-size: 0.68rem; padding: 1px 6px;">${b.rarity_name}</span>
+                      <span class="entity-badge badge-gray" style="font-size: 0.68rem; padding: 1px 6px;">ID #${b.id}</span>
+                      <span class="entity-badge badge-blue" style="font-size: 0.68rem; padding: 1px 6px;">${b.class_name}</span>
+                    </div>
+                    <div style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.4; margin-bottom: 6px;">
+                      ${b.desc || 'Consuma este livro para aprender ou aprimorar a respectiva habilidade.'}
+                    </div>
+                    <div style="font-size: 0.72rem; color: #64748b; font-family: monospace;">
+                      Tipo: ${b.type_name} (${b.type_code}) • Vínculo EffectType=4 (EffectParams=${s.id})
+                    </div>
+                  </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
+                  <button class="filter-btn" style="padding: 4px 10px; font-size: 0.75rem; cursor: pointer;" onclick="window.inspectItem('${b.id}')">
+                    🎒 Ver Item
+                  </button>
+                  ${b.is_craftable ? `
+                    <button class="filter-btn" style="padding: 4px 10px; font-size: 0.75rem; border-color: rgba(245,158,11,0.5); color: #fbbf24; cursor: pointer;" onclick="window.openRecipeFromItem('${b.craft_recipe_id}')">
+                      🔨 Ver Receita
+                    </button>
+                  ` : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    } else if (s.id === '72') {
+      booksSection = `
+        <div class="panel-box" style="margin-top: 20px; border-left: 3px solid #eab308; background: rgba(234,179,8,0.06);">
+          <div class="panel-title" style="color: #facc15; display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+            <span>⚠️ Registro Canônico Sem Nome Traduzido & Sem Livro Associado</span>
+          </div>
+          <div style="font-size: 0.84rem; color: #cbd5e1; line-height: 1.55;">
+            O arquivo de localização (<code style="color: #fbbf24;">Skill_Name.csv</code>) registra esta entrada provisoriamente como <em>"2025-05-21 Registered"</em>, mas documenta seu efeito explícito como <strong>"Reduz a Recarga de Habilidade Ativa em 50%"</strong>.
+            <br><br>
+            Nos arquivos do cliente (<code style="color: #fbbf24;">Item.csv</code>), <strong>não há livro ou item vinculado diretamente ao ID 72</strong> (<code style="color: #94a3b8;">EffectType=4</code>), não havendo evidência suficiente nos arquivos para atribuir um nome inventado. O rótulo canônico <strong>Habilidade 72</strong> foi preservado para garantir precisão e fidelidade documental.
+          </div>
+        </div>
+      `;
+    } else {
+      booksSection = `
+        <div class="panel-box" style="margin-top: 20px; border-left: 3px solid #64748b; background: rgba(0,0,0,0.25);">
+          <div class="panel-title" style="color: #94a3b8; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+            <span>🛡️ Habilidade de Progressão Natural / Inata</span>
+          </div>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin: 0; line-height: 1.5;">
+            Esta habilidade não exige o consumo de livros de habilidade nos arquivos do jogo (<code style="color: #64748b;">sem vínculo em EffectType=4</code>). Ela é desbloqueada diretamente através da progressão de nível da classe, despertar ou rotação base de combate.
+          </p>
+        </div>
+      `;
+    }
+
     modalBody.innerHTML = `
       <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
         <img src="${s.icon_img || 'assets/logo.png'}" alt="${s.name}" style="width: 56px; height: 56px; border-radius: 8px; border: 1px solid var(--border-gold);" onerror="this.src='assets/logo.png'">
@@ -5273,6 +5387,7 @@
           Stack Count: ${s.stack_count} | Mobile Cast: ${s.mobile ? 'Sim (Permite Andar)' : 'Não'} | Dash Offset: ${s.dash_offset}
         </div>
       </div>
+      ${booksSection}
     `;
 
     detailModal.classList.add('open');
@@ -5509,6 +5624,33 @@
     modalTitle.innerHTML = `<span style="color: ${item.rarity_color || '#fff'}; font-weight: 700;">${item.name}</span>`;
     modalSubtitle.innerText = `${item.type_name} • ${item.rarity_name || 'Comum'} • Tier ${item.tier} (ID #${item.id})`;
 
+    // Check if item teaches a skill
+    let skillTaughtHtml = '';
+    const taughtSkill = state.data.skills ? state.data.skills.find(s => s.books && s.books.some(b => String(b.id) === String(item.id))) : null;
+    if (taughtSkill) {
+      skillTaughtHtml = `
+        <div class="panel-box" style="margin-top: 16px; border-left: 3px solid #a855f7;">
+          <div class="panel-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span>⚡ Habilidade Ensinada por este Livro</span>
+            <span class="entity-badge badge-purple">${taughtSkill.class_name}</span>
+          </div>
+          <div style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 12px; min-width: 240px; flex: 1;">
+              <img src="${taughtSkill.icon_img}" style="width: 44px; height: 44px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); object-fit: contain; background: rgba(0,0,0,0.4); padding: 2px;" onerror="this.src='assets/logo.png'">
+              <div>
+                <div style="font-weight: 700; color: #fff; font-size: 0.95rem;">${taughtSkill.name} <span class="entity-badge badge-gray" style="font-size: 0.68rem;">ID #${taughtSkill.id}</span></div>
+                <div style="font-size: 0.82rem; color: #cbd5e1; margin-top: 2px;">${taughtSkill.description || taughtSkill.effect_description}</div>
+                <div style="font-size: 0.74rem; color: var(--gold-primary); margin-top: 4px;">⏱️ ${taughtSkill.cooldown} • 💧 MP: ${taughtSkill.mp_cost} • 🎯 ${taughtSkill.range}</div>
+              </div>
+            </div>
+            <button class="filter-btn" style="padding: 5px 12px; font-size: 0.78rem; border-color: rgba(168,85,247,0.5); color: #c084fc; cursor: pointer;" onclick="window.inspectSkill('${taughtSkill.id}')">
+              Ver Habilidade ⚡
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
     let craftableHtml = '';
     const craftingRecipes = state.data.crafting ? state.data.crafting.filter(c => String(c.target_item_id) === String(item.id)) : [];
     if (craftingRecipes.length > 0) {
@@ -5626,6 +5768,7 @@
           ${item.max_enchant}
         </div>
       </div>
+      ${skillTaughtHtml}
       ${craftableHtml}
       ${droppersHtml}
       ${collectionsHtml}
@@ -6059,6 +6202,17 @@
         document.querySelectorAll('#skillsFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
         state.skillsClassFilter = e.target.dataset.class;
+        state.skillsPage = 1;
+        renderSkills();
+      }
+    });
+
+    document.getElementById('skillsBookFilterBar')?.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (btn && btn.dataset.bfilter) {
+        document.querySelectorAll('#skillsBookFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.skillsBookFilter = btn.dataset.bfilter;
         state.skillsPage = 1;
         renderSkills();
       }

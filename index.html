@@ -339,6 +339,15 @@
             <button class="filter-btn" data-class="5">Akasha</button>
             <button class="filter-btn" data-class="0">Comuns / Gerais</button>
           </div>
+          <div style="display: flex; gap: 8px; align-items: center; margin-top: 10px; margin-bottom: 16px; flex-wrap: wrap;" id="skillsBookFilterBar">
+            <span style="font-size: 0.85rem; color: #94a3b8; font-weight: 600;">📖 Origem:</span>
+            <button class="filter-btn active" data-bfilter="all">Todas as Habilidades (1.336)</button>
+            <button class="filter-btn" data-bfilter="with_books">📖 Com Livros de Habilidade (409)</button>
+            <button class="filter-btn" data-bfilter="no_books">⚔️ Inatas / Sem Livro Direto (927)</button>
+            <span style="margin-left: auto; font-size: 0.8rem; color: #64748b;" id="skillsSummaryNote">
+              409 habilidades vinculadas a 425 livros e itens nos arquivos
+            </span>
+          </div>
           <div class="cards-grid" id="skillsContainer">
             <!-- Dynamically populated -->
           </div>
