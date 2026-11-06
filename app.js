@@ -86,6 +86,9 @@
     disciplineCategory: '1',
     disciplineChapter: 'all',
     disciplineSearchTerm: '',
+    clanTab: 'ranks',
+    archiveCategoryFilter: 'all',
+    archiveSearchTerm: '',
     modesFilter: 'all',
     pvpTab: 'arena',
     enchantTab: 'scrolls',
@@ -121,7 +124,7 @@
     }
 
     try {
-      const [classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, bloodrealm, refinement, lifetree, faq, constants] = await Promise.all([
+      const [classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, bloodrealm, refinement, lifetree, bloodshapes, mounts, discipline, clan, archive, drain, faq, constants] = await Promise.all([
         fetch('data/classes.json').then(r => r.json()),
         fetch('data/builds.json').then(r => r.json()),
         fetch('data/skills.json').then(r => r.json()),
@@ -144,11 +147,15 @@
         fetch('data/lifetree.json').then(r => r.json()),
         fetch('data/bloodshapes.json').then(r => r.json()),
         fetch('data/mounts.json').then(r => r.json()),
+        fetch('data/discipline.json').then(r => r.json()),
+        fetch('data/clan.json').then(r => r.json()),
+        fetch('data/archive.json').then(r => r.json()),
+        fetch('data/drain.json').then(r => r.json()),
         fetch('data/faq.json').then(r => r.json()),
         fetch('data/constants.json').then(r => r.json())
       ]);
 
-      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, bloodrealm, refinement, lifetree, bloodshapes, mounts, faq, constants };
+      state.data = { classes, builds, skills, bosses, dungeons, items, quests, crafting, modes, pvp, enchantment, shops, codex, research, portraits, artifacts, bloodline, bloodrealm, refinement, lifetree, bloodshapes, mounts, discipline, clan, archive, drain, faq, constants };
       initApp();
     } catch (e) {
       console.error('Failed to load JSON data asynchronously:', e);
@@ -192,6 +199,7 @@
     if (tabId === 'bloodshapes') renderBloodshapes();
     if (tabId === 'mounts') renderMounts();
     if (tabId === 'discipline') renderDiscipline();
+    if (tabId === 'clan') renderClan();
   }
 
   window.navTo = function(tabId) {
@@ -1347,6 +1355,96 @@
           </div>
         </div>
       `;
+    } else if (state.pvpTab === 'gehenna') {
+      const g = p.gehenna || {
+        title: "Campo de Batalha de Geena (Gehenna)",
+        zones_count: 3,
+        entry_limit: "Limite de entrada exclusivo por servidor participante (sem confirmação nos dados do cliente para a estimativa de 200 jogadores).",
+        currency: "Pontos de Geena (Gehenna Points)",
+        merchants: "Mercadores de Pontos de Geena em vilas para aquisição de itens raros.",
+        weekly_cap: "Ganho semanal máximo com reinício semanal na virada de ciclo.",
+        pk_recovery: "Jogadores que sofrerem perdas por PK podem recuperar pontos adicionais equivalentes à perda sofrida, ultrapassando temporariamente o teto.",
+        monsters_and_bosses: "Zonas habitadas por monstros de alto nível e chefes territoriais de disputa coletiva."
+      };
+      const bg = p.blood_gate || {
+        title: "Portões de Sangue (Blood Gate)",
+        activation: "Interação com portais de sangue nos campos que emitem brilho vermelho ao serem ativados.",
+        world_map_reveal: "Ao ativar um Portão de Sangue, parte da região oculta no Mapa-múndi é revelada de forma permanente.",
+        hunting_spots: "Os locais de Campo de Caça conectados nas proximidades são ativados com listagem detalhada de possíveis saques.",
+        teleport: "Permite teletransporte rápido para os Portões de Sangue e pontos de caça conectados (com pagamento de taxa de teletransporte para os locais de caça)."
+      };
+
+      container.innerHTML = `
+        <!-- Gehenna Banner -->
+        <div style="background: rgba(138, 3, 3, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: var(--radius-md); padding: 22px; margin-bottom: 24px; position: relative; overflow: hidden;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
+            <div>
+              <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px;">
+                <span class="entity-badge badge-crimson" style="font-size: 0.75rem;">⚔️ PvP Inter-Servidores</span>
+                <span class="entity-badge badge-gold" style="font-size: 0.75rem;">3 Zonas Territoriais</span>
+                <span class="entity-badge badge-blue" style="font-size: 0.75rem;">Moeda: Pontos de Geena</span>
+              </div>
+              <h3 style="font-family: var(--font-serif); font-size: 1.5rem; color: #fff; margin: 0 0 6px 0;">${g.title}</h3>
+              <p style="color: #cbd5e1; font-size: 0.88rem; margin: 0; line-height: 1.5;">
+                Campo de batalha persistente no qual todos os servidores de um mesmo grupo competem por recursos raros, eliminação de monstros de elite e chefes territoriais.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Technical Rigor Alert: Entry Limit -->
+        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-left: 4px solid #f59e0b; border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 24px;">
+          <strong style="color: #fbbf24; font-size: 0.92rem; display: block; margin-bottom: 4px;">⚠️ Análise Documental Canônica: Limites de Geena (TutorialGuide #50401)</strong>
+          <p style="font-size: 0.84rem; color: #cbd5e1; line-height: 1.5; margin: 0;">
+            O texto oficial confirma que <strong>há um limite de entrada específico para cada servidor participante</strong> (<code style="color: #fca5a5;">Há um limite de entrada para cada servidor</code>). <em>Não há confirmação nos dados do cliente para a estimativa de 200 jogadores simultâneos</em>; não se deve extrapolar parâmetros de outras instâncias para Geena.
+          </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 28px;">
+          <div style="background: rgba(15,20,30,0.65); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 16px;">
+            <div style="font-weight: 700; color: #ef4444; font-size: 0.92rem; margin-bottom: 6px;">🪙 Economia dos Pontos de Geena</div>
+            <p style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.5; margin: 0;">
+              Obtidos exclusivamente derrotando monstros de Geena ou eliminando jogadores hostis em PvP. Utilizados nos <strong>Mercadores de Pontos de Geena</strong> localizados em cada vila.
+            </p>
+          </div>
+          <div style="background: rgba(15,20,30,0.65); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 16px;">
+            <div style="font-weight: 700; color: #fbbf24; font-size: 0.92rem; margin-bottom: 6px;">⏱️ Teto Semanal & Recuperação de PK</div>
+            <p style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.5; margin: 0;">
+              Existe um ganho semanal máximo que reseta a cada ciclo. No entanto, se o jogador sofrer perdas por penalidade de PK, poderá obter pontos adicionais exatamente equivalentes ao montante perdido.
+            </p>
+          </div>
+          <div style="background: rgba(15,20,30,0.65); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 16px;">
+            <div style="font-weight: 700; color: #38bdf8; font-size: 0.92rem; margin-bottom: 6px;">🗺️ Estrutura das 3 Zonas</div>
+            <p style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.5; margin: 0;">
+              Dividido em 3 zonas geográficas com exibição em tempo real de chefes territoriais, tabelas de saques nobres e ecossistema de monstros de alto nível.
+            </p>
+          </div>
+        </div>
+
+        <!-- Blood Gate Section -->
+        <h4 style="font-size: 1.15rem; color: #fff; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+          <span>🚪 Portões de Sangue (Blood Gate - Tutoriais #10601–10603)</span>
+        </h4>
+        <div style="background: rgba(15,20,30,0.7); border: 1px solid rgba(168,85,247,0.3); border-radius: var(--radius-md); padding: 20px; margin-bottom: 24px;">
+          <p style="font-size: 0.86rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 14px;">
+            Espalhados pelas províncias de Nocturne, os <strong>Portões de Sangue</strong> atuam como âncoras cartográficas e de transporte para viajantes vampíricos:
+          </p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px;">
+            <div style="background: rgba(0,0,0,0.3); border-left: 3px solid #a855f7; padding: 12px 14px; border-radius: 6px;">
+              <strong style="color: #c084fc; display: block; margin-bottom: 4px;">🩸 Ativação Visual em Campo</strong>
+              Portais inativos surgem em cinza apagado. Ao interagir, o portal se enche de sangue vivo e emite um brilho vermelho fulgurante, marcando o domínio territorial.
+            </div>
+            <div style="background: rgba(0,0,0,0.3); border-left: 3px solid #38bdf8; padding: 12px 14px; border-radius: 6px;">
+              <strong style="color: #38bdf8; display: block; margin-bottom: 4px;">🗺️ Revelação do Mapa-múndi</strong>
+              A ativação dissipa a névoa da região oculta no <strong>Mapa-múndi</strong> (aparecendo em branco no mapa) e conecta imediatamente os locais de Campo de Caça próximos.
+            </div>
+            <div style="background: rgba(0,0,0,0.3); border-left: 3px solid #34d399; padding: 12px 14px; border-radius: 6px;">
+              <strong style="color: #34d399; display: block; margin-bottom: 4px;">⚡ Teleporte & Tabela de Saques</strong>
+              Jogadores podem visualizar os saques possíveis do Campo de Caça e optar por caminhar ou <strong>pagar taxa em ouro</strong> para se teletransportar instantaneamente até o destino.
+            </div>
+          </div>
+        </div>
+      `;
     }
   }
 
@@ -1663,19 +1761,19 @@
         <!-- Summary Metric Badges -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px;">
           <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
-            <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Taxa Fixa Universal</div>
-            <div style="font-size: 1.6rem; font-weight: 700; color: #34d399; font-family: monospace;">20,00%</div>
-            <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">SuccessRate = 2.000 fixo</div>
+            <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Taxa Bruta Registrada</div>
+            <div style="font-size: 1.6rem; font-weight: 700; color: #34d399; font-family: monospace;">20,00%*</div>
+            <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">SuccessRate = 2.000 bruto</div>
           </div>
           <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
             <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Risco de Destruição</div>
             <div style="font-size: 1.6rem; font-weight: 700; color: #38bdf8; font-family: monospace;">0% Quebra</div>
-            <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">Item protegido em falhas</div>
+            <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">ITEM_BLESSING_PAGE_DESC03</div>
           </div>
           <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
             <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Moeda Requerida</div>
             <div style="font-size: 1.6rem; font-weight: 700; color: var(--gold-primary); font-family: monospace;">Trindade</div>
-            <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">MaterialItemType = 50</div>
+            <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">Custo: 40 a 1.800.000</div>
           </div>
           <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
             <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px;">Raridades Elegíveis</div>
@@ -1700,8 +1798,8 @@
               Diferente dos pergaminhos convencionais que quebram o item a partir de +6, o ritual de bênção <strong>nunca quebra ou degrada</strong> o equipamento. Em caso de falha, apenas os pontos de Trindade investidos são consumidos.
             </div>
             <div style="background: rgba(0,0,0,0.35); border-left: 3px solid #38bdf8; padding: 12px 16px; border-radius: 6px;">
-              <strong style="color: #38bdf8; display: block; margin-bottom: 4px;">⚖️ Probabilidade Matemática Estrita (20%)</strong>
-              Em todos os 2.048 registros cadastrados no cliente (<code style="color: #fbbf24;">ItemBlessing.csv</code>), a taxa é invariavelmente calibrada em <strong>2.000 / 10.000 (20,00%)</strong>, independentemente da raridade ou tier da peça.
+              <strong style="color: #38bdf8; display: block; margin-bottom: 4px;">⚖️ Taxa Bruta 2000 (Compatível com 20%)</strong>
+              Em todos os 2.048 registros cadastrados no cliente (<code style="color: #fbbf24;">ItemBlessing.csv</code>), todas as linhas utilizam a taxa bruta <code style="color: #fbbf24;">SuccessRate = 2000</code>, compatível com 20% numa escala de 10.000 (embora a conversão final no servidor não tenha sido confirmada por telemetria). A tabela contém custos que variam de <strong>40 a 1.800.000 unidades</strong> de material. A interface oficial (<code style="color: #fbbf24;">ITEM_BLESSING_PAGE_DESC03</code>) informa expressamente que a falha <strong>não destrói o equipamento</strong>.
             </div>
             <div style="background: rgba(0,0,0,0.35); border-left: 3px solid var(--gold-primary); padding: 12px 16px; border-radius: 6px;">
               <strong style="color: var(--gold-primary); display: block; margin-bottom: 4px;">💎 Escalonamento por Nível de Encantamento</strong>
@@ -2027,7 +2125,8 @@
       collections: document.getElementById('codexCollectionsView'),
       entries: document.getElementById('codexEntriesView'),
       character: document.getElementById('codexCharacterView'),
-      tomb: document.getElementById('codexTombView')
+      tomb: document.getElementById('codexTombView'),
+      archive: document.getElementById('codexArchiveView')
     };
 
     Object.keys(views).forEach(tabKey => {
@@ -2044,6 +2143,8 @@
       renderCodexCharacter();
     } else if (state.codexTab === 'tomb') {
       renderCodexTomb();
+    } else if (state.codexTab === 'archive') {
+      renderCodexArchive();
     }
   }
 
@@ -2288,6 +2389,146 @@
         </div>
       `).join('')}
     `;
+  }
+
+  function renderCodexArchive() {
+    const container = document.getElementById('codexArchiveContainer');
+    if (!container || !state.data.archive) return;
+
+    const arch = state.data.archive;
+    const categories = arch.categories || [];
+
+    // Filter categories and tasks
+    let filteredCategories = categories.map(cat => {
+      let tasks = cat.tasks || [];
+      if (state.archiveCategoryFilter && state.archiveCategoryFilter !== 'all' && cat.menu_id !== state.archiveCategoryFilter) {
+        return null;
+      }
+      if (state.archiveSearchTerm && state.archiveSearchTerm.trim()) {
+        const q = state.archiveSearchTerm.toLowerCase().trim();
+        tasks = tasks.filter(t => 
+          (t.name && t.name.toLowerCase().includes(q)) ||
+          (t.id && t.id.includes(q)) ||
+          (cat.name && cat.name.toLowerCase().includes(q))
+        );
+      }
+      return tasks.length > 0 ? { ...cat, tasks } : null;
+    }).filter(Boolean);
+
+    const totalVisibleTasks = filteredCategories.reduce((acc, cat) => acc + cat.tasks.length, 0);
+
+    container.innerHTML = `
+      <!-- Archive & Saga Hero Card -->
+      <div style="background: rgba(138, 3, 3, 0.12); border: 1px solid rgba(212, 175, 55, 0.35); border-radius: var(--radius-md); padding: 22px; margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px;">
+              <span class="entity-badge badge-crimson" style="font-size: 0.75rem;">🌐 Servidor Global</span>
+              <span class="entity-badge badge-gold" style="font-size: 0.75rem;">232 Conquistas</span>
+              <span class="entity-badge badge-blue" style="font-size: 0.75rem;">23 Categorias</span>
+            </div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.5rem; color: #fff; margin: 0 0 6px 0;">
+              ${arch.info?.title || 'Anais & Saga do Servidor'}
+            </h3>
+            <p style="color: #cbd5e1; font-size: 0.88rem; margin: 0; line-height: 1.5;">
+              Sistema de legado coletivo e pioneirismo que recompensa todos os habitantes do servidor quando metas épicas são atingidas.
+            </p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+          <div style="background: rgba(0,0,0,0.35); border-left: 3px solid #38bdf8; padding: 14px 16px; border-radius: 6px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+              <span style="font-size: 1.1rem;">📜</span>
+              <strong style="color: #38bdf8; font-size: 0.95rem;">Anais (Conquistas Coletivas)</strong>
+            </div>
+            <p style="font-size: 0.83rem; color: #cbd5e1; margin: 0; line-height: 1.5;">
+              ${arch.info?.anais_tooltip || 'As conquistas dos [Anais] são concluídas em conjunto por todos os usuários do servidor. Ao concluir, todos os usuários do servidor podem obter recompensas.'}
+            </p>
+          </div>
+          <div style="background: rgba(0,0,0,0.35); border-left: 3px solid var(--gold-primary); padding: 14px 16px; border-radius: 6px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+              <span style="font-size: 1.1rem;">👑</span>
+              <strong style="color: var(--gold-primary); font-size: 0.95rem;">Saga (Pioneiros & Clãs Lendários)</strong>
+            </div>
+            <p style="font-size: 0.83rem; color: #cbd5e1; margin: 0; line-height: 1.5;">
+              ${arch.info?.saga_tooltip || 'A [Saga] é onde são registrados os personagens ou clãs que obtiveram a conquista primeiro. Ao concluir, todos os usuários do servidor podem obter recompensas.'}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters Bar -->
+      <div style="display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <label style="font-size: 0.85rem; color: #94a3b8; font-weight: 600;">📁 Categoria / Região:</label>
+          <select id="archiveCategorySelect" class="filter-select" style="background: rgba(15,20,30,0.85); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 6px 14px; border-radius: 6px; font-size: 0.85rem; cursor: pointer;">
+            <option value="all">Todas as Categorias (23)</option>
+            ${categories.map(c => `<option value="${c.menu_id}" ${state.archiveCategoryFilter === c.menu_id ? 'selected' : ''}>${c.name} (${c.records_count})</option>`).join('')}
+          </select>
+        </div>
+        <div style="flex: 1; max-width: 320px; min-width: 220px;">
+          <input type="text" id="archiveSearchInput" placeholder="Buscar por tarefa, monstro ou ID..." value="${state.archiveSearchTerm || ''}" style="width: 100%; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 7px 12px; border-radius: 6px; font-size: 0.85rem;">
+        </div>
+        <div style="font-size: 0.82rem; color: #94a3b8;">
+          Exibindo <strong style="color: #fbbf24;">${totalVisibleTasks}</strong> de ${arch.info?.total_records || 232} tarefas
+        </div>
+      </div>
+
+      <!-- Categories & Tasks Grid -->
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        ${filteredCategories.length === 0 ? `
+          <div style="padding: 40px; text-align: center; color: #94a3b8; background: rgba(15,20,30,0.6); border-radius: 8px;">
+            Nenhuma tarefa encontrada para os filtros selecionados.
+          </div>
+        ` : filteredCategories.map(cat => `
+          <div style="background: rgba(15,20,30,0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 10px;">
+              <h4 style="margin: 0; font-size: 1.1rem; color: #fff; display: flex; align-items: center; gap: 8px;">
+                <span>📍 ${cat.name}</span>
+                <span class="entity-badge badge-blue" style="font-size: 0.7rem;">Menu #${cat.menu_id}</span>
+              </h4>
+              <span style="font-size: 0.8rem; color: #94a3b8;">${cat.tasks.length} tarefa(s)</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px;">
+              ${cat.tasks.map(t => {
+                const targetText = (t.name || '')
+                  .replace('{TaskParam2}', Number(t.param2 || 0).toLocaleString())
+                  .replace(/<Red>(.*?)<\/>/g, '<span style="color: #f87171; font-weight: 600;">$1</span>');
+                return `
+                  <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-left: 3px solid var(--gold-primary); border-radius: 6px; padding: 10px 14px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                      <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; color: #94a3b8; margin-bottom: 4px;">
+                        <span>Tarefa #${t.id}</span>
+                        ${t.param1 ? `<span style="font-family: monospace; color: #64748b;">Alvo: ${t.param1}</span>` : ''}
+                      </div>
+                      <div style="font-size: 0.84rem; color: #cbd5e1; line-height: 1.45;">
+                        ${targetText}
+                      </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 6px; border-top: 1px dashed rgba(255,255,255,0.06); font-size: 0.74rem;">
+                      <span style="color: #94a3b8;">Meta Coletiva:</span>
+                      <strong style="color: #fbbf24; font-family: monospace;">${Number(t.param2 || 0).toLocaleString()}</strong>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    // Listeners for Archive
+    document.getElementById('archiveCategorySelect')?.addEventListener('change', e => {
+      state.archiveCategoryFilter = e.target.value;
+      renderCodexArchive();
+    });
+
+    document.getElementById('archiveSearchInput')?.addEventListener('input', e => {
+      state.archiveSearchTerm = e.target.value;
+      renderCodexArchive();
+    });
   }
 
   window.openCodexFromItem = function(collectionId) {
@@ -5590,6 +5831,232 @@
     detailModal.classList.add('active');
   };
 
+  // ==========================================
+  // CLAN, CRYPT & RELIC DEFENSE (MODULE 25)
+  // ==========================================
+  function renderClan() {
+    const container = document.getElementById('clanContentContainer');
+    if (!container || !state.data.clan) return;
+
+    const clanData = state.data.clan;
+
+    if (state.clanTab === 'ranks') {
+      const ranks = clanData.ranks || [];
+      container.innerHTML = `
+        <div style="background: rgba(138, 3, 3, 0.12); border: 1px solid rgba(212, 175, 55, 0.35); border-radius: var(--radius-md); padding: 22px; margin-bottom: 24px;">
+          <h3 style="font-family: var(--font-serif); font-size: 1.45rem; color: #fff; margin: 0 0 6px 0;">
+            👑 Hierarquia do Clã: As 6 Patentes Oficiais
+          </h3>
+          <p style="color: #cbd5e1; font-size: 0.88rem; margin: 0; line-height: 1.55;">
+            Estrutura de liderança, permissões e limites de membros extraídos de <code style="color: #fbbf24;">GuildMemberRank_Name.csv</code> e diretrizes canônicas de administração.
+          </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 24px;">
+          ${ranks.map(r => `
+            <div class="entity-card" style="border-left: 3px solid var(--gold-primary); display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <img src="${r.icon || 'assets/items/collectionmaterial_clan_01.png'}" style="width: 38px; height: 38px; object-fit: contain; border-radius: 6px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); padding: 2px;" alt="${r.name}" onerror="this.src='assets/logo.png'">
+                    <div>
+                      <strong style="color: #fff; font-size: 1.1rem; display: block;">${r.name}</strong>
+                      <span style="font-size: 0.72rem; color: #94a3b8; font-family: monospace;">RankCode #${r.rank_code}</span>
+                    </div>
+                  </div>
+                  <span class="entity-badge ${r.badge}">${r.limit_desc}</span>
+                </div>
+                <p style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; margin: 0 0 10px 0;">
+                  ${r.desc}
+                </p>
+              </div>
+              <div style="background: rgba(0,0,0,0.25); border-radius: 6px; padding: 8px 12px; font-size: 0.75rem; color: #94a3b8; border-top: 1px dashed rgba(255,255,255,0.06);">
+                Capacidade: <strong style="color: #fbbf24;">${r.limit === '0' ? 'Ilimitada' : `${r.limit} vaga(s)`}</strong>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    } else if (state.clanTab === 'crypt' || state.clanTab === 'slots') {
+      const cryptTypes = clanData.crypt_types || [];
+      const cryptSlots = clanData.crypt_slots || [];
+
+      container.innerHTML = `
+        <div style="background: rgba(138, 3, 3, 0.12); border: 1px solid rgba(212, 175, 55, 0.35); border-radius: var(--radius-md); padding: 22px; margin-bottom: 24px;">
+          <h3 style="font-family: var(--font-serif); font-size: 1.45rem; color: #fff; margin: 0 0 6px 0;">
+            🔮 As 4 Criptas do Clã & Alocação de Membros por RP
+          </h3>
+          <p style="color: #cbd5e1; font-size: 0.88rem; margin: 0 0 12px 0; line-height: 1.55;">
+            Os administradores do clã (Mestre e Vice-mestre) designam membros em criptas de poder. Os bônus são ativados para <strong>todos os membros do clã</strong> com base na soma acumulada de Ranking Points (RP) dos guardiões alocados.
+          </p>
+          <div style="background: rgba(0,0,0,0.3); border-left: 3px solid #fbbf24; padding: 10px 14px; border-radius: 6px; font-size: 0.82rem; color: #fef3c7;">
+            ℹ️ <strong>Rigor Documental:</strong> A Cripta do Clã <em>não armazena itens nem realiza leilões de saques</em>. Sua finalidade é o cálculo cooperativo de RP e dispersão de atributos globais.
+          </div>
+        </div>
+
+        <!-- 4 Crypt Types Grid -->
+        <h4 style="font-size: 1.15rem; color: #fff; margin-bottom: 14px;">🏛️ Criptas Elementares de Atributos</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 28px;">
+          ${cryptTypes.map(c => `
+            <div style="background: rgba(15,20,30,0.65); border: 1px solid rgba(255,255,255,0.08); border-left: 4px solid ${c.color}; border-radius: var(--radius-md); padding: 16px;">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <span style="font-size: 1.8rem;">${c.icon}</span>
+                <div>
+                  <strong style="color: #fff; font-size: 1.05rem; display: block;">${c.name}</strong>
+                  <span style="font-size: 0.72rem; color: ${c.color}; font-weight: 600;">Atributo: ${c.stat}</span>
+                </div>
+              </div>
+              <p style="font-size: 0.83rem; color: #cbd5e1; line-height: 1.5; margin: 0;">
+                ${c.desc}
+              </p>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- 12 Slots Table by Guild Level -->
+        <h4 style="font-size: 1.15rem; color: #fff; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+          <span>🔓 Os 12 Compartimentos de Guardiões (GuildCryptSlot.csv)</span>
+          <span style="font-size: 0.75rem; color: #94a3b8; font-weight: normal;">Desbloqueio Progressivo por Nível do Clã</span>
+        </h4>
+        <div style="overflow-x: auto; margin-bottom: 24px;">
+          <table class="skills-table" style="background: rgba(15,20,30,0.6); border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08);">
+            <thead>
+              <tr style="background: rgba(0,0,0,0.5);">
+                <th style="padding: 12px 14px;">Espaço (Slot ID)</th>
+                <th style="padding: 12px 14px;">Cripta Associada</th>
+                <th style="padding: 12px 14px;">Grupo (GroupId)</th>
+                <th style="padding: 12px 14px;">Nível de Clã Requerido</th>
+                <th style="padding: 12px 14px;">Efeito para o Clã</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${cryptSlots.map(s => {
+                let cryptName = 'Desconhecida';
+                let cryptColor = '#fff';
+                if (s.GroupId === '100') { cryptName = 'Cripta do Ataque'; cryptColor = '#ef4444'; }
+                else if (s.GroupId === '200') { cryptName = 'Cripta da Defesa'; cryptColor = '#3b82f6'; }
+                else if (s.GroupId === '300') { cryptName = 'Cripta da Precisão'; cryptColor = '#eab308'; }
+                else if (s.GroupId === '400') { cryptName = 'Cripta da Evasão'; cryptColor = '#10b981'; }
+
+                return `
+                  <tr>
+                    <td style="padding: 12px 14px; font-weight: 700; color: #fff; font-family: monospace;">#${s.Id}</td>
+                    <td style="padding: 12px 14px;"><strong style="color: ${cryptColor};">${cryptName}</strong></td>
+                    <td style="padding: 12px 14px; font-family: monospace; color: #94a3b8;">${s.GroupId}</td>
+                    <td style="padding: 12px 14px;"><span class="entity-badge badge-gold">Nível ${s.NeedGuildLevel}</span></td>
+                    <td style="padding: 12px 14px; color: #cbd5e1; font-size: 0.82rem;">Adiciona o RP do membro designado ao total da Cripta</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    } else if (state.clanTab === 'defense') {
+      const def = clanData.relic_defense || {};
+
+      container.innerHTML = `
+        <div style="background: rgba(138, 3, 3, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: var(--radius-md); padding: 22px; margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
+            <div>
+              <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px;">
+                <span class="entity-badge badge-crimson" style="font-size: 0.75rem;">Masmorra #${def.dungeon_id || '71001'}</span>
+                <span class="entity-badge badge-gold" style="font-size: 0.75rem;">Requisito: Clã Nível ${def.req_guild_level || 3}</span>
+                <span class="entity-badge badge-blue" style="font-size: 0.75rem;">55 Configurações de Onda</span>
+              </div>
+              <h3 style="font-family: var(--font-serif); font-size: 1.5rem; color: #fff; margin: 0 0 6px 0;">
+                Defesa da ${def.relic_name || 'Relíquia de Elottarvizian'}
+              </h3>
+              <p style="color: #cbd5e1; font-size: 0.88rem; margin: 0; line-height: 1.55;">
+                Masmorra cooperativa em arena onde o clã defende a relíquia sagrada contra ondas ininterruptas de monstros invasores.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px;">
+          <div style="background: rgba(15,20,30,0.65); border: 1px solid rgba(255,255,255,0.08); border-left: 3px solid #ef4444; border-radius: 8px; padding: 16px;">
+            <div style="font-weight: 700; color: #ef4444; font-size: 0.92rem; margin-bottom: 6px;">⚠️ Penalidade de 100+ Monstros</div>
+            <p style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.5; margin: 0;">
+              Se o número de monstros acumulados na arena atingir <strong>100 ou mais</strong>, uma penalidade severa reduz continuamente o PV da Relíquia, acelerando o colapso da defesa.
+            </p>
+          </div>
+          <div style="background: rgba(15,20,30,0.65); border: 1px solid rgba(255,255,255,0.08); border-left: 3px solid #fbbf24; border-radius: 8px; padding: 16px;">
+            <div style="font-weight: 700; color: #fbbf24; font-size: 0.92rem; margin-bottom: 6px;">🔄 Onda 30 Repetitiva Cíclica</div>
+            <p style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.5; margin: 0;">
+              Após superar as primeiras 29 ondas, a <strong>Onda 30</strong> repete-se de forma contínua com dificuldade máxima progressiva até que a relíquia seja destruída.
+            </p>
+          </div>
+          <div style="background: rgba(15,20,30,0.65); border: 1px solid rgba(255,255,255,0.08); border-left: 3px solid #38bdf8; border-radius: 8px; padding: 16px;">
+            <div style="font-weight: 700; color: #38bdf8; font-size: 0.92rem; margin-bottom: 6px;">🏰 Torres Mágicas & 3 Escolhas Táticas</div>
+            <p style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.5; margin: 0;">
+              Defensores podem construir e reforçar barreiras e torres mágicas. Nos intervalos de ondas, o clã escolhe 1 entre 3 opções táticas de melhoria.
+            </p>
+          </div>
+        </div>
+
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.25); border-radius: var(--radius-md); padding: 20px;">
+          <h4 style="font-size: 1.05rem; color: var(--gold-primary); margin-bottom: 12px;">📜 Diretrizes de Combate & Pontuação</h4>
+          <ul style="margin: 0; padding-left: 20px; font-size: 0.84rem; color: #cbd5e1; line-height: 1.7;">
+            ${(def.rules || []).map(r => `<li>${r}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+    } else if (state.clanTab === 'rules' || state.clanTab === 'regras') {
+      const r = clanData.rules || {};
+
+      container.innerHTML = `
+        <div style="background: rgba(138, 3, 3, 0.12); border: 1px solid rgba(212, 175, 55, 0.35); border-radius: var(--radius-md); padding: 22px; margin-bottom: 24px;">
+          <h3 style="font-family: var(--font-serif); font-size: 1.45rem; color: #fff; margin: 0 0 6px 0;">
+            📜 Regras de Clã, Doações & Penalidades Canônicas
+          </h3>
+          <p style="color: #cbd5e1; font-size: 0.88rem; margin: 0; line-height: 1.55;">
+            Políticas de ingresso, contribuições diárias, penalidades de saída voluntária e declarações de hostilidade.
+          </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px;">
+          <div style="background: rgba(15,20,30,0.65); border: 1px solid rgba(255,255,255,0.08); border-left: 3px solid #ef4444; border-radius: 8px; padding: 18px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <span style="font-size: 1.3rem;">⏱️</span>
+              <strong style="color: #ef4444; font-size: 0.95rem;">Penalidade de Saída / Dissolução</strong>
+            </div>
+            <p style="font-size: 0.83rem; color: #cbd5e1; line-height: 1.55; margin: 0;">
+              ${r.leave_penalty || 'Ao sair voluntariamente ou dissolver um clã, o jogador é submetido a uma penalidade de 30 minutos de tempo de espera antes de poder criar ou ingressar em outro clã (TutorialGuide #40801/#40807).'}
+            </p>
+          </div>
+
+          <div style="background: rgba(15,20,30,0.65); border: 1px solid rgba(255,255,255,0.08); border-left: 3px solid #38bdf8; border-radius: 8px; padding: 18px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <span style="font-size: 1.3rem;">🪙</span>
+              <strong style="color: #38bdf8; font-size: 0.95rem;">Fundação & Admissão</strong>
+            </div>
+            <p style="font-size: 0.83rem; color: #cbd5e1; line-height: 1.55; margin: 0;">
+              ${r.creation_and_entry || 'Qualquer jogador elegível pode fundar um clã mediante pagamento de ouro. A admissão pode ser imediata ou sujeita à aprovação manual de administradores.'}
+            </p>
+          </div>
+
+          <div style="background: rgba(15,20,30,0.65); border: 1px solid rgba(255,255,255,0.08); border-left: 3px solid var(--gold-primary); border-radius: 8px; padding: 18px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <span style="font-size: 1.3rem;">⚔️</span>
+              <strong style="color: var(--gold-primary); font-size: 0.95rem;">Relações Hostis</strong>
+            </div>
+            <p style="font-size: 0.83rem; color: #cbd5e1; line-height: 1.55; margin: 0;">
+              ${r.hostility || 'Administradores podem declarar e gerenciar relações hostis com outros clãs diretamente no painel de gestão do clã.'}
+            </p>
+          </div>
+        </div>
+
+        <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 18px; border: 1px solid rgba(255,255,255,0.08);">
+          <h4 style="color: #fbbf24; font-size: 1rem; margin: 0 0 8px 0;">💎 Doações Diárias de Clã</h4>
+          <p style="font-size: 0.84rem; color: #cbd5e1; line-height: 1.55; margin: 0;">
+            Os membros podem realizar doações diárias utilizando Ouro ou Trindade. As doações aumentam a experiência do clã para desbloquear novos níveis e conferem Moedas de Clã individuais, utilizadas para adquirir itens exclusivos com o Mercador de Clã.
+          </p>
+        </div>
+      `;
+    }
+  }
+
   // Render FAQ
   function renderFaq() {
     const container = document.getElementById('faqContainer');
@@ -6455,6 +6922,91 @@
     detailModal.classList.add('open');
   };
 
+  window.inspectDrainSystem = function() {
+    const drain = state.data.drain || {};
+    const buffs = drain.adrenaline_buffs || [];
+
+    modalTitle.innerText = "Drenagem de Sangue & Medidor de Adrenalina";
+    modalSubtitle.innerText = "Mecânicas Canônicas de Execução Instantânea, Carga de Adrenalina e os 27 Registros de Buffs";
+
+    modalBody.innerHTML = `
+      <!-- Technical Overview Card -->
+      <div style="background: rgba(138, 3, 3, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: var(--radius-md); padding: 18px; margin-bottom: 20px;">
+        <div style="display: flex; gap: 14px; align-items: flex-start;">
+          <span style="font-size: 2.2rem; line-height: 1;">🩸</span>
+          <div>
+            <h4 style="margin: 0 0 6px 0; font-size: 1.15rem; color: #fff;">Mecânica Oficial de Dreno (TutorialGuide #41201/#41202)</h4>
+            <p style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.55; margin: 0;">
+              Durante combates contra monstros, há uma probabilidade de disparo do ícone contextual de Dreno na tela. Pressionar o botão ativa a habilidade de <strong>Abate Instantâneo (Instant Kill)</strong>, drenando a essência vital do monstro e carregando o <strong>Medidor de Adrenalina</strong> do personagem.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Critical Rules Grid -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-bottom: 20px;">
+        <div style="background: rgba(0,0,0,0.3); border-left: 3px solid #ef4444; padding: 12px 14px; border-radius: 6px;">
+          <strong style="color: #ef4444; display: block; margin-bottom: 4px; font-size: 0.88rem;">💀 Abate Instantâneo em PvE</strong>
+          <span style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.5;">
+            Monstros elegíveis são executados de forma instantânea ao acionar o ícone de Drenagem.
+          </span>
+        </div>
+        <div style="background: rgba(0,0,0,0.3); border-left: 3px solid #f59e0b; padding: 12px 14px; border-radius: 6px;">
+          <strong style="color: #fbbf24; display: block; margin-bottom: 4px; font-size: 0.88rem;">⚠️ Separação PvE vs PvP</strong>
+          <span style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.5;">
+            As habilidades de Drenagem para monstros e personagens são estruturadas separadamente nos arquivos do jogo (<em>sem confirmação de Instant Kill em PvP</em>).
+          </span>
+        </div>
+        <div style="background: rgba(0,0,0,0.3); border-left: 3px solid #a855f7; padding: 12px 14px; border-radius: 6px;">
+          <strong style="color: #c084fc; display: block; margin-bottom: 4px; font-size: 0.88rem;">⚡ Carga de Barra de Adrenalina</strong>
+          <span style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.5;">
+            Cada execução bem-sucedida preenche o medidor até alcançar o pico de 100%, despertando o estado frenético de Adrenalina.
+          </span>
+        </div>
+      </div>
+
+      <!-- 27 Adrenaline Buffs Catalog -->
+      <h4 style="font-size: 1.05rem; color: #fff; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+        <span>🔥 Os 27 Buffs de Adrenalina Mapeados (Adrenaline.csv)</span>
+        <span class="entity-badge badge-gold" style="font-size: 0.72rem;">27 Registros</span>
+      </h4>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; max-height: 380px; overflow-y: auto; padding-right: 6px;">
+        ${buffs.map(b => {
+          let extraInfo = '';
+          if (b.id === '1') {
+            extraInfo = '<span style="color: #fbbf24; font-weight: 600;">+10% Vel. Ataque • +10% Taxa Crítica • +10% Dano Crítico</span>';
+          } else if (b.img && b.img.includes('DamageMultiplier')) {
+            extraInfo = '<span style="color: #f87171;">Multiplicador de Dano Ofensivo em Escala</span>';
+          } else if (b.img && b.img.includes('CriticalRate')) {
+            extraInfo = '<span style="color: #38bdf8;">Taxa Crítica Ampliada de Adrenalina</span>';
+          } else if (b.img && b.img.includes('AttackSpeed')) {
+            extraInfo = '<span style="color: #34d399;">Aceleração de Velocidade de Ataque / Habilidades</span>';
+          }
+          return `
+            <div style="background: rgba(15,20,30,0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 10px 12px; display: flex; gap: 10px; align-items: center;">
+              <div style="width: 38px; height: 38px; border-radius: 6px; background: rgba(0,0,0,0.4); border: 1px solid rgba(239,68,68,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.2rem;">
+                ${b.id === '1' ? '🩸' : (b.img && b.img.includes('Damage') ? '⚔️' : (b.img && b.img.includes('Critical') ? '🎯' : '⚡'))}
+              </div>
+              <div style="flex: 1; min-width: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <strong style="color: #fff; font-size: 0.86rem;">${b.name}</strong>
+                  <span class="entity-badge badge-gray" style="font-size: 0.65rem;">ID #${b.id}</span>
+                </div>
+                <div style="font-size: 0.72rem; color: #94a3b8; font-family: monospace;">
+                  Grupo: ${b.operation_group_id}
+                </div>
+                ${extraInfo ? `<div style="font-size: 0.75rem; margin-top: 2px;">${extraInfo}</div>` : ''}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+
+    detailModal.classList.add('open');
+    detailModal.classList.add('active');
+  };
+
   // Setup Event Listeners
   function setupListeners() {
     navItems.forEach(item => {
@@ -6681,6 +7233,16 @@
         btn.classList.add('active');
         state.enchantTab = btn.dataset.enchtab;
         renderEnchantment();
+      }
+    });
+
+    document.getElementById('clanSubNav')?.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (btn && btn.dataset.clantab) {
+        document.querySelectorAll('#clanSubNav .pvp-subnav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.clanTab = btn.dataset.clantab;
+        renderClan();
       }
     });
 
@@ -6955,6 +7517,7 @@
     renderBloodshapes();
     renderMounts();
     renderDiscipline();
+    renderClan();
     renderFaq();
     setupListeners();
   }

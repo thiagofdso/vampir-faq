@@ -2042,6 +2042,25 @@ pvp_catalog = {
             "tiebreaker": "Em empate de pontuação, prioridade para o personagem com nível mais alto; cálculo abrange até o Top 500.",
             "divergence_note": "Divergência técnica: A descrição da habilidade do Barão informa PRE e ESQ PvP +6, enquanto a descrição do efeito e a tabela StaticOperation (GroupId 1110) registram +3. Os testes estáticos indicam que o motor aplica o valor da tabela de efeitos (+3)."
         }
+    },
+    "gehenna": {
+        "title": "Campo de Batalha de Geena (Gehenna)",
+        "subtitle": "Campo PvP entre servidores composto por 3 zonas territoriais",
+        "zones_count": 3,
+        "entry_limit": "Limite de entrada exclusivo por servidor participante (sem confirmação nos dados do cliente para a estimativa de 200 jogadores).",
+        "currency": "Pontos de Geena (Gehenna Points)",
+        "merchants": "Mercadores de Pontos de Geena em vilas para aquisição de itens raros.",
+        "weekly_cap": "Ganho semanal máximo com reinício semanal na virada de ciclo.",
+        "pk_recovery": "Jogadores que sofrerem perdas por PK podem recuperar pontos adicionais equivalentes à perda sofrida, ultrapassando temporariamente o teto.",
+        "monsters_and_bosses": "Zonas habitadas por monstros de alto nível e chefes territoriais de disputa coletiva."
+    },
+    "blood_gate": {
+        "title": "Portões de Sangue (Blood Gate)",
+        "subtitle": "Marcos territoriais de revelação cartográfica e teleporte rápido",
+        "activation": "Interação com portais de sangue nos campos que emitem brilho vermelho ao serem ativados.",
+        "world_map_reveal": "Ao ativar um Portão de Sangue, parte da região oculta no Mapa-múndi é revelada de forma permanente.",
+        "hunting_spots": "Os locais de Campo de Caça conectados nas proximidades são ativados com listagem detalhada de possíveis saques.",
+        "teleport": "Permite teletransporte rápido para os Portões de Sangue e pontos de caça conectados (com pagamento de taxa de teletransporte para os locais de caça)."
     }
 }
 
@@ -4452,6 +4471,181 @@ with open(os.path.join(OUT_DIR, "discipline.json"), "w", encoding="utf-8") as f:
 print(f"  ✓ Processed Discipline catalog ({len(discipline_phases)} phases in 11 chapters).")
 
 # ==========================================
+# 25. CLAN, GUILD CRYPT & RELIC DEFENSE
+# ==========================================
+print("Processing Clan, Crypt and Relic Defense...")
+ranks_raw = list(csv.DictReader(open(os.path.join(CSV_DIR, 'GuildMemberRank.csv'), encoding='utf-8-sig')))
+rank_num_map = {
+    '5': {'name': 'Mestre', 'desc': 'Líder supremo do clã com autoridade total sobre admissões, cripta, permissões, hostilidades e dissolução.', 'badge': 'badge-gold'},
+    '4': {'name': 'Vice-mestre', 'desc': 'Subcomandante do clã; gerencia membros, aprova solicitações de entrada e coordena alocações de cripta.', 'badge': 'badge-crimson'},
+    '3': {'name': 'Líder', 'desc': 'Oficial sênior de combate e gestão de grupos em eventos de guerra e masmorras de clã.', 'badge': 'badge-purple'},
+    '2': {'name': 'Elite', 'desc': 'Membros veteranos de alto escalão com prioridade em vagas de Defesa de Relíquia.', 'badge': 'badge-blue'},
+    '1': {'name': 'Geral', 'desc': 'Membro regular efetivado com acesso a doações diárias e bônus passivos da Cripta do Clã.', 'badge': 'badge-green'},
+    '0': {'name': 'Aprendiz', 'desc': 'Membro recém-admitido em período probatório de integração.', 'badge': 'badge-gray'}
+}
+ranks = []
+for r in ranks_raw:
+    num = r['GuildMemberRank']
+    meta = rank_num_map.get(num, {'name': f'Patente {num}', 'desc': '', 'badge': 'badge-gray'})
+    ranks.append({
+        'rank_code': num,
+        'name': meta['name'],
+        'limit': r.get('CreationCountMax', '0'),
+        'limit_desc': 'Ilimitado' if r.get('CreationCountMax', '0') == '0' else f'Máx. {r.get("CreationCountMax")} membros',
+        'desc': meta['desc'],
+        'badge': meta['badge'],
+        'icon': 'assets/items/collectionmaterial_clan_03.png' if num in ['4', '5'] else 'assets/items/collectionmaterial_clan_01.png'
+    })
+
+crypt_slots_raw = list(csv.DictReader(open(os.path.join(CSV_DIR, 'GuildCryptSlot.csv'), encoding='utf-8-sig')))
+crypt_types = [
+    {
+        'id': '1',
+        'name': 'Cripta do Ataque',
+        'stat': 'Poder de Ataque',
+        'icon': '⚔️',
+        'color': '#ef4444',
+        'desc': 'Amplifica o poder de ataque ofensivo de todos os membros do clã com base na soma do RP (Ranking Points) dos membros designados pelos administradores.'
+    },
+    {
+        'id': '2',
+        'name': 'Cripta da Defesa',
+        'stat': 'Defesa & Redução de Dano',
+        'icon': '🛡️',
+        'color': '#3b82f6',
+        'desc': 'Fortalece a resistência a danos físicos e mágicos do clã proporcionalmente aos guardiões alocados.'
+    },
+    {
+        'id': '3',
+        'name': 'Cripta da Precisão',
+        'stat': 'Precisão Geral (HitValue)',
+        'icon': '🎯',
+        'color': '#eab308',
+        'desc': 'Eleva o índice de acerto em combate contra monstros e adversários conforme a soma de RP atribuída.'
+    },
+    {
+        'id': '4',
+        'name': 'Cripta da Evasão',
+        'stat': 'Evasão & Esquiva',
+        'icon': '💨',
+        'color': '#10b981',
+        'desc': 'Aumenta as chances de esquiva de golpes letais em confrontos coletivos e raides.'
+    }
+]
+
+clan_catalog = {
+    'ranks': ranks,
+    'crypt_types': crypt_types,
+    'crypt_slots': crypt_slots_raw,
+    'relic_defense': {
+        'dungeon_id': '71001',
+        'req_guild_level': 3,
+        'relic_name': 'Relíquia de Elottarvizian',
+        'total_wave_configs': 55,
+        'penalty_threshold': 100,
+        'rules': [
+            'Desbloqueia no Nível 3 do Clã (Masmorra de Defesa #71001).',
+            'O objetivo é proteger a Relíquia de Elottarvizian de ondas sucessivas de monstros invasores.',
+            'A destruição da Relíquia encerra imediatamente a partida.',
+            'Se acumularem 100 ou mais monstros simultâneos na arena, ativa-se uma penalidade contínua de redução do PV da Relíquia.',
+            'A Onda 30 é a onda mestra cíclica e se repete continuamente até a derrota dos defensores.',
+            'Torres de barreira mágicas podem ser erguidas e reforçadas durante o combate.',
+            'A cada intervalo de ondas, os defensores podem escolher bônus de aumento entre 3 opções táticas.',
+            'A pontuação final alimenta o Ranking de Clãs do servidor.'
+        ]
+    },
+    'rules': {
+        'creation_and_entry': 'Qualquer jogador elegível pode fundar um clã assim que os recursos forem desbloqueados, mediante taxa em ouro. A admissão pode ser imediata ou sujeita à aprovação de administradores.',
+        'leave_penalty': 'Ao sair voluntariamente ou dissolver um clã, o jogador é submetido a uma penalidade de 30 minutos de tempo de espera antes de poder criar ou ingressar em outro clã (TutorialGuide #40801/#40807).',
+        'crypt_clarification': 'A Cripta do Clã é um sistema de alocação de membros para concessão de bônus globais por soma de RP. NÃO se trata de depósito de itens nem de leilão interno de saques de chefes.',
+        'hostility': 'Administradores podem declarar e gerenciar relações hostis com outros clãs diretamente no painel de gestão.'
+    }
+}
+
+with open(os.path.join(OUT_DIR, "clan.json"), "w", encoding="utf-8") as f:
+    json.dump(clan_catalog, f, ensure_ascii=False)
+print("  ✓ Processed Clan, Crypt and Relic Defense.")
+
+# ==========================================
+# 26. SERVER ARCHIVE & SAGA (232 Records)
+# ==========================================
+print("Processing Server Archive and Saga...")
+archive_raw = list(csv.DictReader(open(os.path.join(CSV_DIR, 'Archive.csv'), encoding='utf-8-sig')))
+menu_names = {r['Id']: r['Name'] for r in csv.DictReader(open(os.path.join(L10N_DIR, 'ArchiveMenu_Name.csv'), encoding='utf-8-sig'))}
+archive_names = {r['Id']: r['Name'] for r in csv.DictReader(open(os.path.join(L10N_DIR, 'Archive_Name.csv'), encoding='utf-8-sig'))}
+
+by_cat = defaultdict(list)
+for a in archive_raw:
+    mid = a.get('ArchiveMenuInfoId', '')
+    aid = a.get('Id', '')
+    by_cat[mid].append({
+        'id': aid,
+        'name': archive_names.get(aid, f'Marco #{aid}'),
+        'param1': a.get('TaskParam1', ''),
+        'param2': a.get('TaskParam2', '')
+    })
+
+archive_cats = []
+for mid, name in menu_names.items():
+    if mid in by_cat:
+        archive_cats.append({
+            'menu_id': mid,
+            'name': name,
+            'records_count': len(by_cat[mid]),
+            'tasks': by_cat[mid]
+        })
+
+archive_catalog = {
+    'info': {
+        'title': 'Anais & Saga do Servidor',
+        'total_records': len(archive_raw),
+        'categories_count': len(archive_cats),
+        'anais_tooltip': 'As conquistas dos [Anais] são concluídas em conjunto por todos os usuários do servidor. Ao concluir, todos os usuários do servidor podem obter recompensas.',
+        'saga_tooltip': 'A [Saga] é onde são registrados os personagens ou clãs que obtiveram a conquista primeiro. Ao concluir, todos os usuários do servidor podem obter recompensas.'
+    },
+    'categories': archive_cats
+}
+
+with open(os.path.join(OUT_DIR, "archive.json"), "w", encoding="utf-8") as f:
+    json.dump(archive_catalog, f, ensure_ascii=False)
+print(f"  ✓ Processed Server Archive ({len(archive_raw)} records in {len(archive_cats)} categories).")
+
+# ==========================================
+# 27. DRAIN & ADRENALINE SYSTEM (27 Records)
+# ==========================================
+print("Processing Drain & Adrenaline system...")
+ad_raw = list(csv.DictReader(open(os.path.join(CSV_DIR, 'Adrenaline.csv'), encoding='utf-8-sig')))
+ad_names = {r['Id']: r for r in csv.DictReader(open(os.path.join(L10N_DIR, 'Adrenaline_Name.csv'), encoding='utf-8-sig'))}
+ad_list = []
+for r in ad_raw:
+    aid = r.get('Id')
+    name_info = ad_names.get(aid, {})
+    ad_list.append({
+        'id': aid,
+        'img': r.get('Img'),
+        'operation_group_id': r.get('OperationGroupId'),
+        'name': name_info.get('Name', f'Adrenalina #{aid}'),
+        'desc': name_info.get('Desc', '')
+    })
+
+drain_catalog = {
+    'title': 'Drenagem de Sangue & Medidor de Adrenalina',
+    'total_records': len(ad_raw),
+    'drain_rules': [
+        'Ao atacar monstros, surge uma probabilidade de disparo do ícone contextual de Dreno na interface.',
+        'Pressionar o botão de Dreno executa a habilidade especial de abate instantâneo (Instant Kill) no monstro.',
+        'Habilidades de Drenagem para monstros e personagens são estruturadas separadamente nos arquivos do jogo (sem comprovação de Instant Kill em PvP).',
+        'Cada drenagem bem-sucedida carrega a Barra de Adrenalina.',
+        'Ao preencher totalmente a barra, o personagem adquire o status Adrenalina com buffs maciços de combate.'
+    ],
+    'adrenaline_buffs': ad_list
+}
+
+with open(os.path.join(OUT_DIR, "drain.json"), "w", encoding="utf-8") as f:
+    json.dump(drain_catalog, f, ensure_ascii=False)
+print(f"  ✓ Processed Drain & Adrenaline catalog ({len(ad_raw)} records).")
+
+# ==========================================
 # 8. BUNDLE GENERATION
 # ==========================================
 print("Writing bundle.js...")
@@ -4481,6 +4675,9 @@ bundle_data = {
     "bloodshapes": bloodshapes_catalog,
     "mounts": mounts_catalog,
     "discipline": discipline_catalog,
+    "clan": clan_catalog,
+    "archive": archive_catalog,
+    "drain": drain_catalog,
     "constants": constants_dict,
     "faq": faq_catalog
 }

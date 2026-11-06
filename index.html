@@ -145,6 +145,11 @@
           <span>Disciplina</span>
           <span class="nav-count" id="countDiscipline">44</span>
         </a>
+        <a class="nav-item" data-target="clan">
+          <span class="nav-icon"><img src="assets/pvp/flat_guildconquest.png" style="width: 18px; height: 18px; vertical-align: middle; object-fit: contain;" onerror="this.outerHTML='🏰'"></span>
+          <span>Clãs & Cripta</span>
+          <span class="nav-count" id="countClan">6</span>
+        </a>
         <a class="nav-item" data-target="faq">
           <span class="nav-icon">❓</span>
           <span>FAQ & Sistemas</span>
@@ -245,6 +250,11 @@
               <div class="metric-value" style="color: #60a5fa;">44 Fases</div>
               <div class="metric-desc">11 Capítulos (Padrão & Absoluto) com 3 espaços e bônus de maestria</div>
             </div>
+            <div class="metric-card" onclick="window.navTo('clan')" style="cursor: pointer;">
+              <div class="metric-label">Clãs & Cripta</div>
+              <div class="metric-value" style="color: #f59e0b;">6 Patentes</div>
+              <div class="metric-desc">4 Criptas por RP, Doações e Defesa da Relíquia</div>
+            </div>
           </div>
 
           <!-- Feature Cards / Core Pillars -->
@@ -285,19 +295,18 @@
               </div>
             </div>
 
-            <div class="entity-card" onclick="window.navTo('faq')">
+            <div class="entity-card" onclick="window.inspectDrainSystem()" style="cursor: pointer;">
               <div class="entity-header">
                 <span class="entity-badge badge-purple">Mecânica Central</span>
-                <span class="entity-id">Blood Engine</span>
+                <span class="entity-id">Blood & Adrenaline</span>
               </div>
-              <h4 class="entity-title">Pontos de Sangue & Drenagem</h4>
+              <h4 class="entity-title">Drenagem & Adrenalina</h4>
               <p class="entity-desc">
-                Drenagem de sangue em alvos e execuções alimentam a barra de BP (Blood Points), 
-                desencadeando as temidas Formas de Sangue com amplificação de até +20% no poder ofensivo.
+                Abate instantâneo (Instant Kill) em monstros via ícone de Drenagem, carga do Medidor de Adrenalina e buffs canônicos de combate (+10% Velocidade, Crítico e Dano).
               </p>
               <div class="entity-meta-row">
-                <span>Sistema de Tumbas & BP</span>
-                <span style="color: var(--gold-primary);">Ler Guia →</span>
+                <span>27 Variações de Adrenalina</span>
+                <span style="color: var(--gold-primary);">Ver Mecânica →</span>
               </div>
             </div>
           </div>
@@ -580,6 +589,9 @@
               <img src="assets/pvp/flat_noble.png" style="width: 16px; height: 16px;" onerror="this.outerHTML='👑'">
               <span>Títulos de Nobreza & Ranking</span>
             </button>
+            <button class="pvp-subnav-btn" data-pvptab="gehenna">
+              <span>🌋 Geena & Portões de Sangue</span>
+            </button>
           </div>
 
           <div id="pvpContentContainer">
@@ -739,6 +751,9 @@
             <button class="pvp-subnav-btn" data-codextab="tomb">
               <span>⚰️ Cartas da Tumba (29 Grupos)</span>
             </button>
+            <button class="pvp-subnav-btn" data-codextab="archive">
+              <span>📖 Anais & Saga do Servidor (232)</span>
+            </button>
           </div>
 
           <!-- Sub-View 1: Item Collections -->
@@ -792,6 +807,11 @@
           <!-- Sub-View 4: Tomb Card Collections -->
           <div id="codexTombView" class="codex-subview" style="display: none;">
             <div class="entity-grid" id="codexTombContainer" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));"></div>
+          </div>
+
+          <!-- Sub-View 5: Server Archive & Saga -->
+          <div id="codexArchiveView" class="codex-subview" style="display: none;">
+            <div id="codexArchiveContainer"></div>
           </div>
         </section>
 
@@ -1638,7 +1658,55 @@
         </section>
 
         <!-- ==============================================
-             25. FAQ SECTION
+             25. CLAN, GUILD CRYPT & RELIC DEFENSE SECTION
+             ============================================== -->
+        <section id="clan" class="view-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <img src="assets/pvp/flat_guildconquest.png" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 8px;" onerror="this.outerHTML='🏰'">
+              Clãs, Cripta & Defesa da Relíquia
+            </h2>
+            <p class="section-subtitle">
+              Estrutura hierárquica em 6 patentes, Cripta com alocação de membros por RP, Defesa da Relíquia de Elottarvizian e regras de clã.
+            </p>
+          </div>
+
+          <!-- Alert / Clarification Banner -->
+          <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.35); border-left: 4px solid #f59e0b; border-radius: var(--radius-md); padding: 16px 20px; margin-bottom: 24px;">
+            <div style="display: flex; align-items: flex-start; gap: 14px;">
+              <span style="font-size: 1.6rem; line-height: 1;">🛡️</span>
+              <div>
+                <strong style="color: #fbbf24; font-size: 1rem; display: block; margin-bottom: 4px;">Rigor Técnico: Funcionamento Canônico da Cripta do Clã</strong>
+                <p style="font-size: 0.86rem; color: #cbd5e1; line-height: 1.5; margin: 0;">
+                  A <strong>Cripta do Clã</strong> opera exclusivamente como um sistema onde os administradores alocam membros em criptas especializadas (Ataque, Defesa, Precisão e Evasão). Os efeitos são aplicados a <strong>todos os membros do clã</strong> com base na <strong>soma do RP</strong> dos membros designados (<code style="color: #fbbf24;">GUILDCRYPT_MAIN_TOOLTIP_DESC</code>). <em>Não se trata de depósito de itens nem de sistema de leilão interno de saques de chefes</em>.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subnav -->
+          <div class="pvp-subnav" id="clanSubNav" style="margin-bottom: 24px;">
+            <button class="pvp-subnav-btn active" data-clantab="ranks">
+              <span>👑 As 6 Patentes de Membros</span>
+            </button>
+            <button class="pvp-subnav-btn" data-clantab="crypt">
+              <span>🔮 As 4 Criptas do Clã & Slots de RP</span>
+            </button>
+            <button class="pvp-subnav-btn" data-clantab="defense">
+              <span>🛡️ Defesa da Relíquia de Elottarvizian</span>
+            </button>
+            <button class="pvp-subnav-btn" data-clantab="rules">
+              <span>📜 Regras, Doações & Hostilidade</span>
+            </button>
+          </div>
+
+          <div id="clanContentContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+
+        <!-- ==============================================
+             26. FAQ SECTION
              ============================================== -->
         <section id="faq" class="view-section">
           <div class="section-header">
